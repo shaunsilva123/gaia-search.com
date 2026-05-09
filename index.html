@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
   :root {
     --earth: #2d6a2f;
     --earth-light: #4a8f4c;
@@ -24,16 +24,16 @@
     --text-light: #5a7a5b;
     --white: #ffffff;
   }
- 
+
   html { scroll-behavior: smooth; }
- 
+
   body {
     font-family: 'DM Sans', sans-serif;
     color: var(--text-dark);
     background: var(--cream);
     overflow-x: hidden;
   }
- 
+
   /* NAV */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -45,12 +45,12 @@
     transition: background 0.4s;
   }
   nav.scrolled { background: rgba(30, 42, 31, 0.95); }
- 
+
   .nav-logo {
     display: flex; align-items: center; text-decoration: none;
   }
   .nav-logo img { height: 42px; width: auto; }
- 
+
   .nav-links { display: flex; gap: 2.5rem; list-style: none; }
   .nav-links a {
     color: rgba(255,255,255,0.85); text-decoration: none;
@@ -58,21 +58,21 @@
     font-weight: 400; transition: color 0.2s;
   }
   .nav-links a:hover { color: var(--sand); }
- 
+
   .nav-cta {
     background: var(--sand); color: #fff !important;
     padding: 0.5rem 1.4rem; border-radius: 2px;
     font-weight: 500 !important; transition: background 0.2s !important;
   }
   .nav-cta:hover { background: var(--sand-light) !important; color: #fff !important; }
- 
+
   /* HERO */
   .hero {
     position: relative; height: 100vh; min-height: 700px;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
- 
+
   .hero-bg {
     position: absolute; inset: 0;
     background: linear-gradient(
@@ -83,7 +83,7 @@
     );
     z-index: 1;
   }
- 
+
   /* Offshore wind farm SVG scene */
   .wind-scene {
     position: absolute; inset: 0; z-index: 0;
@@ -97,12 +97,12 @@
       #4a7a68 100%
     );
   }
- 
+
   .wind-scene svg {
     width: 100%; height: 100%;
     position: absolute; top: 0; left: 0;
   }
- 
+
   /* Turbine blade animations at different speeds */
   .blades-1 { animation: spin 8s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
   .blades-2 { animation: spin 10s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
@@ -111,26 +111,26 @@
   .blades-5 { animation: spin 11s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
   .blades-6 { animation: spin 8.5s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
   .blades-7 { animation: spin 7.5s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
- 
+
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
- 
+
   /* Gentle wave animation */
   .wave { animation: waveMove 6s ease-in-out infinite alternate; }
   @keyframes waveMove { from { transform: translateX(0); } to { transform: translateX(-20px); } }
- 
+
   .hero-content {
     position: relative; z-index: 2;
     text-align: center; padding: 0 2rem;
     max-width: 860px;
   }
- 
+
   .hero-eyebrow {
     font-family: 'DM Sans', sans-serif;
     font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--sand); margin-bottom: 1.5rem;
     opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
   }
- 
+
   .hero-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(3rem, 7vw, 5.5rem);
@@ -140,18 +140,18 @@
     opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
   }
   .hero-title em { font-style: italic; color: var(--sand); }
- 
+
   .hero-sub {
     font-size: 1.05rem; font-weight: 300; color: rgba(255,255,255,0.85);
     line-height: 1.7; margin-bottom: 3rem;
     opacity: 0; animation: fadeUp 0.9s 0.7s forwards;
   }
- 
+
   .hero-buttons {
     display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
     opacity: 0; animation: fadeUp 0.9s 0.9s forwards;
   }
- 
+
   .btn-primary {
     background: var(--sand); color: #fff;
     padding: 0.9rem 2.2rem; border-radius: 2px;
@@ -161,7 +161,7 @@
     display: inline-block;
   }
   .btn-primary:hover { background: var(--sand-light); transform: translateY(-1px); }
- 
+
   .btn-outline {
     border: 1px solid rgba(255,255,255,0.6); color: white;
     padding: 0.9rem 2.2rem; border-radius: 2px;
@@ -171,12 +171,12 @@
     display: inline-block;
   }
   .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); transform: translateY(-1px); }
- 
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
- 
+
   .scroll-hint {
     position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
     z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
@@ -192,7 +192,7 @@
     0%, 100% { transform: scaleY(1); opacity: 1; }
     50% { transform: scaleY(0.5); opacity: 0.3; }
   }
- 
+
   /* STRIP */
   .strip {
     background: var(--earth-dark); color: var(--sand-light);
@@ -203,15 +203,15 @@
   }
   .strip-item { display: flex; align-items: center; gap: 0.5rem; }
   .strip-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--sand); flex-shrink: 0; }
- 
+
   /* SECTIONS */
   section { padding: 7rem 4rem; }
- 
+
   .section-label {
     font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--moss); margin-bottom: 1rem; display: block;
   }
- 
+
   .section-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(2rem, 4vw, 3rem); font-weight: 400;
@@ -219,7 +219,7 @@
     max-width: 640px;
   }
   .section-title em { font-style: italic; color: var(--earth); }
- 
+
   /* INTRO */
   .intro { background: var(--cream); }
   .intro-inner {
@@ -238,7 +238,7 @@
     transition: opacity 0.2s;
   }
   .intro-text .btn-earth:hover { opacity: 0.6; }
- 
+
   .intro-stats {
     display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
   }
@@ -252,13 +252,13 @@
     line-height: 1;
   }
   .stat-label { font-size: 0.78rem; color: var(--text-light); margin-top: 0.4rem; letter-spacing: 0.05em; }
- 
+
   /* SPECIALISMS */
   .specialisms { background: var(--earth-dark); padding: 7rem 4rem; }
   .specialisms-inner { max-width: 1200px; margin: 0 auto; }
   .specialisms .section-label { color: var(--sand); }
   .specialisms .section-title { color: white; margin-bottom: 3.5rem; }
- 
+
   .spec-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -280,7 +280,7 @@
     margin-bottom: 0.5rem; line-height: 1.3;
   }
   .spec-desc { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
- 
+
   /* SERVICES */
   .services { background: var(--sand-pale); }
   .services-inner { max-width: 1200px; margin: 0 auto; }
@@ -309,7 +309,7 @@
     margin-bottom: 0.8rem;
   }
   .service-desc { font-size: 0.88rem; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
- 
+
   /* TESTIMONIALS */
   .testimonials { background: var(--cream); }
   .testimonials-inner { max-width: 1200px; margin: 0 auto; }
@@ -328,7 +328,7 @@
   }
   .testi-author { font-size: 0.78rem; color: var(--text-light); letter-spacing: 0.05em; }
   .testi-author strong { display: block; color: var(--text-mid); font-weight: 500; margin-bottom: 2px; }
- 
+
   /* CTA BANNER */
   .cta-band {
     background: linear-gradient(135deg, var(--earth) 0%, var(--earth-dark) 100%);
@@ -342,7 +342,7 @@
   }
   .cta-band p { color: rgba(255,255,255,0.7); margin-bottom: 2.5rem; font-size: 1rem; font-weight: 300; }
   .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
- 
+
   /* FOOTER */
   footer {
     background: var(--earth-dark); color: rgba(255,255,255,0.6);
@@ -378,7 +378,7 @@
     display: flex; justify-content: space-between; align-items: center;
     font-size: 0.75rem;
   }
- 
+
   /* JOBS TICKER */
   .jobs-ticker {
     background: var(--sand-pale); border-top: 1px solid var(--sand);
@@ -400,7 +400,7 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
- 
+
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
@@ -413,7 +413,7 @@
 </style>
 </head>
 <body>
- 
+
 <!-- NAV -->
 <nav id="mainNav">
   <a href="#" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
@@ -425,7 +425,7 @@
     <li><a href="#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
- 
+
 <!-- HERO -->
 <section class="hero" id="home">
   <div class="wind-scene">
@@ -445,10 +445,10 @@
           <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
         </linearGradient>
       </defs>
- 
+
       <!-- Sky -->
       <rect width="1440" height="900" fill="url(#skyGrad)"/>
- 
+
       <!-- Clouds -->
       <g opacity="0.5">
         <ellipse cx="200" cy="120" rx="120" ry="35" fill="url(#cloudGrad)"/>
@@ -463,13 +463,13 @@
         <ellipse cx="1200" cy="140" rx="130" ry="28" fill="white"/>
         <ellipse cx="1260" cy="125" rx="90" ry="22" fill="white"/>
       </g>
- 
+
       <!-- Horizon glow -->
       <ellipse cx="720" cy="570" rx="500" ry="60" fill="rgba(180,210,200,0.18)"/>
- 
+
       <!-- Sea base -->
       <rect y="560" width="1440" height="340" fill="url(#seaGrad)"/>
- 
+
       <!-- Sea surface shimmer -->
       <g class="wave" opacity="0.5">
         <path d="M0,570 Q120,555 240,570 Q360,585 480,570 Q600,555 720,570 Q840,585 960,570 Q1080,555 1200,570 Q1320,585 1440,570 L1440,580 Q1320,595 1200,580 Q1080,565 960,580 Q840,595 720,580 Q600,565 480,580 Q360,595 240,580 Q120,565 0,580 Z" fill="rgba(150,200,190,0.35)"/>
@@ -483,10 +483,10 @@
       <g opacity="0.2">
         <path d="M0,655 Q180,645 360,655 Q540,665 720,655 Q900,645 1080,655 Q1260,665 1440,655 L1440,660 Q1200,670 960,660 Q720,650 480,660 Q240,670 0,660 Z" fill="rgba(200,230,220,0.4)"/>
       </g>
- 
+
       <!-- === TURBINES === -->
       <!-- Helper: turbine at (cx, base_y, scale, blade_class) -->
- 
+
       <!-- Turbine 1 - far left background, small -->
       <g transform="translate(100, 390) scale(0.42)">
         <rect x="-5" y="0" width="10" height="200" rx="3" fill="rgba(240,245,242,0.82)"/>
@@ -497,7 +497,7 @@
           <circle cx="0" cy="0" r="7" fill="rgba(210,225,218,0.95)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 2 - left bg -->
       <g transform="translate(260, 330) scale(0.52)">
         <rect x="-6" y="0" width="12" height="240" rx="3" fill="rgba(240,245,242,0.85)"/>
@@ -508,7 +508,7 @@
           <circle cx="0" cy="0" r="8" fill="rgba(210,225,218,0.95)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 3 - mid-left, large foreground -->
       <g transform="translate(430, 245) scale(0.75)">
         <rect x="-7" y="0" width="14" height="330" rx="4" fill="rgba(235,242,240,0.88)"/>
@@ -519,7 +519,7 @@
           <circle cx="0" cy="0" r="10" fill="rgba(210,225,218,0.95)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 4 - centre, tallest -->
       <g transform="translate(680, 185) scale(0.92)">
         <rect x="-8" y="0" width="16" height="390" rx="5" fill="rgba(235,242,240,0.9)"/>
@@ -530,7 +530,7 @@
           <circle cx="0" cy="0" r="12" fill="rgba(210,225,218,0.95)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 5 - right of centre -->
       <g transform="translate(920, 260) scale(0.7)">
         <rect x="-7" y="0" width="13" height="310" rx="4" fill="rgba(235,242,240,0.86)"/>
@@ -541,7 +541,7 @@
           <circle cx="0" cy="0" r="9" fill="rgba(210,225,218,0.95)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 6 - right bg -->
       <g transform="translate(1130, 340) scale(0.5)">
         <rect x="-6" y="0" width="11" height="230" rx="3" fill="rgba(240,245,242,0.83)"/>
@@ -552,7 +552,7 @@
           <circle cx="0" cy="0" r="8" fill="rgba(210,225,218,0.92)"/>
         </g>
       </g>
- 
+
       <!-- Turbine 7 - far right bg -->
       <g transform="translate(1320, 400) scale(0.38)">
         <rect x="-5" y="0" width="9" height="185" rx="3" fill="rgba(240,245,242,0.8)"/>
@@ -563,7 +563,7 @@
           <circle cx="0" cy="0" r="6" fill="rgba(210,225,218,0.9)"/>
         </g>
       </g>
- 
+
       <!-- Platform bases in water -->
       <g opacity="0.6">
         <rect x="96" y="585" width="10" height="20" rx="1" fill="rgba(200,215,210,0.7)"/>
@@ -574,14 +574,14 @@
         <rect x="1124" y="580" width="12" height="18" rx="1" fill="rgba(200,215,210,0.7)"/>
         <rect x="1315" y="588" width="10" height="16" rx="1" fill="rgba(200,215,210,0.7)"/>
       </g>
- 
+
       <!-- Deep sea bottom darkening -->
       <rect y="700" width="1440" height="200" fill="rgba(20,50,40,0.5)"/>
     </svg>
   </div>
- 
+
   <div class="hero-bg"></div>
- 
+
   <div class="hero-content">
     <p class="hero-eyebrow">Specialist Recruitment · Environmental & Energy</p>
     <h1 class="hero-title">Connecting the UK's<br><em>leading energy talent</em></h1>
@@ -591,13 +591,12 @@
       <a href="#contact" class="btn-outline">Find Talent</a>
     </div>
   </div>
- 
+
   <div class="scroll-hint">
-    <span>Discover</span>
     <div class="line"></div>
   </div>
 </section>
- 
+
 <!-- JOBS TICKER -->
 <div class="jobs-ticker" id="jobs">
   <div class="ticker-inner">
@@ -620,7 +619,7 @@
     <span class="ticker-item"><span class="ticker-dot"></span>Ecology Principal — Cambridge</span>
   </div>
 </div>
- 
+
 <!-- STRIP -->
 <div class="strip">
   <span class="strip-item"><span class="strip-dot"></span>UK Specialists</span>
@@ -629,7 +628,7 @@
   <span class="strip-item"><span class="strip-dot"></span>Sustainability</span>
   <span class="strip-item"><span class="strip-dot"></span>Net Zero Focused</span>
 </div>
- 
+
 <!-- ABOUT / INTRO -->
 <section class="intro" id="about">
   <div class="intro-inner">
@@ -642,25 +641,25 @@
     </div>
     <div class="intro-stats">
       <div class="stat-card">
-        <div class="stat-num">500+</div>
+        <div class="stat-num" data-target="200" data-suffix="+">0+</div>
         <div class="stat-label">Placements made across the UK</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">98%</div>
+        <div class="stat-num" data-target="98" data-suffix="%">0%</div>
         <div class="stat-label">Client satisfaction rate</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">12+</div>
+        <div class="stat-num" data-target="5" data-suffix="+">0+</div>
         <div class="stat-label">Years sector expertise</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">200+</div>
-        <div class="stat-label">Active client partners</div>
+        <div class="stat-num" data-target="80" data-suffix="+">0+</div>
+        <div class="stat-label">Active clients</div>
       </div>
     </div>
   </div>
 </section>
- 
+
 <!-- SPECIALISMS -->
 <section class="specialisms" id="specialisms">
   <div class="specialisms-inner">
@@ -700,7 +699,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- SERVICES -->
 <section class="services" id="services">
   <div class="services-inner">
@@ -725,7 +724,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- TESTIMONIALS -->
 <section class="testimonials">
   <div class="testimonials-inner">
@@ -756,7 +755,7 @@
     </div>
   </div>
 </section>
- 
+
 <!-- CTA BAND -->
 <div class="cta-band" id="contact">
   <h2>Ready to find your next opportunity<br>— or your next hire?</h2>
@@ -766,7 +765,7 @@
     <a href="#jobs" class="btn-outline">Browse live roles</a>
   </div>
 </div>
- 
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -809,14 +808,43 @@
     </div>
   </div>
 </footer>
- 
+
 <script>
   // Nav scroll effect
   const nav = document.getElementById('mainNav');
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 80);
   });
+
+  // Animated number counters
+  function animateCounter(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1800;
+    const startTime = performance.now();
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  const counters = document.querySelectorAll('.stat-num[data-target]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  counters.forEach(c => observer.observe(c));
 </script>
 </body>
 </html>
- 
