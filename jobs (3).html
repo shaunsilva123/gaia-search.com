@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Live Roles | Gaia Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --leaf:        #5bb544;
+    --leaf-light:  #7ccc66;
+    --forest:      #2a6b2a;
+    --forest-dark: #1b4a1b;
+    --cream:       #f5f5dc;
+    --cream-mid:   #eceacc;
+    --cream-pale:  #fafaed;
+    --text-dark:   #1a1a1a;
+    --text-mid:    #383838;
+    --text-light:  #686868;
+    --white:       #ffffff;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(27,74,27,0.97);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 400; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta {
+    background: var(--leaf); color: #fff !important;
+    padding: 0.5rem 1.4rem; border-radius: 2px;
+    font-weight: 500 !important;
+  }
+  .nav-cta:hover { background: var(--leaf-light) !important; }
+
+  /* HERO BANNER */
+  .jobs-hero {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 10rem 4rem 5rem;
+    text-align: center;
+  }
+  .jobs-hero-label {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--leaf-light); margin-bottom: 1rem; display: block;
+  }
+  .jobs-hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 400; color: var(--cream);
+    line-height: 1.15; margin-bottom: 2.5rem;
+  }
+  .jobs-hero h1 em { font-style: italic; color: var(--leaf-light); }
+
+  /* SEARCH BAR */
+  .search-bar {
+    display: flex; gap: 0; max-width: 700px; margin: 0 auto;
+    background: white; border-radius: 3px;
+    overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .search-bar input {
+    flex: 1; padding: 1rem 1.5rem;
+    border: none; outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; color: var(--text-dark);
+    background: white;
+  }
+  .search-bar input::placeholder { color: var(--text-light); }
+  .search-bar button {
+    background: var(--leaf); color: white;
+    border: none; padding: 1rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .search-bar button:hover { background: var(--leaf-light); }
+
+  /* FILTERS */
+  .filters-bar {
+    background: var(--cream-mid);
+    border-bottom: 1px solid #d0cea8;
+    padding: 1.2rem 4rem;
+    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+  }
+  .filter-label {
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-light); font-weight: 600; margin-right: 0.5rem;
+  }
+  .filter-btn {
+    background: white; border: 1px solid #c8c6a8;
+    padding: 0.45rem 1.1rem; border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; color: var(--text-mid);
+    cursor: pointer; transition: all 0.2s; font-weight: 400;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--forest); color: white; border-color: var(--forest);
+  }
+  .results-count {
+    margin-left: auto; font-size: 0.8rem;
+    color: var(--text-light); font-weight: 400;
+  }
+
+  /* MAIN LAYOUT */
+  .jobs-main {
+    max-width: 1200px; margin: 0 auto;
+    padding: 3rem 4rem 6rem;
+    display: grid; grid-template-columns: 280px 1fr; gap: 3rem;
+  }
+
+  /* SIDEBAR */
+  .sidebar { }
+  .sidebar-section {
+    background: var(--cream-pale); padding: 1.5rem;
+    border-radius: 3px; margin-bottom: 1.5rem;
+    border: 1px solid #d8d6b8;
+  }
+  .sidebar-section h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--forest); font-weight: 700; margin-bottom: 1rem;
+  }
+  .sidebar-option {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.6rem; cursor: pointer;
+  }
+  .sidebar-option input[type="checkbox"] {
+    accent-color: var(--leaf); width: 15px; height: 15px; cursor: pointer;
+  }
+  .sidebar-option label {
+    font-size: 0.85rem; color: var(--text-mid);
+    cursor: pointer; display: flex; justify-content: space-between;
+    width: 100%; font-weight: 400;
+  }
+  .sidebar-option label span {
+    color: var(--text-light); font-size: 0.75rem;
+  }
+  .clear-filters {
+    background: none; border: 1px solid var(--leaf);
+    color: var(--leaf); padding: 0.5rem 1rem;
+    border-radius: 2px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; cursor: pointer; width: 100%;
+    transition: all 0.2s; font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  .clear-filters:hover { background: var(--leaf); color: white; }
+
+  /* JOB CARDS */
+  .jobs-list { display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .job-card {
+    background: var(--cream-pale); border: 1px solid #d8d6b8;
+    border-radius: 3px; padding: 1.8rem 2rem;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer; position: relative; overflow: hidden;
+    text-decoration: none; display: block; color: inherit;
+  }
+  .job-card::before {
+    content: ''; position: absolute;
+    left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--leaf); opacity: 0; transition: opacity 0.2s;
+  }
+  .job-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(42,107,42,0.1);
+    border-color: #b8d6a8;
+  }
+  .job-card:hover::before { opacity: 1; }
+
+  .job-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 0.8rem; gap: 1rem;
+  }
+  .job-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--forest);
+    line-height: 1.3;
+  }
+  .job-type {
+    background: var(--forest-dark); color: var(--cream);
+    font-size: 0.7rem; padding: 0.3rem 0.8rem;
+    border-radius: 20px; letter-spacing: 0.08em;
+    text-transform: uppercase; font-weight: 500;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .job-type.contract { background: var(--leaf); }
+  .job-type.interim { background: #7a6b2a; }
+
+  .job-meta {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+  }
+  .job-meta-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.82rem; color: var(--text-light); font-weight: 400;
+  }
+  .job-meta-item svg { flex-shrink: 0; }
+
+  .job-desc {
+    font-size: 0.88rem; color: var(--text-mid);
+    line-height: 1.65; font-weight: 300;
+    margin-bottom: 1.2rem;
+  }
+
+  .job-card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .job-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .job-tag {
+    background: var(--cream-mid); color: var(--forest);
+    font-size: 0.72rem; padding: 0.25rem 0.7rem;
+    border-radius: 2px; font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .job-apply {
+    color: white; font-size: 0.78rem;
+    font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; text-decoration: none;
+    background: var(--forest); padding: 0.5rem 1.2rem;
+    border-radius: 2px; transition: background 0.2s;
+    white-space: nowrap; display: inline-block;
+  }
+  .job-apply:hover { background: var(--leaf); }
+
+  /* NO RESULTS */
+  .no-results {
+    text-align: center; padding: 4rem 2rem;
+    display: none;
+  }
+  .no-results p {
+    color: var(--text-light); font-size: 1rem; margin-bottom: 1rem;
+  }
+
+  /* CAN'T FIND ROLE */
+  .cant-find {
+    background: var(--forest-dark); padding: 5rem 4rem;
+    text-align: center;
+  }
+  .cant-find h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 400; color: var(--cream);
+    margin-bottom: 1rem; line-height: 1.2;
+  }
+  .cant-find p {
+    color: rgba(245,245,220,0.7); font-size: 0.95rem;
+    max-width: 560px; margin: 0 auto 2rem;
+    line-height: 1.7; font-weight: 300;
+  }
+  .btn-primary {
+    background: var(--leaf); color: white;
+    padding: 0.9rem 2.2rem; border-radius: 2px;
+    text-decoration: none; font-size: 0.85rem;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    display: inline-block; transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--leaf-light); transform: translateY(-1px); }
+
+  /* REGISTER CV */
+  .register-cv {
+    background: var(--cream); padding: 6rem 4rem;
+  }
+  .register-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 5rem; align-items: start;
+  }
+  .register-label {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--forest); margin-bottom: 1rem; display: block; font-weight: 600;
+  }
+  .register-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem; font-weight: 400; color: var(--text-dark);
+    line-height: 1.2; margin-bottom: 1.2rem;
+  }
+  .register-text p {
+    font-size: 0.92rem; color: var(--text-mid); line-height: 1.8;
+    font-weight: 300; margin-bottom: 1.5rem;
+  }
+  .register-benefits {
+    list-style: none; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .register-benefits li {
+    font-size: 0.85rem; color: var(--forest); font-weight: 600;
+  }
+
+  .register-form-wrap { position: relative; }
+  .register-form {
+    background: var(--cream-pale); padding: 2.5rem;
+    border: 1px solid #d8d6b8; border-radius: 3px;
+  }
+  .form-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  }
+  .form-group {
+    display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;
+  }
+  .form-group label {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-mid);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 1px solid #d0cea8; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    color: var(--text-dark); background: white;
+    transition: border-color 0.2s; outline: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--leaf); }
+  .form-group textarea { resize: vertical; }
+  .form-group select { cursor: pointer; }
+
+  .form-check {
+    display: flex; gap: 0.7rem; align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+  .form-check input { accent-color: var(--leaf); margin-top: 3px; flex-shrink: 0; }
+  .form-check label { font-size: 0.78rem; color: var(--text-light); line-height: 1.5; }
+
+  .form-submit {
+    background: var(--forest); color: white; border: none;
+    padding: 0.9rem 2rem; border-radius: 2px; width: 100%;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .form-submit:hover { background: var(--leaf); }
+
+  .form-success {
+    display: none; text-align: center;
+    background: var(--cream-pale); padding: 3rem 2rem;
+    border: 1px solid #b8d6a8; border-radius: 3px;
+  }
+  .success-icon {
+    width: 56px; height: 56px; background: var(--leaf);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.5rem; margin: 0 auto 1rem;
+  }
+  .form-success h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; color: var(--forest); margin-bottom: 0.8rem;
+  }
+  .form-success p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.7; }
+
+  @media (max-width: 900px) {
+    .register-cv { padding: 4rem 1.5rem; }
+    .register-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--forest-dark); color: rgba(245,245,220,0.65);
+    padding: 3rem 4rem 1.5rem;
+  }
+  .footer-bottom {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.75rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo img { height: 36px; width: auto; }
+
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .jobs-hero { padding: 8rem 1.5rem 4rem; }
+    .filters-bar { padding: 1rem 1.5rem; }
+    .jobs-main { grid-template-columns: 1fr; padding: 2rem 1.5rem 4rem; }
+    .sidebar { display: none; }
+    .cant-find { padding: 4rem 1.5rem; }
+    footer { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="#register" class="nav-cta">Register CV</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="jobs-hero">
+  <span class="jobs-hero-label">Live Opportunities</span>
+  <h1>Find your next role in<br><em>environmental & clean energy</em></h1>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by job title, keyword or location…" oninput="filterJobs()">
+    <button onclick="filterJobs()">Search</button>
+  </div>
+</div>
+
+<!-- FILTERS BAR -->
+<div class="filters-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="setFilter('all', this)">All roles</button>
+  <button class="filter-btn" onclick="setFilter('permanent', this)">Permanent</button>
+  <button class="filter-btn" onclick="setFilter('contract', this)">Contract</button>
+  <button class="filter-btn" onclick="setFilter('interim', this)">Interim</button>
+  <span class="results-count" id="resultsCount">Showing all roles</span>
+</div>
+
+<!-- MAIN -->
+<div class="jobs-main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h3>Sector</h3>
+      <div class="sidebar-option">
+        <input type="checkbox" id="s1" onchange="filterJobs()">
+        <label for="s1">Offshore Wind <span>(3)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="s2" onchange="filterJobs()">
+        <label for="s2">Environmental Consulting <span>(4)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="s3" onchange="filterJobs()">
+        <label for="s3">Solar & Storage <span>(2)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="s4" onchange="filterJobs()">
+        <label for="s4">Sustainability <span>(2)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="s5" onchange="filterJobs()">
+        <label for="s5">Marine & Coastal <span>(1)</span></label>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Location</h3>
+      <div class="sidebar-option">
+        <input type="checkbox" id="l1" onchange="filterJobs()">
+        <label for="l1">London <span>(4)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="l2" onchange="filterJobs()">
+        <label for="l2">Scotland <span>(2)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="l3" onchange="filterJobs()">
+        <label for="l3">South East <span>(2)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="l4" onchange="filterJobs()">
+        <label for="l4">Remote / Hybrid <span>(3)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="l5" onchange="filterJobs()">
+        <label for="l5">Nationwide <span>(1)</span></label>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Salary</h3>
+      <div class="sidebar-option">
+        <input type="checkbox" id="p1" onchange="filterJobs()">
+        <label for="p1">Up to £40k <span>(2)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="p2" onchange="filterJobs()">
+        <label for="p2">£40k – £60k <span>(4)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="p3" onchange="filterJobs()">
+        <label for="p3">£60k – £80k <span>(3)</span></label>
+      </div>
+      <div class="sidebar-option">
+        <input type="checkbox" id="p4" onchange="filterJobs()">
+        <label for="p4">£80k+ <span>(3)</span></label>
+      </div>
+    </div>
+
+    <button class="clear-filters" onclick="clearFilters()">Clear all filters</button>
+  </aside>
+
+  <!-- JOB LISTINGS -->
+  <div>
+    <div class="jobs-list" id="jobsList">
+
+      <a class="job-card" href="jobs/principal-environmental-clerk-of-works.html" data-type="permanent" data-title="principal environmental clerk of works uk wide (field based)">
+        <div class="job-card-top">
+          <div class="job-title">Principal Environmental Clerk of Works</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide (Field Based)</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> £55,000 per annum</span>
+        </div>
+        <p class="job-desc">A leading engineering and environmental consultancy is seeking a Principal EnvCoW to provide independent oversight of construction activities across complex UK infrastructure projects. You'll lead audits, produce RAG compliance reports and mentor junior EnvCoWs. Degree in Environmental Science or related discipline plus relevant professional membership (AEnvCoW, CIEEM or ISEP) required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">EnvCoW</span><span class="job-tag">Compliance</span><span class="job-tag">Infrastructure</span></div>
+          <a href="jobs/principal-environmental-clerk-of-works.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/principal-terrestrial-ornithologist.html" data-type="permanent" data-title="principal terrestrial ornithologist uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Principal Terrestrial Ornithologist</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> £55,000 per annum</span>
+        </div>
+        <p class="job-desc">A specialist environmental consultancy is looking for an experienced Principal Ornithologist to lead bird survey work and assessments across major infrastructure and renewable energy projects. You'll provide technical leadership, mentor junior staff and contribute to EIA chapters and stakeholder engagement. CIEEM membership preferred.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Ornithology</span><span class="job-tag">EIA</span><span class="job-tag">Renewables</span></div>
+          <a href="jobs/principal-terrestrial-ornithologist.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-water-network-modeller.html" data-type="permanent" data-title="senior water network modeller uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Water Network Modeller</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> £45,000 per annum</span>
+        </div>
+        <p class="job-desc">A global infrastructure consultancy is seeking a Senior Water Network Modeller to lead large-scale clean water projects. You'll apply advanced modelling using InfoWorks WS, InfoWater or similar, lead network optimisation and leakage studies, and mentor junior staff. Chartership and experience in water balance analysis preferred.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Water Modelling</span><span class="job-tag">InfoWorks</span><span class="job-tag">Infrastructure</span></div>
+          <a href="jobs/senior-water-network-modeller.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-wastewater-modeller.html" data-type="permanent" data-title="senior wastewater modeller uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Wastewater Modeller</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A leading engineering consultancy is looking for a Senior Wastewater Modeller to support hydraulic modelling studies for major regulated water clients. Experience with InfoWorks ICM/CS essential. Roles available from Consultant to Associate Director grade with flexible working across UK offices.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Wastewater</span><span class="job-tag">InfoWorks ICM</span><span class="job-tag">Hydraulic Modelling</span></div>
+          <a href="jobs/senior-wastewater-modeller.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-eia-consultant.html" data-type="permanent" data-title="senior eia consultant uk wide / flexible">
+        <div class="job-card-top">
+          <div class="job-title">Senior EIA Consultant</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Flexible</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> £45,000 – £50,000 per annum</span>
+        </div>
+        <p class="job-desc">A global sustainability consultancy is seeking a Senior EIA Consultant to coordinate statutory environmental assessment processes across major development proposals including onshore and offshore energy, property, data centres and major projects. Prior EIA coordination experience essential. 27 days holiday, private medical and matched pension on offer.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">EIA</span><span class="job-tag">Offshore Wind</span><span class="job-tag">Energy</span></div>
+          <a href="jobs/senior-eia-consultant.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-flood-risk-engineer.html" data-type="permanent" data-title="senior flood risk engineer manchester / leeds / london / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Flood Risk Engineer</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Manchester / Leeds / London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A major water engineering consultancy is recruiting a Senior Flood Risk Engineer to lead delivery across flood alleviation, surface water separation and SuDS projects. Projects range from £10k commissions to £100m schemes. ICE or CIWEM chartership preferred.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Flood Risk</span><span class="job-tag">SuDS</span><span class="job-tag">NPPF</span></div>
+          <a href="jobs/senior-flood-risk-engineer.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/offshore-consents-environment-manager.html" data-type="permanent" data-title="offshore consents &amp; environment manager edinburgh / cardiff / london / durham">
+        <div class="job-card-top">
+          <div class="job-title">Offshore Consents &amp; Environment Manager</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / Cardiff / London / Durham</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> £50,000 – £55,000 per annum</span>
+        </div>
+        <p class="job-desc">A leading UK renewable energy developer is looking for an Offshore Consents &amp; Environment Manager to lead DCO and Marine Licence applications, own the EIA process and manage stakeholder consultations across major offshore wind projects. Floating wind experience is a strong advantage.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Marine Licence</span><span class="job-tag">Offshore Wind</span></div>
+          <a href="jobs/offshore-consents-environment-manager.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/principal-ecologist-edinburgh.html" data-type="permanent" data-title="principal ecologist edinburgh / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Principal Ecologist</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A global infrastructure consultancy is looking for an ambitious Principal Ecologist to build and lead a growing ecology team in Edinburgh. You'll manage PEAs, ECIAs and HRA contributions, support water utility frameworks and develop client relationships. UKHab and Defra Metric experience essential. MCIEEM preferred.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">BNG</span><span class="job-tag">Water Utilities</span></div>
+          <a href="jobs/principal-ecologist-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-ecologist-uk.html" data-type="permanent" data-title="senior ecologist uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Ecologist</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A specialist environmental consultancy is seeking a Senior Ecologist to deliver ecological surveys, assessments and reports across infrastructure and development projects. You'll support protected species licence work, contribute to EIA chapters and mentor junior ecologists. CIEEM membership and protected species survey skills required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Protected Species</span><span class="job-tag">EIA</span></div>
+          <a href="jobs/senior-ecologist-uk.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/principal-ecologist-infrastructure-renewables.html" data-type="permanent" data-title="principal ecologist — infrastructure &amp; renewables uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Principal Ecologist — Infrastructure &amp; Renewables</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A growing engineering consultancy is looking for a Principal Ecologist to provide senior technical leadership across housing, infrastructure and renewables projects. You'll lead EPS licence preparation, quality assure EIAs and BNG assessments, manage a team and drive business development. Two European Protected Species licences and Full MCIEEM required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">EPS Licences</span><span class="job-tag">BNG</span><span class="job-tag">Leadership</span></div>
+          <a href="jobs/principal-ecologist-infrastructure-renewables.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/associate-director-ecology.html" data-type="permanent" data-title="associate director — ecology manchester / leeds / london / glasgow">
+        <div class="job-card-top">
+          <div class="job-title">Associate Director — Ecology</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Manchester / Leeds / London / Glasgow</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + flexible benefits</span>
+        </div>
+        <p class="job-desc">A global engineering and environmental consultancy is looking for an Associate Director to act as ecology lead on high-profile major projects including DCOs across energy, water, renewables, defence and transport sectors. DCO examination experience highly desirable. CIEEM membership required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Major Projects</span><span class="job-tag">Director Level</span></div>
+          <a href="jobs/associate-director-ecology.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-ecologist-bristol.html" data-type="permanent" data-title="senior ecologist — bristol bristol / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Ecologist — Bristol</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bristol / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A large, friendly and diverse ecology team within a leading global consultancy is seeking a Senior Ecologist in Bristol. You'll undertake UKHab and protected species surveys, contribute to PEAs, EcIAs, EPS licence applications, HRAs and EIA biodiversity chapters, and provide mentoring to junior colleagues. CIEEM membership required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">UKHab</span><span class="job-tag">Bristol</span></div>
+          <a href="jobs/senior-ecologist-bristol.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/climate-carbon-esg-director.html" data-type="permanent" data-title="climate, carbon &amp; esg director london / bristol / warrington">
+        <div class="job-card-top">
+          <div class="job-title">Climate, Carbon &amp; ESG Director</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Bristol / Warrington</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Sustainability &amp; Policy</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + enhanced pension</span>
+        </div>
+        <p class="job-desc">A top 25 UK environmental consultancy is seeking a Director to lead its growing climate, carbon and ESG practice. You'll oversee GHG emissions inventories, net zero strategies, carbon footprinting and TCFD reporting for corporate and public sector clients. Minimum 10 years' experience required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Net Zero</span><span class="job-tag">GHG</span><span class="job-tag">Director Level</span></div>
+          <a href="jobs/climate-carbon-esg-director.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-geotechnical-engineer-london.html" data-type="permanent" data-title="senior geotechnical engineer london / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Geotechnical Engineer</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 27 days + private medical</span>
+        </div>
+        <p class="job-desc">A global sustainability consultancy is looking for a Senior Geotechnical Engineer to join a growing London-based team working across transport, energy, water and development projects. You'll provide technical leadership on complex soil and rock design and mentor junior staff. Matched pension, private medical and 27 days leave on offer.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Geotechnical</span><span class="job-tag">Infrastructure</span><span class="job-tag">London</span></div>
+          <a href="jobs/senior-geotechnical-engineer-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/associate-ecologist-wales.html" data-type="permanent" data-title="associate ecologist — wales team lead cardiff / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Associate Ecologist — Wales Team Lead</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Cardiff / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 4-day week on 5-day salary</span>
+        </div>
+        <p class="job-desc">A forward-thinking ecological consultancy is looking for an Associate to lead their Wales ecology team based in Cardiff. You'll manage operational delivery, pipeline and business development alongside the Regional Ecology Director. A rare 4-day working week on a 5-day salary is on offer. Full CIEEM membership or Chartered Ecologist status required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Wales</span><span class="job-tag">4-Day Week</span></div>
+          <a href="jobs/associate-ecologist-wales.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/ecologist-south-west-midlands-wales.html" data-type="permanent" data-title="ecologists — multiple levels (south west, midlands &amp; wales) south west / midlands / wales">
+        <div class="job-card-top">
+          <div class="job-title">Ecologists — Multiple Levels (South West, Midlands &amp; Wales)</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> South West / Midlands / Wales</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + 25 days leave</span>
+        </div>
+        <p class="job-desc">A global sustainability consultancy with over 200 ecologists is growing its South West, Midlands and Wales teams across all levels from Senior through to Principal and Associate. Specialisms welcome include ornithology, protected species, habitats, EcIA and HRA. Flexible hybrid working and structured career progression on offer.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">Multiple Levels</span><span class="job-tag">Ecology</span><span class="job-tag">South West</span></div>
+          <a href="jobs/ecologist-south-west-midlands-wales.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+      <a class="job-card" href="jobs/senior-landscape-architect.html" data-type="permanent" data-title="senior landscape architect uk wide / hybrid">
+        <div class="job-card-top">
+          <div class="job-title">Senior Landscape Architect</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A leading global infrastructure consultancy is growing its UK landscape architecture practice and seeking Senior Landscape Architects across the UK. You'll work on NSIPs and major energy transition projects including wind, solar, hydrogen and nuclear, preparing LVIAs and TVIAs. Chartered Member of the Landscape Institute (CMLI) required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags"><span class="job-tag">LVIA</span><span class="job-tag">NSIP</span><span class="job-tag">Energy Transition</span></div>
+          <a href="jobs/senior-landscape-architect.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
+        </div>
+      </a>
+
+    </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            London
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Environmental Consulting
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £45,000 – £55,000
+          </span>
+        </div>
+        <p class="job-desc">A leading environmental consultancy is looking for a Senior Environmental Consultant to join their growing infrastructure team. You'll lead EIA projects across major UK infrastructure schemes, managing junior staff and client relationships.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">EIA</span>
+            <span class="job-tag">Infrastructure</span>
+            <span class="job-tag">Hybrid</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Senior Environmental Consultant" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: Offshore Wind Project Manager" data-type="permanent" data-title="Offshore Wind Project Manager Scotland wind energy">
+        <div class="job-card-top">
+          <div class="job-title">Offshore Wind Project Manager</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Scotland / Hybrid
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Offshore Wind
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £65,000 – £80,000
+          </span>
+        </div>
+        <p class="job-desc">An offshore wind developer is seeking an experienced Project Manager to oversee the development and consenting phase of a major offshore wind project in Scottish waters. Strong stakeholder management and planning experience essential.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">Offshore Wind</span>
+            <span class="job-tag">Project Management</span>
+            <span class="job-tag">Consenting</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Offshore Wind Project Manager" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: Ecology Principal" data-type="permanent" data-title="Ecology Principal London ecology environmental">
+        <div class="job-card-top">
+          <div class="job-title">Ecology Principal</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            London / South East
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Environmental Consulting
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £50,000 – £65,000
+          </span>
+        </div>
+        <p class="job-desc">A multi-disciplinary consultancy is looking for an Ecology Principal to lead complex biodiversity projects and mentor a growing team. MCIEEM membership preferred, with experience across renewable energy and infrastructure sectors.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">Ecology</span>
+            <span class="job-tag">BNG</span>
+            <span class="job-tag">Leadership</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Ecology Principal" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: EIA Consultant" data-type="contract" data-title="EIA Consultant contract Bristol environmental">
+        <div class="job-card-top">
+          <div class="job-title">EIA Consultant</div>
+          <span class="job-type contract">Contract</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Remote / Nationwide
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Environmental Consulting
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £350 – £450 per day
+          </span>
+        </div>
+        <p class="job-desc">An established environmental consultancy requires an experienced EIA Consultant on a 6-month contract basis to support a busy infrastructure programme. Flexible remote working with occasional site visits required.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">EIA</span>
+            <span class="job-tag">Contract</span>
+            <span class="job-tag">Remote</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: EIA Consultant" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: Sustainability Director" data-type="permanent" data-title="Sustainability Director London ESG sustainability">
+        <div class="job-card-top">
+          <div class="job-title">Sustainability Director</div>
+          <span class="job-type">Permanent</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            London
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Sustainability
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £90,000 – £110,000
+          </span>
+        </div>
+        <p class="job-desc">A major infrastructure group is hiring a Sustainability Director to shape and lead their net zero strategy across a diverse UK portfolio. You'll work at board level, driving ESG reporting, supply chain decarbonisation, and sustainability governance.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">ESG</span>
+            <span class="job-tag">Net Zero</span>
+            <span class="job-tag">Director</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Sustainability Director" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: Wind Farm Site Manager" data-type="contract" data-title="Wind Farm Site Manager Scotland wind energy">
+        <div class="job-card-top">
+          <div class="job-title">Wind Farm Site Manager</div>
+          <span class="job-type contract">Contract</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Scotland
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Offshore Wind
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £400 – £500 per day
+          </span>
+        </div>
+        <p class="job-desc">A renewables contractor requires an experienced Wind Farm Site Manager for an onshore construction project in Scotland. You'll oversee daily site operations, HSE compliance, and contractor management across the build programme.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">Wind Energy</span>
+            <span class="job-tag">Construction</span>
+            <span class="job-tag">HSE</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Wind Farm Site Manager" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+      <a class="job-card" href="mailto:shaun.silva@gaia-search.com?subject=Application: Energy Policy Analyst" data-type="interim" data-title="Energy Policy Analyst London remote energy policy">
+        <div class="job-card-top">
+          <div class="job-title">Energy Policy Analyst</div>
+          <span class="job-type interim">Interim</span>
+        </div>
+        <div class="job-meta">
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            London / Remote
+          </span>
+          <span class="job-meta-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            Sustainability
+          </span>
+          <span class="job-meta-item">
+            <span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span>
+            £45,000 – £55,000
+          </span>
+        </div>
+        <p class="job-desc">A clean energy think-tank is seeking an Energy Policy Analyst on an interim basis to support research and policy development around the UK's net zero transition. Strong writing skills and knowledge of UK energy markets essential.</p>
+        <div class="job-card-footer">
+          <div class="job-tags">
+            <span class="job-tag">Policy</span>
+            <span class="job-tag">Net Zero</span>
+            <span class="job-tag">Research</span>
+          </div>
+          <a href="mailto:shaun.silva@gaia-search.com?subject=Application: Energy Policy Analyst" class="job-apply" onclick="event.stopPropagation()">Apply now →</a>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="no-results" id="noResults">
+      <p>No roles match your search. Try different keywords or clear your filters.</p>
+      <button class="clear-filters" style="width:auto;padding:0.6rem 1.5rem;" onclick="clearFilters()">Clear filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAN'T FIND ROLE -->
+<div class="cant-find">
+  <h2>Can't find the right role?</h2>
+  <p>We're in constant contact with leading environmental consultancies and clean energy businesses across the UK. Even if the perfect role isn't listed, get in touch — we'd love to hear about you.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;">
+    <a href="mailto:shaun.silva@gaia-search.com" class="btn-primary">Get in touch</a>
+    <a href="https://wa.me/447484855801?text=Hi%20Shaun%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="btn-whatsapp" target="_blank" style="margin-top:0;">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+  </div>
+</div>
+
+<!-- REGISTER CV -->
+<section class="register-cv" id="register">
+  <div class="register-inner">
+    <div class="register-text">
+      <span class="register-label">Speculative Applications</span>
+      <h2 class="register-title">Register your CV</h2>
+      <p>Not seeing the right role? Send us your CV and we'll keep you in mind as new opportunities come in. We work with candidates at all levels across environmental consulting and clean energy — so even if the timing isn't right today, we'd love to know about you.</p>
+      <ul class="register-benefits">
+        <li>✓ Be first to hear about new roles</li>
+        <li>✓ Confidential and no obligation</li>
+        <li>✓ Personal response from Shaun</li>
+      </ul>
+    </div>
+    <div class="register-form-wrap">
+      <form class="register-form" id="cvForm" onsubmit="submitForm(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" placeholder="Jane" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name *</label>
+            <input type="text" id="lastName" placeholder="Smith" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" placeholder="jane.smith@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+44 7700 000000">
+        </div>
+        <div class="form-group">
+          <label for="sector">Sector *</label>
+          <select id="sector" required>
+            <option value="" disabled selected>Select your sector</option>
+            <option>Offshore Wind</option>
+            <option>Environmental Consulting</option>
+            <option>Solar & Storage</option>
+            <option>Marine & Coastal</option>
+            <option>Sustainability & ESG</option>
+            <option>Energy Policy</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="experience">Years of Experience *</label>
+          <select id="experience" required>
+            <option value="" disabled selected>Select experience level</option>
+            <option>0–2 years (Graduate / Junior)</option>
+            <option>3–5 years (Mid-level)</option>
+            <option>6–10 years (Senior)</option>
+            <option>10+ years (Principal / Director)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Tell us about yourself</label>
+          <textarea id="message" rows="4" placeholder="Brief summary of your background, what you're looking for, and any location preferences…"></textarea>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="consent" required>
+          <label for="consent">I agree to Gaia Search storing my details and contacting me about relevant opportunities.</label>
+        </div>
+        <button type="submit" class="form-submit">Send my CV →</button>
+      </form>
+      <div class="form-success" id="formSuccess">
+        <div class="success-icon">✓</div>
+        <h3>Thanks for getting in touch!</h3>
+        <p>Shaun will review your details and be in touch personally. We'll keep you in mind as new roles come in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:underline;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Privacy Policy</a></span>
+  </div>
+</footer>
+
+<script>
+  let activeFilter = 'all';
+
+  function setFilter(type, btn) {
+    activeFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterJobs();
+  }
+
+  function filterJobs() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.job-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      const type = card.dataset.type;
+      const title = card.dataset.title.toLowerCase();
+      const matchesType = activeFilter === 'all' || type === activeFilter;
+      const matchesSearch = query === '' || title.includes(query);
+
+      if (matchesType && matchesSearch) {
+        card.style.display = 'block';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    const count = document.getElementById('resultsCount');
+    count.textContent = visible === 0 ? 'No roles found' : `Showing ${visible} role${visible !== 1 ? 's' : ''}`;
+
+    document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+</script>
+<!-- FLOATING WHATSAPP -->
+<a href="https://wa.me/447484855801?text=Hi%20Shaun%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+</body>
+</html>
