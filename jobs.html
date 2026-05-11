@@ -375,6 +375,26 @@
     .form-row { grid-template-columns: 1fr; }
   }
 
+  /* SEARCH SUGGESTIONS */
+  .search-wrap { position: relative; flex: 1; }
+  .suggestions {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: white; border-radius: 0 0 3px 3px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 50; display: none; max-height: 280px; overflow-y: auto;
+  }
+  .suggestions.open { display: block; }
+  .suggestion-item {
+    padding: 0.75rem 1.5rem; font-size: 0.88rem;
+    color: var(--text-mid); cursor: pointer;
+    border-bottom: 1px solid #f0eedc;
+    display: flex; align-items: center; gap: 0.6rem;
+    transition: background 0.15s;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover { background: var(--cream-mid); color: var(--forest); }
+  .suggestion-item svg { flex-shrink: 0; opacity: 0.4; }
+
   /* WHATSAPP */
   .btn-whatsapp {
     background: #25D366; color: #fff;
@@ -442,7 +462,10 @@
   <span class="jobs-hero-label">Live Opportunities</span>
   <h1>Find your next role in<br><em>environmental & clean energy</em></h1>
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search by job title, keyword or location…" oninput="filterJobs()">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search by job title, keyword or location…" oninput="handleSearchInput()" onkeydown="handleSearchKey(event)" autocomplete="off">
+      <div class="suggestions" id="suggestions"></div>
+    </div>
     <button onclick="filterJobs()">Search</button>
   </div>
 </div>
@@ -810,48 +833,6 @@
         </div>
       </a>
 
-      <a class="job-card" href="jobs/senior-sustainability-consultant.html" data-type="permanent" data-title="senior sustainability consultant building simulation energy modelling uk">
-        <div class="job-card-top">
-          <div class="job-title">Senior Sustainability Consultant</div>
-          <span class="job-type">Permanent</span>
-        </div>
-        <div class="job-meta">
-          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK / Hybrid</span>
-          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Sustainability &amp; Policy</span>
-          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
-        </div>
-        <p class="job-desc">A leading building simulation consultancy is seeking an experienced Senior Sustainability Consultant to join their growing team. You'll work with top-tier modellers running complex building energy simulations for high-profile projects across healthcare, commercial and educational sectors. You'll advise clients on results, support decarbonisation strategies and contribute to net zero goals. Experience in IES Virtual Environment, UK Part L and energy modelling of common UK building types required.</p>
-        <div class="job-card-footer">
-          <div class="job-tags">
-            <span class="job-tag">IES VE</span>
-            <span class="job-tag">Energy Modelling</span>
-            <span class="job-tag">Net Zero</span>
-          </div>
-          <a href="jobs/senior-sustainability-consultant.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
-        </div>
-      </a>
-
-      <a class="job-card" href="jobs/building-physics-team-lead.html" data-type="permanent" data-title="building physics team lead bristol mep engineering">
-        <div class="job-card-top">
-          <div class="job-title">Building Physics Team Lead</div>
-          <span class="job-type">Permanent</span>
-        </div>
-        <div class="job-meta">
-          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bristol / Hybrid</span>
-          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
-          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
-        </div>
-        <p class="job-desc">A dynamic MEP engineering consultancy in Bristol is looking for a Building Physics Team Lead to head up and grow their building physics capability. You'll deliver SAP calculations, Level 5 Part L dynamic thermal modelling, TM52/TM54/TM59 thermal comfort studies, daylight modelling and commercial EPCs. APEL accreditation for commercial EPC lodging required. You'll also recruit and mentor a team, develop client relationships and contribute to business development. Experience with IES, TAS or DesignBuilder essential.</p>
-        <div class="job-card-footer">
-          <div class="job-tags">
-            <span class="job-tag">Building Physics</span>
-            <span class="job-tag">SAP / Part L</span>
-            <span class="job-tag">Bristol</span>
-          </div>
-          <a href="jobs/building-physics-team-lead.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
-        </div>
-      </a>
-
     </div>
 
     <div class="no-results" id="noResults">
@@ -953,12 +934,68 @@
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2025 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; Company Registration Number: 15162203</span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:underline;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Privacy Policy</a></span>
   </div>
 </footer>
 
 <script>
   let activeFilter = 'all';
+
+  // Collect all job titles and their hrefs for suggestions
+  function getJobData() {
+    return Array.from(document.querySelectorAll('.job-card')).map(card => ({
+      title: card.querySelector('.job-title').textContent.trim(),
+      href: card.getAttribute('href')
+    }));
+  }
+
+  function handleSearchInput() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const suggestionsEl = document.getElementById('suggestions');
+
+    if (query.length < 2) {
+      suggestionsEl.classList.remove('open');
+      suggestionsEl.innerHTML = '';
+      filterJobs();
+      return;
+    }
+
+    const matches = getJobData().filter(j => j.title.toLowerCase().includes(query));
+    if (matches.length === 0) {
+      suggestionsEl.classList.remove('open');
+    } else {
+      suggestionsEl.innerHTML = matches.map(j => `
+        <div class="suggestion-item" onclick="selectSuggestion('${j.title.replace(/'/g, "\\'")}', '${j.href}')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          ${j.title}
+        </div>`).join('');
+      suggestionsEl.classList.add('open');
+    }
+    filterJobs();
+  }
+
+  function selectSuggestion(title, href) {
+    document.getElementById('searchInput').value = title;
+    document.getElementById('suggestions').classList.remove('open');
+    window.location.href = href;
+  }
+
+  function handleSearchKey(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('suggestions').classList.remove('open');
+    }
+    if (e.key === 'Enter') {
+      document.getElementById('suggestions').classList.remove('open');
+      filterJobs();
+    }
+  }
+
+  // Close suggestions when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) {
+      document.getElementById('suggestions').classList.remove('open');
+    }
+  });
 
   function setFilter(type, btn) {
     activeFilter = type;
@@ -988,8 +1025,17 @@
 
     const count = document.getElementById('resultsCount');
     count.textContent = visible === 0 ? 'No roles found' : `Showing ${visible} role${visible !== 1 ? 's' : ''}`;
-
     document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('suggestions').classList.remove('open');
+    activeFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.filter-btn').classList.add('active');
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    filterJobs();
   }
 
   function submitForm(e) {
@@ -1000,31 +1046,11 @@
     const sector = document.getElementById('sector').value;
     const experience = document.getElementById('experience').value;
     const message = document.getElementById('message').value || 'No additional message';
-
     const subject = encodeURIComponent(`CV Registration: ${name} — ${sector}`);
-    const body = encodeURIComponent(
-      `New CV Registration from Gaia Search Website\n\n` +
-      `Name: ${name}\n` +
-      `Email: ${email}\n` +
-      `Phone: ${phone}\n` +
-      `Sector: ${sector}\n` +
-      `Experience: ${experience}\n\n` +
-      `About them:\n${message}`
-    );
-
+    const body = encodeURIComponent(`New CV Registration from Gaia Search Website\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nSector: ${sector}\nExperience: ${experience}\n\nAbout them:\n${message}`);
     window.location.href = `mailto:shaun.silva@gaia-search.com?subject=${subject}&body=${body}`;
-
     document.getElementById('cvForm').style.display = 'none';
     document.getElementById('formSuccess').style.display = 'block';
-  }
-
-  function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    activeFilter = 'all';
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.filter-btn').classList.add('active');
-    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-    filterJobs();
   }
 </script>
 <!-- FLOATING WHATSAPP -->
