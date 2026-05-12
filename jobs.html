@@ -960,7 +960,20 @@
       return;
     }
 
-    const matches = getJobData().filter(j => j.title.toLowerCase().includes(query));
+    const allCards = document.querySelectorAll('.job-card');
+    const matches = [];
+    allCards.forEach(card => {
+      const title = card.querySelector('.job-title')?.textContent.trim() || '';
+      const searchableText = (
+        title + ' ' +
+        (card.querySelector('.job-desc')?.textContent || '') + ' ' +
+        Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ') + ' ' +
+        Array.from(card.querySelectorAll('.job-meta-item')).map(m => m.textContent).join(' ')
+      ).toLowerCase();
+      if (searchableText.includes(query)) {
+        matches.push({ title, href: card.getAttribute('href') });
+      }
+    });
     if (matches.length === 0) {
       suggestionsEl.classList.remove('open');
     } else {
@@ -1011,9 +1024,17 @@
 
     cards.forEach(card => {
       const type = card.dataset.type;
-      const title = card.dataset.title.toLowerCase();
+      // Search across title, sector, tags, description and location
+      const searchableText = (
+        card.dataset.title + ' ' +
+        (card.querySelector('.job-title')?.textContent || '') + ' ' +
+        (card.querySelector('.job-desc')?.textContent || '') + ' ' +
+        Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ') + ' ' +
+        Array.from(card.querySelectorAll('.job-meta-item')).map(m => m.textContent).join(' ')
+      ).toLowerCase();
+
       const matchesType = activeFilter === 'all' || type === activeFilter;
-      const matchesSearch = query === '' || title.includes(query);
+      const matchesSearch = query === '' || searchableText.includes(query);
 
       if (matchesType && matchesSearch) {
         card.style.display = 'block';
