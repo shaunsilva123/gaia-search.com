@@ -74,13 +74,19 @@
   .jobs-hero h1 em { font-style: italic; color: var(--leaf-light); }
 
   /* SEARCH BAR */
+  .search-bar-outer {
+    max-width: 700px; margin: 0 auto; position: relative;
+  }
   .search-bar {
-    display: flex; gap: 0; max-width: 700px; margin: 0 auto;
+    display: flex; gap: 0;
     background: white; border-radius: 3px;
     overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   }
+  .search-wrap {
+    position: static; flex: 1;
+  }
   .search-bar input {
-    flex: 1; padding: 1rem 1.5rem;
+    width: 100%; padding: 1rem 1.5rem;
     border: none; outline: none;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.95rem; color: var(--text-dark);
@@ -95,8 +101,49 @@
     letter-spacing: 0.08em; text-transform: uppercase;
     cursor: pointer; transition: background 0.2s;
     white-space: nowrap;
+    flex-shrink: 0;
   }
   .search-bar button:hover { background: var(--leaf-light); }
+
+  /* SEARCH SUGGESTIONS */
+  .suggestions {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: white;
+    border: 1px solid #d0cea8;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 200; display: none; max-height: 320px; overflow-y: auto;
+    margin-top: 2px;
+  }
+  .suggestions.open { display: block; }
+  .suggestion-item {
+    padding: 0.75rem 1.5rem; font-size: 0.88rem;
+    color: var(--text-mid); cursor: pointer;
+    border-bottom: 1px solid #f0eedc;
+    display: flex; align-items: center; gap: 0.75rem;
+    transition: background 0.15s;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover, .suggestion-item.highlighted {
+    background: var(--cream-mid); color: var(--forest);
+  }
+  .suggestion-icon {
+    flex-shrink: 0; opacity: 0.45; color: var(--forest);
+  }
+  .suggestion-meta {
+    margin-left: auto; font-size: 0.75rem; color: var(--text-light);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .suggestion-label {
+    padding: 0.45rem 1.5rem; font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-light); background: #f8f8ee;
+    border-bottom: 1px solid #f0eedc; font-weight: 600;
+  }
+  .no-suggestions {
+    padding: 0.9rem 1.5rem; font-size: 0.85rem; color: var(--text-light);
+    font-style: italic;
+  }
 
   /* FILTERS */
   .filters-bar {
@@ -375,26 +422,6 @@
     .form-row { grid-template-columns: 1fr; }
   }
 
-  /* SEARCH SUGGESTIONS */
-  .search-wrap { position: relative; flex: 1; }
-  .suggestions {
-    position: absolute; top: 100%; left: 0; right: 0;
-    background: white; border-radius: 0 0 3px 3px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    z-index: 50; display: none; max-height: 280px; overflow-y: auto;
-  }
-  .suggestions.open { display: block; }
-  .suggestion-item {
-    padding: 0.75rem 1.5rem; font-size: 0.88rem;
-    color: var(--text-mid); cursor: pointer;
-    border-bottom: 1px solid #f0eedc;
-    display: flex; align-items: center; gap: 0.6rem;
-    transition: background 0.15s;
-  }
-  .suggestion-item:last-child { border-bottom: none; }
-  .suggestion-item:hover { background: var(--cream-mid); color: var(--forest); }
-  .suggestion-item svg { flex-shrink: 0; opacity: 0.4; }
-
   /* WHATSAPP */
   .btn-whatsapp {
     background: #25D366; color: #fff;
@@ -461,12 +488,14 @@
 <div class="jobs-hero">
   <span class="jobs-hero-label">Live Opportunities</span>
   <h1>Find your next role in<br><em>environmental & clean energy</em></h1>
-  <div class="search-bar">
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Search by job title, keyword or location…" oninput="handleSearchInput()" onkeydown="handleSearchKey(event)" autocomplete="off">
-      <div class="suggestions" id="suggestions"></div>
+  <div class="search-bar-outer">
+    <div class="search-bar">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Search by job, keyword or location" oninput="handleSearchInput()" onkeydown="handleSearchKey(event)" autocomplete="off">
+      </div>
+      <button onclick="filterJobs()">Search</button>
     </div>
-    <button onclick="filterJobs()">Search</button>
+    <div class="suggestions" id="suggestions"></div>
   </div>
 </div>
 
@@ -560,7 +589,7 @@
   <div>
     <div class="jobs-list" id="jobsList">
 
-      <a class="job-card" href="jobs/principal-environmental-clerk-of-works.html" data-type="permanent" data-title="principal environmental clerk of works uk wide (field based)">
+      <div class="job-card" data-href="jobs/principal-environmental-clerk-of-works.html" data-type="permanent" data-title="principal environmental clerk of works uk wide (field based)" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Principal Environmental Clerk of Works</div>
           <span class="job-type">Permanent</span>
@@ -575,8 +604,9 @@
           <div class="job-tags"><span class="job-tag">EnvCoW</span><span class="job-tag">Compliance</span><span class="job-tag">Infrastructure</span></div>
           <a href="jobs/principal-environmental-clerk-of-works.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/principal-terrestrial-ornithologist.html" data-type="permanent" data-title="principal terrestrial ornithologist uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-terrestrial-ornithologist.html" data-type="permanent" data-title="principal terrestrial ornithologist uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Principal Terrestrial Ornithologist</div>
           <span class="job-type">Permanent</span>
@@ -591,8 +621,9 @@
           <div class="job-tags"><span class="job-tag">Ornithology</span><span class="job-tag">EIA</span><span class="job-tag">Renewables</span></div>
           <a href="jobs/principal-terrestrial-ornithologist.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-water-network-modeller.html" data-type="permanent" data-title="senior water network modeller uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-water-network-modeller.html" data-type="permanent" data-title="senior water network modeller uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Water Network Modeller</div>
           <span class="job-type">Permanent</span>
@@ -607,8 +638,9 @@
           <div class="job-tags"><span class="job-tag">Water Modelling</span><span class="job-tag">InfoWorks</span><span class="job-tag">Infrastructure</span></div>
           <a href="jobs/senior-water-network-modeller.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-wastewater-modeller.html" data-type="permanent" data-title="senior wastewater modeller uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-wastewater-modeller.html" data-type="permanent" data-title="senior wastewater modeller uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Wastewater Modeller</div>
           <span class="job-type">Permanent</span>
@@ -623,8 +655,9 @@
           <div class="job-tags"><span class="job-tag">Wastewater</span><span class="job-tag">InfoWorks ICM</span><span class="job-tag">Hydraulic Modelling</span></div>
           <a href="jobs/senior-wastewater-modeller.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-eia-consultant.html" data-type="permanent" data-title="senior eia consultant uk wide / flexible">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-eia-consultant.html" data-type="permanent" data-title="senior eia consultant uk wide / flexible" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior EIA Consultant</div>
           <span class="job-type">Permanent</span>
@@ -639,8 +672,9 @@
           <div class="job-tags"><span class="job-tag">EIA</span><span class="job-tag">Offshore Wind</span><span class="job-tag">Energy</span></div>
           <a href="jobs/senior-eia-consultant.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-flood-risk-engineer.html" data-type="permanent" data-title="senior flood risk engineer manchester / leeds / london / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-flood-risk-engineer.html" data-type="permanent" data-title="senior flood risk engineer manchester / leeds / london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Flood Risk Engineer</div>
           <span class="job-type">Permanent</span>
@@ -655,8 +689,9 @@
           <div class="job-tags"><span class="job-tag">Flood Risk</span><span class="job-tag">SuDS</span><span class="job-tag">NPPF</span></div>
           <a href="jobs/senior-flood-risk-engineer.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/offshore-consents-environment-manager.html" data-type="permanent" data-title="offshore consents &amp; environment manager edinburgh / cardiff / london / durham">
+      </div>
+
+      <div class="job-card" data-href="jobs/offshore-consents-environment-manager.html" data-type="permanent" data-title="offshore consents & environment manager edinburgh / cardiff / london / durham" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Offshore Consents &amp; Environment Manager</div>
           <span class="job-type">Permanent</span>
@@ -671,8 +706,9 @@
           <div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Marine Licence</span><span class="job-tag">Offshore Wind</span></div>
           <a href="jobs/offshore-consents-environment-manager.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/principal-ecologist-edinburgh.html" data-type="permanent" data-title="principal ecologist edinburgh / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-ecologist-edinburgh.html" data-type="permanent" data-title="principal ecologist edinburgh / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Principal Ecologist</div>
           <span class="job-type">Permanent</span>
@@ -687,8 +723,9 @@
           <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">BNG</span><span class="job-tag">Water Utilities</span></div>
           <a href="jobs/principal-ecologist-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-ecologist-uk.html" data-type="permanent" data-title="senior ecologist uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-ecologist-uk.html" data-type="permanent" data-title="senior ecologist uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Ecologist</div>
           <span class="job-type">Permanent</span>
@@ -703,8 +740,9 @@
           <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Protected Species</span><span class="job-tag">EIA</span></div>
           <a href="jobs/senior-ecologist-uk.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/principal-ecologist-infrastructure-renewables.html" data-type="permanent" data-title="principal ecologist — infrastructure &amp; renewables uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-ecologist-infrastructure-renewables.html" data-type="permanent" data-title="principal ecologist infrastructure & renewables uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Principal Ecologist — Infrastructure &amp; Renewables</div>
           <span class="job-type">Permanent</span>
@@ -719,8 +757,9 @@
           <div class="job-tags"><span class="job-tag">EPS Licences</span><span class="job-tag">BNG</span><span class="job-tag">Leadership</span></div>
           <a href="jobs/principal-ecologist-infrastructure-renewables.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/associate-director-ecology.html" data-type="permanent" data-title="associate director — ecology manchester / leeds / london / glasgow">
+      </div>
+
+      <div class="job-card" data-href="jobs/associate-director-ecology.html" data-type="permanent" data-title="associate director ecology manchester / leeds / london / glasgow" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Associate Director — Ecology</div>
           <span class="job-type">Permanent</span>
@@ -735,8 +774,9 @@
           <div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Major Projects</span><span class="job-tag">Director Level</span></div>
           <a href="jobs/associate-director-ecology.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-ecologist-bristol.html" data-type="permanent" data-title="senior ecologist — bristol bristol / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-ecologist-bristol.html" data-type="permanent" data-title="senior ecologist bristol / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Ecologist — Bristol</div>
           <span class="job-type">Permanent</span>
@@ -751,8 +791,9 @@
           <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">UKHab</span><span class="job-tag">Bristol</span></div>
           <a href="jobs/senior-ecologist-bristol.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/climate-carbon-esg-director.html" data-type="permanent" data-title="climate, carbon &amp; esg director london / bristol / warrington">
+      </div>
+
+      <div class="job-card" data-href="jobs/climate-carbon-esg-director.html" data-type="permanent" data-title="climate carbon esg director london / bristol / warrington" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Climate, Carbon &amp; ESG Director</div>
           <span class="job-type">Permanent</span>
@@ -767,8 +808,9 @@
           <div class="job-tags"><span class="job-tag">Net Zero</span><span class="job-tag">GHG</span><span class="job-tag">Director Level</span></div>
           <a href="jobs/climate-carbon-esg-director.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-geotechnical-engineer-london.html" data-type="permanent" data-title="senior geotechnical engineer london / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-geotechnical-engineer-london.html" data-type="permanent" data-title="senior geotechnical engineer london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Geotechnical Engineer</div>
           <span class="job-type">Permanent</span>
@@ -783,8 +825,9 @@
           <div class="job-tags"><span class="job-tag">Geotechnical</span><span class="job-tag">Infrastructure</span><span class="job-tag">London</span></div>
           <a href="jobs/senior-geotechnical-engineer-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/associate-ecologist-wales.html" data-type="permanent" data-title="associate ecologist — wales team lead cardiff / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/associate-ecologist-wales.html" data-type="permanent" data-title="associate ecologist wales team lead cardiff / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Associate Ecologist — Wales Team Lead</div>
           <span class="job-type">Permanent</span>
@@ -799,8 +842,9 @@
           <div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Wales</span><span class="job-tag">4-Day Week</span></div>
           <a href="jobs/associate-ecologist-wales.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/ecologist-south-west-midlands-wales.html" data-type="permanent" data-title="ecologists — multiple levels (south west, midlands &amp; wales) south west / midlands / wales">
+      </div>
+
+      <div class="job-card" data-href="jobs/ecologist-south-west-midlands-wales.html" data-type="permanent" data-title="ecologists multiple levels south west midlands wales" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Ecologists — Multiple Levels (South West, Midlands &amp; Wales)</div>
           <span class="job-type">Permanent</span>
@@ -815,8 +859,9 @@
           <div class="job-tags"><span class="job-tag">Multiple Levels</span><span class="job-tag">Ecology</span><span class="job-tag">South West</span></div>
           <a href="jobs/ecologist-south-west-midlands-wales.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
-      <a class="job-card" href="jobs/senior-landscape-architect.html" data-type="permanent" data-title="senior landscape architect uk wide / hybrid">
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-landscape-architect.html" data-type="permanent" data-title="senior landscape architect uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top">
           <div class="job-title">Senior Landscape Architect</div>
           <span class="job-type">Permanent</span>
@@ -831,7 +876,7 @@
           <div class="job-tags"><span class="job-tag">LVIA</span><span class="job-tag">NSIP</span><span class="job-tag">Energy Transition</span></div>
           <a href="jobs/senior-landscape-architect.html" class="job-apply" onclick="event.stopPropagation()">View role →</a>
         </div>
-      </a>
+      </div>
 
     </div>
 
@@ -940,73 +985,117 @@
 
 <script>
   let activeFilter = 'all';
-
-  // Collect all job titles and their hrefs for suggestions
-  function getJobData() {
-    return Array.from(document.querySelectorAll('.job-card')).map(card => ({
-      title: card.querySelector('.job-title').textContent.trim(),
-      href: card.getAttribute('href')
-    }));
-  }
+  let highlightedIndex = -1;
 
   function handleSearchInput() {
+    highlightedIndex = -1;
     const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    showSuggestions(query);
+    filterJobs();
+  }
+
+  function showSuggestions(query) {
     const suggestionsEl = document.getElementById('suggestions');
 
     if (query.length < 2) {
       suggestionsEl.classList.remove('open');
       suggestionsEl.innerHTML = '';
-      filterJobs();
       return;
     }
 
-    const allCards = document.querySelectorAll('.job-card');
+    // Only select top-level job cards (not nested elements)
+    const cards = Array.from(document.querySelectorAll('#jobsList > .job-card'));
     const matches = [];
-    allCards.forEach(card => {
-      const title = card.querySelector('.job-title')?.textContent.trim() || '';
-      const searchableText = (
-        title + ' ' +
-        (card.querySelector('.job-desc')?.textContent || '') + ' ' +
-        Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ') + ' ' +
-        Array.from(card.querySelectorAll('.job-meta-item')).map(m => m.textContent).join(' ')
-      ).toLowerCase();
-      if (searchableText.includes(query)) {
-        matches.push({ title, href: card.getAttribute('href') });
+
+    cards.forEach(card => {
+      const titleEl = card.querySelector('.job-title');
+      if (!titleEl) return;
+      const title = titleEl.textContent.trim();
+      const metaItems = card.querySelectorAll('.job-meta-item');
+      const location = metaItems[0] ? metaItems[0].textContent.trim() : '';
+      const sector = metaItems[1] ? metaItems[1].textContent.trim() : '';
+      const tags = Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ');
+      const desc = card.querySelector('.job-desc') ? card.querySelector('.job-desc').textContent : '';
+      const searchable = (title + ' ' + location + ' ' + sector + ' ' + tags + ' ' + desc).toLowerCase();
+
+      if (searchable.includes(query)) {
+        matches.push({ title, location: location.trim(), href: card.dataset.href || '' });
       }
     });
+
     if (matches.length === 0) {
-      suggestionsEl.classList.remove('open');
-    } else {
-      suggestionsEl.innerHTML = matches.map(j => `
-        <div class="suggestion-item" onclick="selectSuggestion('${j.title.replace(/'/g, "\\'")}', '${j.href}')">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          ${j.title}
-        </div>`).join('');
+      suggestionsEl.innerHTML = '<div class="no-suggestions">No matching roles found</div>';
       suggestionsEl.classList.add('open');
+      return;
     }
-    filterJobs();
+
+    suggestionsEl.innerHTML = `<div class="suggestion-label">Matching roles (${matches.length})</div>`;
+
+    matches.forEach((j, i) => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.dataset.index = i;
+      item.dataset.title = j.title;
+      item.dataset.href = j.href;
+      item.innerHTML = `
+        <svg class="suggestion-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="suggestion-title">${j.title}</span>
+        <span class="suggestion-meta">${j.location}</span>`;
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selectSuggestion(j.title, j.href);
+      });
+      suggestionsEl.appendChild(item);
+    });
+
+    suggestionsEl.classList.add('open');
   }
 
   function selectSuggestion(title, href) {
     document.getElementById('searchInput').value = title;
     document.getElementById('suggestions').classList.remove('open');
-    window.location.href = href;
+    highlightedIndex = -1;
+    filterJobs();
   }
 
   function handleSearchKey(e) {
-    if (e.key === 'Escape') {
-      document.getElementById('suggestions').classList.remove('open');
+    const suggestionsEl = document.getElementById('suggestions');
+    const items = suggestionsEl.querySelectorAll('.suggestion-item');
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+      updateHighlight(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlightedIndex = Math.max(highlightedIndex - 1, -1);
+      updateHighlight(items);
+    } else if (e.key === 'Enter') {
+      if (highlightedIndex >= 0 && items[highlightedIndex]) {
+        const title = items[highlightedIndex].dataset.title || '';
+        const href = items[highlightedIndex].dataset.href || '';
+        selectSuggestion(title, href);
+      } else {
+        suggestionsEl.classList.remove('open');
+        filterJobs();
+      }
+    } else if (e.key === 'Escape') {
+      suggestionsEl.classList.remove('open');
+      highlightedIndex = -1;
     }
-    if (e.key === 'Enter') {
-      document.getElementById('suggestions').classList.remove('open');
-      filterJobs();
-    }
+  }
+
+  function updateHighlight(items) {
+    items.forEach((item, i) => {
+      item.classList.toggle('highlighted', i === highlightedIndex);
+    });
   }
 
   // Close suggestions when clicking outside
   document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrap')) {
+    if (!e.target.closest('.search-bar-outer')) {
       document.getElementById('suggestions').classList.remove('open');
+      highlightedIndex = -1;
     }
   });
 
@@ -1018,23 +1107,20 @@
   }
 
   function filterJobs() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.job-card');
     let visible = 0;
 
     cards.forEach(card => {
       const type = card.dataset.type;
-      // Search across title, sector, tags, description and location
-      const searchableText = (
-        card.dataset.title + ' ' +
-        (card.querySelector('.job-title')?.textContent || '') + ' ' +
-        (card.querySelector('.job-desc')?.textContent || '') + ' ' +
-        Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ') + ' ' +
-        Array.from(card.querySelectorAll('.job-meta-item')).map(m => m.textContent).join(' ')
-      ).toLowerCase();
+      const title = card.querySelector('.job-title')?.textContent || '';
+      const desc = card.querySelector('.job-desc')?.textContent || '';
+      const tags = Array.from(card.querySelectorAll('.job-tag')).map(t => t.textContent).join(' ');
+      const meta = Array.from(card.querySelectorAll('.job-meta-item')).map(m => m.textContent).join(' ');
+      const searchable = (card.dataset.title + ' ' + title + ' ' + desc + ' ' + tags + ' ' + meta).toLowerCase();
 
       const matchesType = activeFilter === 'all' || type === activeFilter;
-      const matchesSearch = query === '' || searchableText.includes(query);
+      const matchesSearch = query === '' || searchable.includes(query);
 
       if (matchesType && matchesSearch) {
         card.style.display = 'block';
@@ -1045,13 +1131,18 @@
     });
 
     const count = document.getElementById('resultsCount');
-    count.textContent = visible === 0 ? 'No roles found' : `Showing ${visible} role${visible !== 1 ? 's' : ''}`;
+    if (query === '' && activeFilter === 'all') {
+      count.textContent = 'Showing all roles';
+    } else {
+      count.textContent = visible === 0 ? 'No roles found' : `Showing ${visible} role${visible !== 1 ? 's' : ''}`;
+    }
     document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
   }
 
   function clearFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('suggestions').classList.remove('open');
+    highlightedIndex = -1;
     activeFilter = 'all';
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.filter-btn').classList.add('active');
@@ -1074,9 +1165,11 @@
     document.getElementById('formSuccess').style.display = 'block';
   }
 </script>
+
 <!-- FLOATING WHATSAPP -->
 <a href="https://wa.me/447484855801?text=Hi%20Shaun%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
+
 </body>
 </html>
