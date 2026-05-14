@@ -215,6 +215,34 @@
   }
   .clear-filters:hover { background: var(--leaf); color: white; }
 
+  /* ACTIVE FILTER TAGS + SEARCH BTN */
+  .sidebar-actions {
+    display: none; flex-direction: column; gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .sidebar-actions.visible { display: flex; }
+  .active-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .active-tag {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: var(--forest); color: var(--cream);
+    font-size: 0.72rem; font-weight: 500; padding: 0.3rem 0.65rem;
+    border-radius: 2px; letter-spacing: 0.03em;
+  }
+  .active-tag button {
+    background: none; border: none; color: var(--cream);
+    cursor: pointer; font-size: 1rem; line-height: 1;
+    padding: 0; margin: 0; opacity: 0.7; transition: opacity 0.15s;
+  }
+  .active-tag button:hover { opacity: 1; }
+  .sidebar-search-btn {
+    background: var(--leaf); color: white; border: none;
+    padding: 0.7rem 1rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; width: 100%; transition: background 0.2s;
+  }
+  .sidebar-search-btn:hover { background: var(--leaf-light); }
+
   /* JOB CARDS */
   .jobs-list { display: flex; flex-direction: column; gap: 1.2rem; }
 
@@ -517,23 +545,23 @@
     <div class="sidebar-section">
       <h3>Sector</h3>
       <div class="sidebar-option">
-        <input type="checkbox" id="s1" onchange="filterJobs()">
+        <input type="checkbox" id="s1" onchange="updateSidebarActions(); filterJobs()">
         <label for="s1">Offshore Wind <span>(3)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="s2" onchange="filterJobs()">
+        <input type="checkbox" id="s2" onchange="updateSidebarActions(); filterJobs()">
         <label for="s2">Environmental Consulting <span>(4)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="s3" onchange="filterJobs()">
+        <input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()">
         <label for="s3">Solar & Storage <span>(2)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="s4" onchange="filterJobs()">
+        <input type="checkbox" id="s4" onchange="updateSidebarActions(); filterJobs()">
         <label for="s4">Sustainability <span>(2)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="s5" onchange="filterJobs()">
+        <input type="checkbox" id="s5" onchange="updateSidebarActions(); filterJobs()">
         <label for="s5">Marine & Coastal <span>(1)</span></label>
       </div>
     </div>
@@ -541,23 +569,23 @@
     <div class="sidebar-section">
       <h3>Location</h3>
       <div class="sidebar-option">
-        <input type="checkbox" id="l1" onchange="filterJobs()">
+        <input type="checkbox" id="l1" onchange="updateSidebarActions(); filterJobs()">
         <label for="l1">London <span>(4)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="l2" onchange="filterJobs()">
+        <input type="checkbox" id="l2" onchange="updateSidebarActions(); filterJobs()">
         <label for="l2">Scotland <span>(2)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="l3" onchange="filterJobs()">
+        <input type="checkbox" id="l3" onchange="updateSidebarActions(); filterJobs()">
         <label for="l3">South East <span>(2)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="l4" onchange="filterJobs()">
+        <input type="checkbox" id="l4" onchange="updateSidebarActions(); filterJobs()">
         <label for="l4">Remote / Hybrid <span>(3)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="l5" onchange="filterJobs()">
+        <input type="checkbox" id="l5" onchange="updateSidebarActions(); filterJobs()">
         <label for="l5">Nationwide <span>(1)</span></label>
       </div>
     </div>
@@ -565,23 +593,27 @@
     <div class="sidebar-section">
       <h3>Salary</h3>
       <div class="sidebar-option">
-        <input type="checkbox" id="p1" onchange="filterJobs()">
+        <input type="checkbox" id="p1" onchange="updateSidebarActions(); filterJobs()">
         <label for="p1">Up to £40k <span>(2)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="p2" onchange="filterJobs()">
+        <input type="checkbox" id="p2" onchange="updateSidebarActions(); filterJobs()">
         <label for="p2">£40k – £60k <span>(4)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="p3" onchange="filterJobs()">
+        <input type="checkbox" id="p3" onchange="updateSidebarActions(); filterJobs()">
         <label for="p3">£60k – £80k <span>(3)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="p4" onchange="filterJobs()">
+        <input type="checkbox" id="p4" onchange="updateSidebarActions(); filterJobs()">
         <label for="p4">£80k+ <span>(3)</span></label>
       </div>
     </div>
 
+    <div class="sidebar-actions" id="sidebarActions">
+      <div class="active-tags" id="activeTags"></div>
+      <button class="sidebar-search-btn" onclick="filterJobs()">Search roles</button>
+    </div>
     <button class="clear-filters" onclick="clearFilters()">Clear all filters</button>
   </aside>
 
@@ -1099,6 +1131,43 @@
     }
   });
 
+  // Map checkbox IDs to human-readable labels
+  const checkboxLabels = {
+    s1: 'Offshore Wind', s2: 'Environmental Consulting', s3: 'Solar & Storage',
+    s4: 'Sustainability', s5: 'Marine & Coastal',
+    l1: 'London', l2: 'Scotland', l3: 'South East', l4: 'Remote / Hybrid', l5: 'Nationwide',
+    p1: 'Up to £40k', p2: '£40k – £60k', p3: '£60k – £80k', p4: '£80k+'
+  };
+
+  function updateSidebarActions() {
+    const checked = Array.from(document.querySelectorAll('.sidebar input[type="checkbox"]:checked'));
+    const actionsEl = document.getElementById('sidebarActions');
+    const tagsEl = document.getElementById('activeTags');
+
+    if (checked.length === 0) {
+      actionsEl.classList.remove('visible');
+      tagsEl.innerHTML = '';
+      return;
+    }
+
+    actionsEl.classList.add('visible');
+    tagsEl.innerHTML = '';
+    checked.forEach(cb => {
+      const label = checkboxLabels[cb.id] || cb.id;
+      const tag = document.createElement('span');
+      tag.className = 'active-tag';
+      tag.innerHTML = label + ' <button onclick="removeFilter(\'' + cb.id + '\')" aria-label="Remove ' + label + '">&#215;</button>';
+      tagsEl.appendChild(tag);
+    });
+  }
+
+  function removeFilter(cbId) {
+    const cb = document.getElementById(cbId);
+    if (cb) { cb.checked = false; }
+    updateSidebarActions();
+    filterJobs();
+  }
+
   function setFilter(type, btn) {
     activeFilter = type;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1147,6 +1216,7 @@
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.filter-btn').classList.add('active');
     document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateSidebarActions();
     filterJobs();
   }
 
