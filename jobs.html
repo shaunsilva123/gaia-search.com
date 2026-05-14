@@ -553,8 +553,8 @@
         <label for="s2">Environmental Consulting <span>(11)</span></label>
       </div>
       <div class="sidebar-option">
-        <input type="checkbox" id="s3" disabled style="opacity:0.35;cursor:not-allowed">
-        <label for="s3" style="color:#aaa;cursor:not-allowed">Solar & Storage <span>(0)</span></label>
+        <input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()">
+        <label for="s3">Infrastructure &amp; Net Zero <span>(4)</span></label>
       </div>
       <div class="sidebar-option">
         <input type="checkbox" id="s4" onchange="updateSidebarActions(); filterJobs()">
@@ -1133,7 +1133,7 @@
 
   // Map checkbox IDs to human-readable labels
   const checkboxLabels = {
-    s1: 'Offshore Wind', s2: 'Environmental Consulting', s3: 'Solar & Storage',
+    s1: 'Offshore Wind', s2: 'Environmental Consulting', s3: 'Infrastructure & Net Zero',
     s4: 'Sustainability', s5: 'Marine & Coastal',
     l1: 'London', l2: 'Scotland', l3: 'South East', l4: 'Remote / Hybrid', l5: 'Nationwide',
     p1: 'Up to £40k', p2: '£40k – £60k', p3: '£60k – £80k', p4: '£80k+'
@@ -1189,7 +1189,7 @@
     const sectorMap = {
       s1: ['offshore-wind'],
       s2: ['environmental-consulting'],
-      s3: ['solar'],
+      s3: ['infrastructure'],
       s4: ['sustainability'],
       s5: ['marine']
     };
@@ -1213,6 +1213,9 @@
     const anyLocations = checkedLocations.length > 0;
     const anySalaries  = checkedSalaries.length > 0;
     const anyFilters   = anySectors || anyLocations || anySalaries;
+
+    // Reset all cards to visible before applying filters
+    cards.forEach(c => c.style.display = 'block');
 
     cards.forEach(card => {
       const type       = card.dataset.type || '';
@@ -1265,6 +1268,11 @@
       : `Showing ${visible} role${visible !== 1 ? 's' : ''}`;
     document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
   }
+
+  // Ensure clean state on every page load
+  window.addEventListener('load', function() {
+    filterJobs();
+  });
 
   function clearFilters() {
     document.getElementById('searchInput').value = '';
