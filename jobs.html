@@ -12,8 +12,21 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.gaia-search.com/jobs.html">
   <meta property="og:site_name" content="Gaia Search">
+  <meta property="og:image" content="https://www.gaia-search.com/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <link rel="canonical" href="https://www.gaia-search.com/jobs.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Environmental & Clean Energy Jobs UK | Gaia Search">
+  <meta name="twitter:description" content="Browse live environmental and clean energy jobs across the UK. Senior Ecologist, EIA Consultant, Offshore Wind and more.">
+  <meta name="twitter:image" content="https://www.gaia-search.com/logo.png">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" as="style">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,6 +43,15 @@
     --text-light:  #686868;
     --white:       #ffffff;
   }
+
+  .skip-link {
+    position: absolute; top: -100px; left: 1rem; z-index: 9999;
+    background: var(--leaf); color: white; padding: 0.6rem 1.2rem;
+    border-radius: 2px; font-size: 0.85rem; text-decoration: none;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+    transition: top 0.2s;
+  }
+  .skip-link:focus { top: 1rem; }
 
   html { scroll-behavior: smooth; }
   body {
@@ -494,9 +516,29 @@
   }
   .footer-logo img { height: 36px; width: auto; }
 
+
+  .nav-hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 4px;
+  }
+  .nav-hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: rgba(255,255,255,0.85); border-radius: 2px; transition: all 0.3s;
+  }
+  .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
+    .nav-hamburger { display: flex; }
     .nav-links { display: none; }
+    .nav-links.open {
+      display: flex; flex-direction: column; gap: 0;
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: rgba(27,74,27,0.98); padding: 1rem 1.5rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
     .jobs-hero { padding: 8rem 1.5rem 4rem; }
     .filters-bar { padding: 1rem 1.5rem; }
     .jobs-main { grid-template-columns: 1fr; padding: 2rem 1.5rem 4rem; }
@@ -505,13 +547,42 @@
     footer { padding: 2rem 1.5rem; }
   }
 </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EmploymentAgency",
+    "name": "Gaia Search",
+    "url": "https://www.gaia-search.com",
+    "logo": "https://www.gaia-search.com/logo.png",
+    "description": "Specialist recruitment agency placing environmental and clean energy professionals across the UK.",
+    "email": "shaun.silva@gaia-search.com",
+    "areaServed": "GB",
+    "knowsAbout": ["Environmental Consulting", "Ecology", "Offshore Wind", "EIA", "Sustainability", "Infrastructure", "Net Zero"]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.gaia-search.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Jobs", "item": "https://www.gaia-search.com/jobs.html"}
+    ]
+  }
+  </script>
 </head>
 <body>
+<a href="#jobsList" class="skip-link">Skip to job listings</a>
 
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
-  <ul class="nav-links">
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false" id="hamburgerBtn">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
     <li><a href="index.html#about">About</a></li>
     <li><a href="index.html#specialisms">Specialisms</a></li>
     <li><a href="index.html#services">Services</a></li>
@@ -1076,6 +1147,22 @@
 </footer>
 
 <script>
+
+  function toggleMobileMenu() {
+    const btn = document.getElementById('hamburgerBtn');
+    const links = document.getElementById('navLinks');
+    const isOpen = links.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+  }
+  // Close menu when a link is clicked
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.remove('open');
+      document.getElementById('hamburgerBtn').classList.remove('open');
+    });
+  });
+
   let activeFilter = 'all';
   let highlightedIndex = -1;
 
