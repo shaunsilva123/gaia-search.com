@@ -408,7 +408,7 @@
     <p>Any individual has the right to request deletion of their personal data at any time, regardless of the retention periods set out in this policy. We will process such requests within <strong>30 days</strong> of receipt.</p>
 
     <h3>How to make a request</h3>
-    <p>Email <a href="mailto:shaun.silva@gaia-search.com" style="color: var(--forest);">shaun.silva@gaia-search.com</a> with the subject line <strong>"Data Deletion Request"</strong> or <strong>"Data Access Request"</strong>. We may need to verify your identity before processing the request.</p>
+    <p>Email <a href="mailto:hello@gaia-search.com" style="color: var(--forest);">hello@gaia-search.com</a> with the subject line <strong>"Data Deletion Request"</strong> or <strong>"Data Access Request"</strong>. We may need to verify your identity before processing the request.</p>
 
     <h3>Exceptions</h3>
     <p>We may decline a deletion request in limited circumstances — for example, where we have a legal obligation to retain the data (such as a financial record required by HMRC). In such cases, we will explain why and delete all other data relating to the individual.</p>
@@ -445,7 +445,7 @@
     <p>For questions about this policy, to make a data access or deletion request, or to raise a concern about how your data has been handled:</p>
     <div class="contact-box">
       <p><strong style="color:white;">Gaia Search Ltd</strong></p>
-      <p>Email: <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a></p>
+      <p>Email: <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a></p>
       <p>Subject line: "Data Request" or "Data Retention Query"</p>
       <p>Company Registration No: 15162203</p>
       <p>London, UK</p>
@@ -458,9 +458,92 @@
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
+    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
   </div>
 </footer>
 
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+    background: #0f200f; color: rgba(245,245,220,0.9);
+    padding: 1.2rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+    border-top: 2px solid #5bb544;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    font-family: 'DM Sans', sans-serif;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  #cookie-banner.visible { transform: translateY(0); }
+  #cookie-banner p {
+    font-size: 0.85rem; line-height: 1.6; flex: 1; min-width: 200px;
+    margin: 0; color: rgba(245,245,220,0.85);
+  }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-btn-accept {
+    background: #5bb544; color: white; border: none;
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline {
+    background: transparent; color: rgba(245,245,220,0.6);
+    border: 1px solid rgba(245,245,220,0.25);
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="setCookieConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="setCookieConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+
+<script>
+  <!-- Replace G-XXXXXXXXXX with your actual Google Analytics Measurement ID -->
+  var GA_ID = "G-XXXXXXXXXX";
+
+  function loadGA() {
+    if (document.getElementById("ga-script")) return;
+    var s = document.createElement("script");
+    s.id = "ga-script";
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag("js", new Date());
+    gtag("config", GA_ID, { anonymize_ip: true });
+  }
+
+  function setCookieConsent(accepted) {
+    localStorage.setItem("gaia_cookie_consent", accepted ? "accepted" : "declined");
+    document.getElementById("cookie-banner").style.transform = "translateY(100%)";
+    if (accepted) loadGA();
+  }
+
+  (function() {
+    var consent = localStorage.getItem("gaia_cookie_consent");
+    if (consent === "accepted") {
+      loadGA();
+    } else if (!consent) {
+      setTimeout(function() {
+        document.getElementById("cookie-banner").classList.add("visible");
+      }, 800);
+    }
+  })();
+</script>
 </body>
 </html>
