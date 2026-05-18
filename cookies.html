@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Policy | Gaia Search</title>
+<meta name="description" content="Gaia Search cookie policy — what cookies we use and how to control them.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.gaia-search.com/cookies.html">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+  :root {
+    --leaf: #5bb544; --leaf-light: #7ccc66;
+    --forest: #2a6b2a; --forest-dark: #1b4a1b;
+    --cream: #f5f5dc; --cream-mid: #eceacc; --cream-pale: #fafaed;
+    --text-dark: #1a1a1a; --text-mid: #383838; --text-light: #686868;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); }
+  nav {
+    background: var(--forest-dark); padding: 0 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta { background: var(--leaf); color: #fff !important; padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 600 !important; }
+  .hero { background: var(--forest-dark); padding: 5rem 4rem 4rem; }
+  .hero-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--leaf-light); font-weight: 600; display: block; margin-bottom: 1rem; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3rem); color: white; font-weight: 700; line-height: 1.2; margin-bottom: 0.8rem; }
+  .hero p { color: rgba(255,255,255,0.55); font-size: 0.85rem; font-weight: 300; }
+  .content-wrap { max-width: 860px; margin: 0 auto; padding: 4rem 4rem 6rem; }
+  .policy-section { margin-bottom: 3rem; }
+  .policy-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest-dark); margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid #d8d6b8; }
+  .policy-section h3 { font-size: 0.82rem; font-weight: 700; color: var(--forest); margin: 1.4rem 0 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .policy-section p { font-size: 0.92rem; color: var(--text-mid); line-height: 1.85; font-weight: 400; margin-bottom: 1rem; }
+  .policy-section ul { margin: 0.6rem 0 1rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .policy-section li { font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; }
+  .cookie-table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: 3px; border: 1px solid #d8d6b8; }
+  .cookie-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 480px; }
+  .cookie-table thead { background: var(--forest-dark); color: white; }
+  .cookie-table thead th { padding: 0.9rem 1.2rem; text-align: left; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .cookie-table tbody tr { border-bottom: 1px solid #e8e6c8; }
+  .cookie-table tbody tr:last-child { border-bottom: none; }
+  .cookie-table tbody tr:nth-child(even) { background: var(--cream-pale); }
+  .cookie-table td { padding: 0.85rem 1.2rem; color: var(--text-mid); vertical-align: top; }
+  .cookie-table td:first-child { font-weight: 600; color: var(--forest); }
+  .highlight-box { background: var(--cream-pale); border-left: 3px solid var(--leaf); padding: 1.2rem 1.5rem; margin: 1.2rem 0; border-radius: 0 3px 3px 0; }
+  .highlight-box p { font-size: 0.88rem !important; margin-bottom: 0 !important; }
+  .highlight-box strong { color: var(--forest); }
+  .btn-manage { display: inline-block; background: var(--forest); color: white; padding: 0.75rem 1.8rem; border-radius: 2px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: background 0.2s; margin-top: 0.5rem; }
+  .btn-manage:hover { background: var(--leaf); }
+  .divider { border: none; border-top: 1px solid #d8d6b8; margin: 2rem 0; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 2rem 4rem; }
+  .footer-bottom { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+  .footer-logo img { height: 32px; width: auto; }
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; } .nav-links { display: none; }
+    .hero { padding: 4rem 1.5rem 3rem; } .content-wrap { padding: 2.5rem 1.5rem 4rem; }
+    footer { padding: 2rem 1.5rem; } .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <span class="hero-label">Legal</span>
+  <h1>Cookie Policy</h1>
+  <p>Last updated: May 2026 &nbsp;·&nbsp; Gaia Search Ltd &nbsp;·&nbsp; Company No. 15162203</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="policy-section">
+    <h2>What are cookies?</h2>
+    <p>Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and understand how visitors use the site. Some cookies are essential for the site to work; others are optional and used for analytics.</p>
+    <p>Under the UK Privacy and Electronic Communications Regulations (PECR) and UK GDPR, we are required to tell you what cookies we use, why we use them, and to obtain your consent before placing any non-essential cookies on your device.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section">
+    <h2>Cookies we use</h2>
+
+    <div class="cookie-table-wrap">
+      <table class="cookie-table">
+        <thead>
+          <tr>
+            <th>Cookie</th>
+            <th>Type</th>
+            <th>Purpose</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>gaia_cookie_consent</td>
+            <td>Essential</td>
+            <td>Stores your cookie consent preference so we don't ask you every visit</td>
+            <td>1 year</td>
+          </tr>
+          <tr>
+            <td>_ga</td>
+            <td>Analytics</td>
+            <td>Google Analytics — distinguishes unique users by assigning a randomly generated number</td>
+            <td>2 years</td>
+          </tr>
+          <tr>
+            <td>_ga_*</td>
+            <td>Analytics</td>
+            <td>Google Analytics — used to persist session state</td>
+            <td>2 years</td>
+          </tr>
+          <tr>
+            <td>_gid</td>
+            <td>Analytics</td>
+            <td>Google Analytics — distinguishes users</td>
+            <td>24 hours</td>
+          </tr>
+          <tr>
+            <td>_gat</td>
+            <td>Analytics</td>
+            <td>Google Analytics — used to throttle request rate</td>
+            <td>1 minute</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="highlight-box">
+      <p><strong>Analytics cookies are only set if you accept them.</strong> Google Analytics data is aggregated and anonymised — it tells us how many people visit our site and which pages are most popular. It does not identify you personally.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section">
+    <h2>Managing your cookie preferences</h2>
+    <p>You can change your cookie preferences at any time by clicking the button below. This will reopen the cookie banner and allow you to accept or decline analytics cookies.</p>
+    <button class="btn-manage" onclick="resetCookieConsent()">Manage Cookie Preferences</button>
+
+    <h3>Browser settings</h3>
+    <p>You can also control cookies through your browser settings. Most browsers allow you to refuse cookies, delete existing cookies, or be notified when a cookie is set. Note that disabling cookies may affect how some websites work.</p>
+    <ul>
+      <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" style="color:var(--forest);">Google Chrome</a></li>
+      <li><a href="https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences" target="_blank" style="color:var(--forest);">Mozilla Firefox</a></li>
+      <li><a href="https://support.apple.com/en-gb/guide/safari/sfri11471/mac" target="_blank" style="color:var(--forest);">Apple Safari</a></li>
+      <li><a href="https://support.microsoft.com/en-us/windows/manage-cookies-in-microsoft-edge" target="_blank" style="color:var(--forest);">Microsoft Edge</a></li>
+    </ul>
+
+    <h3>Google Analytics opt-out</h3>
+    <p>You can also opt out of Google Analytics across all websites by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" style="color:var(--forest);">Google Analytics Opt-out Browser Add-on</a>.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section">
+    <h2>Contact us</h2>
+    <p>If you have any questions about our use of cookies, please contact us at <a href="mailto:shaun.silva@gaia-search.com" style="color:var(--forest);">shaun.silva@gaia-search.com</a>.</p>
+    <p>For more information about how we handle your personal data, see our <a href="privacy.html" style="color:var(--forest);">Privacy Policy</a>.</p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
+    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
+  </div>
+</footer>
+
+<script>
+function resetCookieConsent() {
+  localStorage.removeItem('gaia_cookie_consent');
+  window.location.reload();
+}
+</script>
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+    background: #0f200f; color: rgba(245,245,220,0.9);
+    padding: 1.2rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+    border-top: 2px solid #5bb544;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    font-family: 'DM Sans', sans-serif;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  #cookie-banner.visible { transform: translateY(0); }
+  #cookie-banner p {
+    font-size: 0.85rem; line-height: 1.6; flex: 1; min-width: 200px;
+    margin: 0; color: rgba(245,245,220,0.85);
+  }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-btn-accept {
+    background: #5bb544; color: white; border: none;
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline {
+    background: transparent; color: rgba(245,245,220,0.6);
+    border: 1px solid rgba(245,245,220,0.25);
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="setCookieConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="setCookieConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+
+<script>
+  <!-- Replace G-XXXXXXXXXX with your actual Google Analytics Measurement ID -->
+  var GA_ID = "G-XXXXXXXXXX";
+
+  function loadGA() {
+    if (document.getElementById("ga-script")) return;
+    var s = document.createElement("script");
+    s.id = "ga-script";
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag("js", new Date());
+    gtag("config", GA_ID, { anonymize_ip: true });
+  }
+
+  function setCookieConsent(accepted) {
+    localStorage.setItem("gaia_cookie_consent", accepted ? "accepted" : "declined");
+    document.getElementById("cookie-banner").style.transform = "translateY(100%)";
+    if (accepted) loadGA();
+  }
+
+  (function() {
+    var consent = localStorage.getItem("gaia_cookie_consent");
+    if (consent === "accepted") {
+      loadGA();
+    } else if (!consent) {
+      setTimeout(function() {
+        document.getElementById("cookie-banner").classList.add("visible");
+      }, 800);
+    }
+  })();
+</script>
+</body>
+</html>
