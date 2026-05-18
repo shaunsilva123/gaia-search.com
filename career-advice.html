@@ -595,6 +595,38 @@
   .hero h1 { animation: fadeUp 0.6s 0.1s ease both; }
   .hero p { animation: fadeUp 0.6s 0.2s ease both; }
 
+  /* GLOBAL OVERFLOW FIX */
+  html, body { max-width: 100%; overflow-x: hidden; }
+  *, *::before, *::after { max-width: 100%; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+
+    .hero { padding: 60px 20px 48px; }
+    .hero h1 { font-size: clamp(32px, 8vw, 52px); }
+
+    .topic-strip { padding: 0 20px; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .topic-btn { padding: 14px 16px; font-size: 12px; white-space: nowrap; }
+
+    .main {
+      grid-template-columns: 1fr;
+      padding: 32px 20px;
+      gap: 40px;
+    }
+
+    .featured { grid-template-columns: 1fr; min-height: auto; }
+    .featured-visual { min-height: 160px; padding: 32px; }
+
+    .articles-grid { grid-template-columns: 1fr; gap: 16px; }
+
+    .salary-banner { flex-direction: column; padding: 24px 20px; gap: 16px; }
+    .salary-banner .btn-outline { width: 100%; text-align: center; }
+
+    .footer-grid { grid-template-columns: 1fr; gap: 28px; padding: 40px 20px 28px; }
+    .footer-bottom { flex-direction: column; gap: 8px; text-align: center; padding: 0 20px 20px; }
+  }
 </style>
 </head>
 <body>
