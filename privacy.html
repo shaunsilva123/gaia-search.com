@@ -4,21 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacy Policy | Gaia Search</title>
-<meta name="description" content="Privacy Policy for Gaia Search Ltd — how we collect, use and protect your personal data in accordance with UK GDPR.">
+<meta name="description" content="Gaia Search privacy policy — how we collect, use and protect your personal data in line with UK GDPR and the Data Protection Act 2018.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.gaia-search.com/privacy.html">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ETWYEH3Q3N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-ETWYEH3Q3N');
-</script>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
 
   :root {
     --leaf:        #5bb544;
@@ -33,21 +27,17 @@
     --text-light:  #686868;
   }
 
-  html { scroll-behavior: smooth; }
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--cream);
     color: var(--text-dark);
-    overflow-x: hidden;
   }
 
-  /* NAV */
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--forest-dark);
+    padding: 0 4rem;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 1.2rem 4rem;
-    background: rgba(27,74,27,0.97);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    height: 72px; position: sticky; top: 0; z-index: 100;
   }
   .nav-logo { display: flex; align-items: center; text-decoration: none; }
   .nav-logo img { height: 42px; width: auto; }
@@ -55,121 +45,115 @@
   .nav-links a {
     color: rgba(255,255,255,0.85); text-decoration: none;
     font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
-    font-weight: 400; transition: color 0.2s;
+    font-weight: 500; transition: color 0.2s;
   }
   .nav-links a:hover { color: var(--leaf-light); }
   .nav-cta {
     background: var(--leaf); color: #fff !important;
-    padding: 0.5rem 1.4rem; border-radius: 2px;
-    font-weight: 500 !important;
+    padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 600 !important;
   }
-  .nav-cta:hover { background: var(--leaf-light) !important; }
 
-  /* HERO */
-  .policy-hero {
-    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
-    padding: 10rem 4rem 5rem;
-    text-align: center;
+  .hero {
+    background: var(--forest-dark);
+    padding: 5rem 4rem 4rem;
   }
-  .policy-hero-label {
+  .hero-label {
     font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--leaf-light); margin-bottom: 1rem; display: block;
+    color: var(--leaf-light); font-weight: 600; display: block; margin-bottom: 1rem;
   }
-  .policy-hero h1 {
+  .hero h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    font-weight: 400; color: var(--cream);
-    line-height: 1.15;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: white; font-weight: 700; line-height: 1.2;
+    margin-bottom: 0.8rem;
   }
-  .policy-hero p {
-    color: rgba(245,245,220,0.7); font-size: 0.9rem;
-    margin-top: 1rem; font-weight: 300;
+  .hero p { color: rgba(255,255,255,0.55); font-size: 0.85rem; font-weight: 300; }
+
+  .content-wrap {
+    max-width: 860px; margin: 0 auto;
+    padding: 4rem 4rem 6rem;
   }
 
-  /* CONTENT */
-  .policy-content {
-    max-width: 820px; margin: 0 auto;
-    padding: 5rem 4rem 7rem;
+  .toc {
+    background: var(--cream-pale); border: 1px solid #d8d6b8;
+    border-radius: 3px; padding: 1.8rem 2rem; margin-bottom: 3rem;
   }
+  .toc h3 {
+    font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--forest); font-weight: 700; margin-bottom: 1rem;
+  }
+  .toc ol { padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .toc ol li a {
+    font-size: 0.85rem; color: var(--text-mid); text-decoration: none; transition: color 0.2s;
+  }
+  .toc ol li a:hover { color: var(--forest); }
 
-  .policy-content h2 {
+  .policy-section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+
+  .policy-section h2 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.7rem; font-weight: 700; color: var(--forest);
-    margin-top: 3rem; margin-bottom: 1rem; line-height: 1.2;
-  }
-  .policy-content h2:first-child { margin-top: 0; }
-
-  .policy-content h3 {
-    font-size: 1rem; font-weight: 700; color: var(--text-dark);
-    margin-top: 1.8rem; margin-bottom: 0.6rem;
+    font-size: 1.6rem; font-weight: 700; color: var(--forest-dark);
+    margin-bottom: 1rem; padding-bottom: 0.6rem;
+    border-bottom: 1px solid #d8d6b8;
   }
 
-  .policy-content p {
+  .policy-section h3 {
+    font-size: 0.82rem; font-weight: 700; color: var(--forest);
+    margin: 1.4rem 0 0.5rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  .policy-section p {
     font-size: 0.92rem; color: var(--text-mid);
-    line-height: 1.85; font-weight: 300; margin-bottom: 1rem;
+    line-height: 1.85; font-weight: 400; margin-bottom: 1rem;
   }
 
-  .policy-content ul {
-    margin: 0.5rem 0 1rem 1.5rem;
-  }
-  .policy-content ul li {
-    font-size: 0.92rem; color: var(--text-mid);
-    line-height: 1.8; font-weight: 300; margin-bottom: 0.3rem;
+  .policy-section ul, .policy-section ol {
+    margin: 0.6rem 0 1rem 1.2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
   }
 
-  .policy-content a {
-    color: var(--forest); text-decoration: underline;
+  .policy-section li {
+    font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; font-weight: 400;
   }
-  .policy-content a:hover { color: var(--leaf); }
 
-  .policy-box {
+  .highlight-box {
     background: var(--cream-pale); border-left: 3px solid var(--leaf);
-    padding: 1.5rem 1.8rem; border-radius: 2px;
-    margin: 2rem 0;
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0; border-radius: 0 3px 3px 0;
   }
-  .policy-box p { margin-bottom: 0; }
+  .highlight-box p { font-size: 0.88rem !important; margin-bottom: 0 !important; }
+  .highlight-box strong { color: var(--forest); }
 
-  .last-updated {
-    font-size: 0.78rem; color: var(--text-light);
-    margin-bottom: 3rem; font-weight: 400;
+  .contact-box {
+    background: var(--forest-dark); border-radius: 3px; padding: 2rem; margin-top: 1rem;
   }
+  .contact-box p { color: rgba(245,245,220,0.8) !important; font-size: 0.88rem !important; margin-bottom: 0.4rem !important; }
+  .contact-box a { color: var(--leaf-light); }
 
-  /* FOOTER */
+  .divider { border: none; border-top: 1px solid #d8d6b8; margin: 2rem 0; }
+
   footer {
     background: var(--forest-dark); color: rgba(245,245,220,0.65);
     padding: 2rem 4rem;
   }
   .footer-bottom {
-    max-width: 1200px; margin: 0 auto;
+    max-width: 860px; margin: 0 auto;
     display: flex; justify-content: space-between; align-items: center;
-    font-size: 0.75rem; flex-wrap: wrap; gap: 1rem;
+    font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
   }
-  .footer-logo img { height: 36px; width: auto; }
+  .footer-logo img { height: 32px; width: auto; }
 
-  /* WHATSAPP */
-  .whatsapp-float {
-    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
-    background: #25D366; color: white;
-    width: 58px; height: 58px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 16px rgba(37,211,102,0.4);
-    text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
-  .whatsapp-float svg { width: 30px; height: 30px; }
-
-  @media (max-width: 900px) {
-    nav { padding: 1rem 1.5rem; }
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; }
     .nav-links { display: none; }
-    .policy-hero { padding: 8rem 1.5rem 4rem; }
-    .policy-content { padding: 3rem 1.5rem 5rem; }
+    .hero { padding: 4rem 1.5rem 3rem; }
+    .content-wrap { padding: 2.5rem 1.5rem 4rem; }
     footer { padding: 2rem 1.5rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
   <ul class="nav-links">
@@ -181,158 +165,213 @@
   </ul>
 </nav>
 
-<!-- HERO -->
-<div class="policy-hero">
-  <span class="policy-hero-label">Legal</span>
+<div class="hero">
+  <span class="hero-label">Legal</span>
   <h1>Privacy Policy</h1>
-  <p>How we collect, use and protect your personal data</p>
+  <p>Last updated: May 2026 &nbsp;·&nbsp; Gaia Search Ltd &nbsp;·&nbsp; Company No. 15162203</p>
 </div>
 
-<!-- CONTENT -->
-<div class="policy-content">
+<div class="content-wrap">
 
-  <p class="last-updated">Last updated: 11 May 2026</p>
-
-  <div class="policy-box">
-    <p>Gaia Search Ltd is committed to protecting your personal data and respecting your privacy. This policy explains how we collect, use and store your information in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.</p>
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#s1">Who we are</a></li>
+      <li><a href="#s2">What data we collect</a></li>
+      <li><a href="#s3">How we use your data</a></li>
+      <li><a href="#s4">Lawful basis for processing</a></li>
+      <li><a href="#s5">How long we keep your data</a></li>
+      <li><a href="#s6">Who we share your data with</a></li>
+      <li><a href="#s7">Cookies</a></li>
+      <li><a href="#s8">Your rights</a></li>
+      <li><a href="#s9">How to contact us</a></li>
+      <li><a href="#s10">Changes to this policy</a></li>
+    </ol>
   </div>
 
-  <h2>1. Who we are</h2>
-  <p>Gaia Search Ltd is the data controller for personal data collected through this website and our recruitment activities.</p>
-  <ul>
-    <li><strong>Company name:</strong> Gaia Search Ltd</li>
-    <li><strong>Company registration:</strong> 15162203</li>
-    <li><strong>Contact email:</strong> <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a></li>
-    <li><strong>Website:</strong> www.gaia-search.com</li>
-  </ul>
-  <p>If you have any questions about how we handle your data, please contact us at the email above.</p>
-
-  <h2>2. What data we collect</h2>
-  <p>We may collect and process the following personal data:</p>
-
-  <h3>From candidates</h3>
-  <ul>
-    <li>Full name</li>
-    <li>Email address</li>
-    <li>Phone number</li>
-    <li>Professional sector and years of experience</li>
-    <li>Any information you provide in your message or CV</li>
-    <li>Job application history and correspondence</li>
-  </ul>
-
-  <h3>From clients</h3>
-  <ul>
-    <li>Name and job title</li>
-    <li>Business email address and phone number</li>
-    <li>Company name and details</li>
-    <li>Recruitment requirements and correspondence</li>
-  </ul>
-
-  <h3>From website visitors</h3>
-  <ul>
-    <li>Website usage data via Google Analytics (anonymised, including pages visited, time on site, and general location)</li>
-    <li>IP address (processed by Google Analytics)</li>
-  </ul>
-
-  <h2>3. How we collect your data</h2>
-  <p>We collect personal data in the following ways:</p>
-  <ul>
-    <li>When you submit the CV registration form on our website</li>
-    <li>When you email us directly</li>
-    <li>When you contact us via WhatsApp or LinkedIn</li>
-    <li>When we source your details from professional networking platforms (such as LinkedIn) in the course of our recruitment activities</li>
-    <li>Through Google Analytics when you browse our website</li>
-  </ul>
-
-  <h2>4. Why we use your data and our legal basis</h2>
-  <p>We only process your personal data where we have a valid legal basis to do so under UK GDPR:</p>
-
-  <h3>Legitimate interests</h3>
-  <p>We process candidate and client data to carry out our recruitment services — matching candidates to suitable roles and helping clients find the right talent. This is in the legitimate interests of all parties involved.</p>
-
-  <h3>Consent</h3>
-  <p>Where you have ticked the consent box on our registration form, we process your data on the basis of your consent. You may withdraw consent at any time by emailing us.</p>
-
-  <h3>Contract</h3>
-  <p>Where we have a contractual relationship with a client or candidate, we process data as necessary to fulfil that contract.</p>
-
-  <h3>Legal obligation</h3>
-  <p>We may process data where required by law, for example to comply with tax or employment regulations.</p>
-
-  <h2>5. How we store your data</h2>
-  <p>Your personal data may be stored in the following places:</p>
-  <ul>
-    <li>Our email inbox (Microsoft Outlook or Google Gmail)</li>
-    <li>A CRM system or spreadsheet used to manage candidate and client records</li>
-    <li>Google Analytics (anonymised website usage data)</li>
-  </ul>
-  <p>We take reasonable steps to ensure your data is stored securely and only accessible to authorised personnel.</p>
-
-  <h2>6. How long we keep your data</h2>
-  <p>We retain personal data only for as long as necessary:</p>
-  <ul>
-    <li><strong>Candidates:</strong> Up to 2 years from last contact, unless you ask us to delete it sooner or we place you in a role</li>
-    <li><strong>Clients:</strong> For the duration of our business relationship and up to 6 years after for legal and tax purposes</li>
-    <li><strong>Website analytics:</strong> As per Google Analytics default retention settings (up to 26 months)</li>
-  </ul>
-  <p>After these periods, your data will be securely deleted or anonymised.</p>
-
-  <h2>7. Who we share your data with</h2>
-  <p>We do not sell your personal data. We will only share your data in the following circumstances:</p>
-  <ul>
-    <li><strong>With clients:</strong> With your explicit consent, we may share your CV and relevant details with prospective employers as part of the recruitment process</li>
-    <li><strong>With clients:</strong> Client contact details may be shared internally for the purposes of managing that relationship</li>
-    <li><strong>Google Analytics:</strong> Anonymised website usage data is processed by Google. See <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a></li>
-    <li><strong>Legal requirements:</strong> Where required by law or a regulatory authority</li>
-  </ul>
-  <p>We will always inform you before sharing your CV with any third party employer.</p>
-
-  <h2>8. Your rights under UK GDPR</h2>
-  <p>You have the following rights regarding your personal data:</p>
-  <ul>
-    <li><strong>Right of access:</strong> You can request a copy of the personal data we hold about you</li>
-    <li><strong>Right to rectification:</strong> You can ask us to correct inaccurate or incomplete data</li>
-    <li><strong>Right to erasure:</strong> You can ask us to delete your data ("right to be forgotten")</li>
-    <li><strong>Right to restrict processing:</strong> You can ask us to limit how we use your data</li>
-    <li><strong>Right to data portability:</strong> You can ask for your data in a portable format</li>
-    <li><strong>Right to object:</strong> You can object to us processing your data on the basis of legitimate interests</li>
-    <li><strong>Right to withdraw consent:</strong> Where processing is based on consent, you can withdraw it at any time</li>
-  </ul>
-  <p>To exercise any of these rights, please email us at <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a>. We will respond within 30 days.</p>
-
-  <h2>9. Cookies and analytics</h2>
-  <p>Our website uses Google Analytics to understand how visitors use the site. Google Analytics uses cookies — small text files stored on your device — to collect anonymised data about your visit.</p>
-  <p>No personally identifiable information is collected through Google Analytics. You can opt out of Google Analytics tracking by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank">Google Analytics Opt-out Browser Add-on</a>.</p>
-
-  <h2>10. Links to other websites</h2>
-  <p>Our website contains links to LinkedIn and other external sites. We are not responsible for the privacy practices of those sites and encourage you to read their privacy policies.</p>
-
-  <h2>11. Changes to this policy</h2>
-  <p>We may update this Privacy Policy from time to time. The "last updated" date at the top of this page will reflect any changes. We encourage you to review this page periodically.</p>
-
-  <h2>12. How to complain</h2>
-  <p>If you are unhappy with how we have handled your personal data, you have the right to lodge a complaint with the UK's data protection regulator:</p>
-  <div class="policy-box">
-    <p><strong>Information Commissioner's Office (ICO)</strong><br>
-    Website: <a href="https://ico.org.uk" target="_blank">ico.org.uk</a><br>
-    Helpline: 0303 123 1113</p>
+  <div class="highlight-box">
+    <p>This policy explains how Gaia Search Ltd collects, uses and protects your personal data in line with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018. We keep this in plain English — if something isn't clear, please get in touch.</p>
   </div>
-  <p>We would, however, always appreciate the chance to address your concerns directly before you contact the ICO — please email us first at <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a>.</p>
+
+  <div class="policy-section" id="s1">
+    <h2>1. Who we are</h2>
+    <p>Gaia Search Ltd is a specialist recruitment agency placing professionals in the UK's environmental consulting and clean energy sectors. We are the data controller for the personal data we collect through this website and in the course of our recruitment activity.</p>
+    <p><strong>Registered address:</strong> Gaia Search Ltd, London, UK<br>
+    <strong>Company Registration:</strong> 15162203<br>
+    <strong>Email:</strong> <a href="mailto:shaun.silva@gaia-search.com" style="color: var(--forest);">shaun.silva@gaia-search.com</a></p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s2">
+    <h2>2. What data we collect</h2>
+
+    <h3>Candidates</h3>
+    <p>When you register your CV, apply for a role, or get in touch with us, we may collect:</p>
+    <ul>
+      <li>Your name, email address and phone number</li>
+      <li>Your CV, work history, qualifications and professional memberships</li>
+      <li>Your sector, experience level and location preferences</li>
+      <li>Any additional information you choose to share with us</li>
+      <li>Communications between us (emails, WhatsApp messages)</li>
+    </ul>
+
+    <h3>Clients</h3>
+    <p>When you engage with us as a hiring organisation, we may collect:</p>
+    <ul>
+      <li>Your name, job title, work email and phone number</li>
+      <li>Your organisation's name, address and relevant business information</li>
+      <li>Details of roles you are looking to fill</li>
+      <li>Communications between us</li>
+    </ul>
+
+    <h3>Website visitors</h3>
+    <p>When you visit gaia-search.com we may collect basic technical data such as your IP address, browser type and pages visited. See Section 7 (Cookies) for more detail.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s3">
+    <h2>3. How we use your data</h2>
+
+    <h3>For candidates, we use your data to:</h3>
+    <ul>
+      <li>Assess your suitability for roles you have applied for or expressed interest in</li>
+      <li>Match you with relevant opportunities and contact you about them</li>
+      <li>Introduce your profile to client organisations (with your knowledge)</li>
+      <li>Keep you updated on roles that may be relevant to your experience</li>
+      <li>Respond to your enquiries</li>
+    </ul>
+
+    <h3>For clients, we use your data to:</h3>
+    <ul>
+      <li>Provide recruitment services and present suitable candidates</li>
+      <li>Manage our working relationship with your organisation</li>
+      <li>Send relevant sector updates and market insights (where you have consented)</li>
+    </ul>
+
+    <div class="highlight-box">
+      <p><strong>We will never</strong> sell your personal data to third parties, use it for purposes unrelated to recruitment, or contact you for reasons unrelated to the services you have engaged us for.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s4">
+    <h2>4. Lawful basis for processing</h2>
+    <p>Under UK GDPR, we must have a lawful basis for processing your personal data. We rely on the following:</p>
+
+    <h3>Legitimate interests (Article 6(1)(f))</h3>
+    <p>For our core recruitment activity — matching candidates to roles and contacting candidates about relevant opportunities — we rely on legitimate interests. We have a legitimate business interest in doing this, and candidates have a reasonable expectation that a specialist recruiter may contact them about relevant roles.</p>
+
+    <h3>Consent (Article 6(1)(a))</h3>
+    <p>Where you submit your CV via our website registration form, you provide explicit consent to us storing and using your details for recruitment purposes. You can withdraw this consent at any time by emailing us.</p>
+
+    <h3>Contract (Article 6(1)(b))</h3>
+    <p>Where we have a contractual relationship with a client organisation, we process contact data as necessary to fulfil that contract.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s5">
+    <h2>5. How long we keep your data</h2>
+    <p>We do not keep your data longer than necessary. Our standard retention periods are:</p>
+    <ul>
+      <li><strong>Active candidates</strong> (placed in a role or recently in contact): up to 2 years from our last meaningful interaction</li>
+      <li><strong>Registered CVs with no subsequent contact:</strong> up to 1 year from the date of registration</li>
+      <li><strong>Client contact data:</strong> up to 3 years from the end of our working relationship</li>
+      <li><strong>Website enquiries:</strong> up to 1 year</li>
+    </ul>
+    <p>After these periods, we will securely delete your data unless we have a legal obligation to retain it, or you have asked us to keep it on file.</p>
+    <div class="highlight-box">
+      <p><strong>Want your data deleted sooner?</strong> You can request deletion at any time — see Section 8 (Your rights) below.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s6">
+    <h2>6. Who we share your data with</h2>
+    <p>We treat your data with discretion. We will only share your information in the following circumstances:</p>
+    <ul>
+      <li><strong>Client organisations:</strong> We will only share your CV and profile with a specific client if you have agreed to be put forward for a role with that organisation</li>
+      <li><strong>Service providers:</strong> We may use third-party tools to manage communications (e.g. email, WhatsApp). These act as data processors on our behalf and are subject to appropriate data protection agreements</li>
+      <li><strong>Legal requirements:</strong> We may disclose your data if required to do so by law or a regulatory authority</li>
+    </ul>
+    <p>We do not transfer your personal data outside the UK unless adequate data protection safeguards are in place.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s7">
+    <h2>7. Cookies</h2>
+    <p>Our website uses cookies — small text files stored on your device — to help the site function and understand how it is used.</p>
+
+    <h3>Cookies we use</h3>
+    <ul>
+      <li><strong>Essential cookies:</strong> Required for the website to function. These cannot be disabled.</li>
+      <li><strong>Analytics cookies:</strong> If we use tools such as Google Analytics, these help us understand visitor behaviour in aggregate (e.g. which pages are most visited). No personally identifiable information is collected through these cookies.</li>
+    </ul>
+    <p>You can control or disable cookies through your browser settings at any time. Disabling cookies may affect how certain parts of the website work.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s8">
+    <h2>8. Your rights</h2>
+    <p>Under UK GDPR, you have the following rights in relation to your personal data. You can exercise any of these by contacting us at <a href="mailto:shaun.silva@gaia-search.com" style="color: var(--forest);">shaun.silva@gaia-search.com</a>. We will respond within 30 days.</p>
+    <ul>
+      <li><strong>Right of access:</strong> You can request a copy of the personal data we hold about you</li>
+      <li><strong>Right to rectification:</strong> You can ask us to correct any inaccurate or incomplete data</li>
+      <li><strong>Right to erasure:</strong> You can ask us to delete your personal data. We will do so unless we have a legal obligation to retain it</li>
+      <li><strong>Right to restrict processing:</strong> You can ask us to limit how we use your data in certain circumstances</li>
+      <li><strong>Right to data portability:</strong> You can request your data in a commonly used, machine-readable format</li>
+      <li><strong>Right to object:</strong> You can object to us processing your data on the basis of legitimate interests. We will stop unless we can demonstrate compelling grounds to continue</li>
+      <li><strong>Right to withdraw consent:</strong> Where we rely on your consent, you can withdraw it at any time without affecting the lawfulness of prior processing</li>
+    </ul>
+
+    <div class="highlight-box">
+      <p><strong>To make a request:</strong> Email <a href="mailto:shaun.silva@gaia-search.com" style="color: var(--forest);">shaun.silva@gaia-search.com</a> with the subject line "Data Request". We may need to verify your identity before processing the request.</p>
+    </div>
+
+    <h3>Right to complain</h3>
+    <p>If you are unhappy with how we have handled your personal data, you have the right to lodge a complaint with the Information Commissioner's Office (ICO):</p>
+    <ul>
+      <li>Website: <a href="https://ico.org.uk" target="_blank" style="color: var(--forest);">ico.org.uk</a></li>
+      <li>Helpline: 0303 123 1113</li>
+    </ul>
+    <p>We would appreciate the opportunity to address any concerns before you contact the ICO — please reach out to us first.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s9">
+    <h2>9. How to contact us</h2>
+    <p>For any questions about this privacy policy, to exercise your data rights, or to request deletion of your data:</p>
+    <div class="contact-box">
+      <p><strong style="color:white;">Gaia Search Ltd</strong></p>
+      <p>Email: <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a></p>
+      <p>Company Registration No: 15162203</p>
+      <p>London, UK</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="policy-section" id="s10">
+    <h2>10. Changes to this policy</h2>
+    <p>We may update this privacy policy from time to time to reflect changes in our practices or legal requirements. The "last updated" date at the top of this page will always reflect the most recent version.</p>
+    <p>If we make significant changes that affect how we use your data, we will notify active candidates and clients directly by email.</p>
+  </div>
 
 </div>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2025 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; Company Registration Number: 15162203</span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · shaun.silva@gaia-search.com · Company Registration Number: 15162203</span>
   </div>
 </footer>
-
-<!-- FLOATING WHATSAPP -->
-<a href="https://wa.me/447484855801?text=Hi%20Shaun%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-</a>
 
 </body>
 </html>
