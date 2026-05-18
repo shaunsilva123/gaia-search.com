@@ -420,13 +420,50 @@
     .nav-links { display: none; }
     .nav-hamburger { display: flex; }
     .hero { padding: 8rem 1.5rem 4rem; }
+    .hero h1 { font-size: clamp(1.8rem, 7vw, 3rem); }
     .stat-strip { padding: 2rem 1.5rem; }
     .stat-strip-inner { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-    .main { grid-template-columns: 1fr; padding: 3rem 1.5rem; gap: 3rem; }
+    .stat-number { font-size: 2rem; }
+
+    .main {
+      grid-template-columns: 1fr;
+      padding: 2rem 1.2rem 4rem;
+      gap: 3rem;
+      width: 100%;
+      overflow-x: hidden;
+    }
     .sidebar { position: static; }
+    .content {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .insight-section p,
+    .insight-section h2,
+    .insight-section h3,
+    .insight-section li {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+
+    /* Tables scroll horizontally */
+    .demand-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+    .demand-table {
+      min-width: 520px;
+      font-size: 0.78rem;
+    }
+    .demand-table th, .demand-table td { padding: 0.6rem 0.8rem; }
+
     .data-grid { grid-template-columns: 1fr; }
-    .demand-table { font-size: 0.82rem; }
-    .demand-table th, .demand-table td { padding: 0.7rem 0.9rem; }
+    .pull-quote { padding: 1.5rem; }
+    .pull-quote p { font-size: 1.1rem; }
+    .highlight { padding: 1rem 1.2rem; }
+
     .cta-band { padding: 4rem 1.5rem; }
     .cta-buttons { flex-direction: column; align-items: center; }
     footer { padding: 3rem 1.5rem 2rem; }
@@ -527,6 +564,7 @@
       <h2>Where the market is hottest right now</h2>
       <p>Not all disciplines are equal in 2026. Mandatory BNG has fundamentally shifted the ecology market, creating a structural shortage of qualified ecologists with UKHab and Defra Metric experience. Meanwhile, offshore wind consenting and flood risk continue to be among the most active hiring areas we work across.</p>
 
+      <div class="demand-table-wrap">
       <table class="demand-table">
         <thead>
           <tr>
@@ -587,6 +625,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <hr class="divider">
