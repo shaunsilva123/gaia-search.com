@@ -954,7 +954,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; London, UK &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Privacy Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Data Retention Policy</a></span>
+      <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; London, UK &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Data Retention Policy</a></span>
       <a href="https://www.linkedin.com/in/shaun-s-48372b211/" target="_blank" style="color:rgba(245,245,220,0.6);display:flex;align-items:center;gap:0.4rem;text-decoration:none;font-size:0.78rem;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
         LinkedIn
@@ -1015,6 +1015,89 @@
     mobileMenu.classList.remove('open');
     document.body.style.overflow = '';
   }
+</script>
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+    background: #0f200f; color: rgba(245,245,220,0.9);
+    padding: 1.2rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+    border-top: 2px solid #5bb544;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    font-family: 'DM Sans', sans-serif;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  #cookie-banner.visible { transform: translateY(0); }
+  #cookie-banner p {
+    font-size: 0.85rem; line-height: 1.6; flex: 1; min-width: 200px;
+    margin: 0; color: rgba(245,245,220,0.85);
+  }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-btn-accept {
+    background: #5bb544; color: white; border: none;
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline {
+    background: transparent; color: rgba(245,245,220,0.6);
+    border: 1px solid rgba(245,245,220,0.25);
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="setCookieConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="setCookieConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+
+<script>
+  <!-- Replace G-XXXXXXXXXX with your actual Google Analytics Measurement ID -->
+  var GA_ID = "G-XXXXXXXXXX";
+
+  function loadGA() {
+    if (document.getElementById("ga-script")) return;
+    var s = document.createElement("script");
+    s.id = "ga-script";
+    s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag("js", new Date());
+    gtag("config", GA_ID, { anonymize_ip: true });
+  }
+
+  function setCookieConsent(accepted) {
+    localStorage.setItem("gaia_cookie_consent", accepted ? "accepted" : "declined");
+    document.getElementById("cookie-banner").style.transform = "translateY(100%)";
+    if (accepted) loadGA();
+  }
+
+  (function() {
+    var consent = localStorage.getItem("gaia_cookie_consent");
+    if (consent === "accepted") {
+      loadGA();
+    } else if (!consent) {
+      setTimeout(function() {
+        document.getElementById("cookie-banner").classList.add("visible");
+      }, 800);
+    }
+  })();
 </script>
 </body>
 </html>
