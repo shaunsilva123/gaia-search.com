@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Retention Policy | Gaia Search</title>
+<meta name="description" content="Gaia Search data retention policy — how long we keep personal data and how it is securely deleted, in line with UK GDPR and the Data Protection Act 2018.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+
+  :root {
+    --leaf:        #5bb544;
+    --leaf-light:  #7ccc66;
+    --forest:      #2a6b2a;
+    --forest-dark: #1b4a1b;
+    --cream:       #f5f5dc;
+    --cream-mid:   #eceacc;
+    --cream-pale:  #fafaed;
+    --text-dark:   #1a1a1a;
+    --text-mid:    #383838;
+    --text-light:  #686868;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+  }
+
+  nav {
+    background: var(--forest-dark);
+    padding: 0 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta {
+    background: var(--leaf); color: #fff !important;
+    padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 600 !important;
+  }
+
+  .hero {
+    background: var(--forest-dark);
+    padding: 5rem 4rem 4rem;
+  }
+  .hero-label {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--leaf-light); font-weight: 600; display: block; margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: white; font-weight: 700; line-height: 1.2; margin-bottom: 0.8rem;
+  }
+  .hero p { color: rgba(255,255,255,0.55); font-size: 0.85rem; font-weight: 300; }
+
+  .content-wrap {
+    max-width: 860px; margin: 0 auto;
+    padding: 4rem 4rem 6rem;
+  }
+
+  /* SUMMARY TABLE */
+  .summary-table-wrap {
+    overflow-x: auto; margin: 1.5rem 0 2.5rem;
+    border-radius: 3px; border: 1px solid #d8d6b8;
+  }
+  .summary-table {
+    width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 500px;
+  }
+  .summary-table thead { background: var(--forest-dark); color: white; }
+  .summary-table thead th {
+    padding: 0.9rem 1.2rem; text-align: left;
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+  }
+  .summary-table tbody tr { border-bottom: 1px solid #e8e6c8; transition: background 0.15s; }
+  .summary-table tbody tr:last-child { border-bottom: none; }
+  .summary-table tbody tr:hover { background: var(--cream-mid); }
+  .summary-table tbody tr:nth-child(even) { background: var(--cream-pale); }
+  .summary-table td { padding: 0.85rem 1.2rem; color: var(--text-mid); vertical-align: top; }
+  .summary-table td:first-child { font-weight: 600; color: var(--forest); }
+  .period { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
+
+  /* SECTIONS */
+  .policy-section { margin-bottom: 3rem; scroll-margin-top: 90px; }
+
+  .policy-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 700; color: var(--forest-dark);
+    margin-bottom: 1rem; padding-bottom: 0.6rem;
+    border-bottom: 1px solid #d8d6b8;
+  }
+  .policy-section h3 {
+    font-size: 0.82rem; font-weight: 700; color: var(--forest);
+    margin: 1.4rem 0 0.5rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .policy-section p {
+    font-size: 0.92rem; color: var(--text-mid);
+    line-height: 1.85; font-weight: 400; margin-bottom: 1rem;
+  }
+  .policy-section ul, .policy-section ol {
+    margin: 0.6rem 0 1rem 1.2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .policy-section li {
+    font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; font-weight: 400;
+  }
+
+  .highlight-box {
+    background: var(--cream-pale); border-left: 3px solid var(--leaf);
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0; border-radius: 0 3px 3px 0;
+  }
+  .highlight-box p { font-size: 0.88rem !important; margin-bottom: 0 !important; }
+  .highlight-box strong { color: var(--forest); }
+
+  .warning-box {
+    background: #fff8e8; border-left: 3px solid #d4a017;
+    padding: 1.2rem 1.5rem; margin: 1.2rem 0; border-radius: 0 3px 3px 0;
+  }
+  .warning-box p { font-size: 0.88rem !important; margin-bottom: 0 !important; color: #6b4c00 !important; }
+
+  .toc {
+    background: var(--cream-pale); border: 1px solid #d8d6b8;
+    border-radius: 3px; padding: 1.8rem 2rem; margin-bottom: 3rem;
+  }
+  .toc h3 {
+    font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--forest); font-weight: 700; margin-bottom: 1rem;
+  }
+  .toc ol { padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .toc ol li a {
+    font-size: 0.85rem; color: var(--text-mid); text-decoration: none; transition: color 0.2s;
+  }
+  .toc ol li a:hover { color: var(--forest); }
+
+  .divider { border: none; border-top: 1px solid #d8d6b8; margin: 2rem 0; }
+
+  .contact-box {
+    background: var(--forest-dark); border-radius: 3px; padding: 2rem; margin-top: 1rem;
+  }
+  .contact-box p { color: rgba(245,245,220,0.8) !important; font-size: 0.88rem !important; margin-bottom: 0.4rem !important; }
+  .contact-box a { color: var(--leaf-light); }
+
+  footer {
+    background: var(--forest-dark); color: rgba(245,245,220,0.65);
+    padding: 2rem 4rem;
+  }
+  .footer-bottom {
+    max-width: 860px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .footer-logo img { height: 32px; width: auto; }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 4rem 1.5rem 3rem; }
+    .content-wrap { padding: 2.5rem 1.5rem 4rem; }
+    footer { padding: 2rem 1.5rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <span class="hero-label">Legal · Internal Policy</span>
+  <h1>Data Retention Policy</h1>
+  <p>Last updated: May 2026 &nbsp;·&nbsp; Gaia Search Ltd &nbsp;·&nbsp; Company No. 15162203 &nbsp;·&nbsp; Version 1.0</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#s1">Purpose and scope</a></li>
+      <li><a href="#s2">Retention schedule</a></li>
+      <li><a href="#s3">Candidate data</a></li>
+      <li><a href="#s4">Client data</a></li>
+      <li><a href="#s5">Website and enquiry data</a></li>
+      <li><a href="#s6">Financial and contractual records</a></li>
+      <li><a href="#s7">How we delete data</a></li>
+      <li><a href="#s8">Data subject requests</a></li>
+      <li><a href="#s9">Review and compliance</a></li>
+      <li><a href="#s10">Contact</a></li>
+    </ol>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Plain English summary:</strong> We only keep personal data for as long as we genuinely need it. This policy sets out exactly how long we keep different types of data, why, and how we delete it securely. It applies to all personal data held by Gaia Search Ltd in any format.</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="policy-section" id="s1">
+    <h2>1. Purpose and scope</h2>
+    <p>This policy applies to all personal data processed by Gaia Search Ltd in the course of our recruitment activity, including data held in email, WhatsApp, spreadsheets, cloud storage, and any third-party tools we use.</p>
+    <p>The UK General Data Protection Regulation (UK GDPR) requires that personal data is kept in a form that permits identification of individuals for no longer than is necessary for the purpose for which it was collected. This is the "storage limitation" principle under Article 5(1)(e).</p>
+    <p>This policy exists to ensure we comply with that obligation, minimise the risk of data breaches, and give candidates and clients confidence that their data is handled responsibly.</p>
+
+    <div class="warning-box">
+      <p><strong>Important:</strong> Keeping data longer than necessary is a compliance risk. Staff should not retain personal data "just in case" — if there is no active recruitment purpose for holding the data, it should be reviewed for deletion.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 2 -->
+  <div class="policy-section" id="s2">
+    <h2>2. Retention schedule — summary</h2>
+    <p>The table below summarises our standard retention periods by data category. Full detail is in Sections 3–6.</p>
+
+    <div class="summary-table-wrap">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Data Category</th>
+            <th>Retention Period</th>
+            <th>Trigger for Deletion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Active candidate (placed or recently active)</td>
+            <td class="period">2 years</td>
+            <td>From date of last meaningful contact</td>
+          </tr>
+          <tr>
+            <td>Registered CV — no subsequent contact</td>
+            <td class="period">1 year</td>
+            <td>From date of registration</td>
+          </tr>
+          <tr>
+            <td>Candidate not placed, no contact in 12 months</td>
+            <td class="period">Delete or re-consent</td>
+            <td>12 months from last contact</td>
+          </tr>
+          <tr>
+            <td>Placed candidate (successful placement)</td>
+            <td class="period">3 years</td>
+            <td>From date of placement</td>
+          </tr>
+          <tr>
+            <td>Client contact data (active relationship)</td>
+            <td class="period">Duration of relationship + 2 years</td>
+            <td>From end of active engagement</td>
+          </tr>
+          <tr>
+            <td>Client contact data (no active relationship)</td>
+            <td class="period">2 years</td>
+            <td>From last meaningful contact</td>
+          </tr>
+          <tr>
+            <td>Website enquiries / contact form submissions</td>
+            <td class="period">1 year</td>
+            <td>From date of submission</td>
+          </tr>
+          <tr>
+            <td>Email correspondence (recruitment-related)</td>
+            <td class="period">2 years</td>
+            <td>From date of last relevant activity</td>
+          </tr>
+          <tr>
+            <td>Invoices and financial records</td>
+            <td class="period">6 years</td>
+            <td>From end of financial year — legal requirement (HMRC)</td>
+          </tr>
+          <tr>
+            <td>Contracts with clients</td>
+            <td class="period">6 years</td>
+            <td>From contract end date — limitation period</td>
+          </tr>
+          <tr>
+            <td>Website analytics (aggregated)</td>
+            <td class="period">26 months</td>
+            <td>Rolling — standard Google Analytics default</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 3 -->
+  <div class="policy-section" id="s3">
+    <h2>3. Candidate data</h2>
+
+    <h3>CV registrations with no follow-up contact</h3>
+    <p>Where a candidate submits their CV via our website but there is no subsequent contact, interview or placement, we will retain their data for <strong>1 year</strong> from the date of registration. After this, data will be securely deleted unless the candidate has re-engaged with us.</p>
+
+    <h3>Active candidates (in active recruitment process)</h3>
+    <p>Where we are actively working with a candidate — submitting them for roles, arranging interviews, or maintaining regular contact — we will retain their data for <strong>2 years</strong> from the date of our last meaningful interaction. "Meaningful interaction" means a substantive exchange, not an automated email.</p>
+
+    <h3>Successfully placed candidates</h3>
+    <p>Where a candidate has been placed in a role through Gaia Search, we will retain their data for <strong>3 years</strong> from the date of placement. This allows us to maintain an appropriate relationship, provide reference information if needed, and consider the candidate for future opportunities.</p>
+
+    <h3>Candidates we are unable to place</h3>
+    <p>If 12 months pass with no meaningful contact and the candidate has not been placed, we will either delete the candidate's data or contact them to seek renewed consent to retain their details on file. If no response is received within 30 days of our re-consent request, data will be deleted.</p>
+
+    <div class="highlight-box">
+      <p><strong>Candidate right to erasure:</strong> Any candidate can request deletion of their data at any time, regardless of these retention periods. We will process such requests within 30 days. See Section 8.</p>
+    </div>
+
+    <h3>Special category data</h3>
+    <p>We do not routinely collect special category data (e.g. health information, ethnicity, disability). If a candidate voluntarily shares such information (for example, to request reasonable adjustments), it will be held only for the duration of the active recruitment process and deleted immediately afterwards unless the candidate requests otherwise.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 4 -->
+  <div class="policy-section" id="s4">
+    <h2>4. Client data</h2>
+
+    <h3>Active client relationships</h3>
+    <p>Contact data for individuals at client organisations will be retained for the <strong>duration of the active relationship plus 2 years</strong>. This allows us to maintain appropriate post-engagement contact and address any queries that may arise after a placement.</p>
+
+    <h3>Inactive clients</h3>
+    <p>Where there has been no active engagement with a client organisation for <strong>2 years</strong>, individual contact records will be reviewed. Where there is no reasonable prospect of re-engagement, data will be deleted. Where there is a legitimate reason to maintain contact, records may be retained with an updated date.</p>
+
+    <h3>Client briefing notes and role specifications</h3>
+    <p>Briefing notes and role specifications containing personal contact information will be retained for <strong>2 years</strong> from the date of the brief, or until the end of the client relationship, whichever is later.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 5 -->
+  <div class="policy-section" id="s5">
+    <h2>5. Website and enquiry data</h2>
+
+    <h3>Contact form and email enquiries</h3>
+    <p>Where someone contacts us via the website contact form or by email without entering into an active recruitment process, their data will be retained for <strong>1 year</strong> from the date of their enquiry. If the enquiry leads to an active recruitment engagement, the relevant candidate or client retention period will apply instead.</p>
+
+    <h3>WhatsApp messages</h3>
+    <p>WhatsApp conversations relating to active recruitment will be treated in the same way as email correspondence — retained for <strong>2 years</strong> from the date of last relevant activity. Chats with no recruitment outcome will be deleted after <strong>1 year</strong>.</p>
+
+    <h3>Website analytics</h3>
+    <p>If we use Google Analytics or similar tools, aggregated analytics data (which does not identify individuals) is retained for up to <strong>26 months</strong> on a rolling basis, in line with Google's standard data retention settings.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 6 -->
+  <div class="policy-section" id="s6">
+    <h2>6. Financial and contractual records</h2>
+    <p>Certain records must be retained for legal or regulatory reasons, regardless of the personal data they contain:</p>
+    <ul>
+      <li><strong>Invoices, financial records and tax documents:</strong> 6 years from the end of the relevant financial year, as required by HMRC</li>
+      <li><strong>Contracts with client organisations:</strong> 6 years from the contract end date, in line with the Limitation Act 1980 (statute of limitations for contract claims)</li>
+      <li><strong>Records of placements:</strong> 6 years from the date of placement, to support any contractual queries</li>
+    </ul>
+    <p>Where financial or contractual records contain personal data (e.g. a candidate's name on an invoice), that data will be retained for the duration required by law, after which the record will be deleted or anonymised.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 7 -->
+  <div class="policy-section" id="s7">
+    <h2>7. How we delete data</h2>
+    <p>When data reaches the end of its retention period, or when a deletion request is received, we will take the following steps:</p>
+
+    <h3>Email and communications</h3>
+    <p>Emails and WhatsApp conversations containing the individual's personal data will be permanently deleted from our inbox and any archived folders. We will not retain "just in case" copies.</p>
+
+    <h3>Spreadsheets and CRM records</h3>
+    <p>Candidate and client records in any spreadsheet, database or CRM tool will be permanently deleted. Where a record cannot be fully deleted (e.g. a shared system), it will be anonymised so that the individual can no longer be identified.</p>
+
+    <h3>Cloud storage and file attachments</h3>
+    <p>CV documents, cover letters and any other files containing personal data will be permanently deleted from cloud storage (e.g. Google Drive, Dropbox, email attachments). We will also check sent items and trash folders.</p>
+
+    <h3>Third-party processors</h3>
+    <p>Where personal data is held by a third-party tool or service provider on our behalf, we will notify them of the deletion requirement and confirm deletion within 30 days.</p>
+
+    <div class="highlight-box">
+      <p><strong>Deletion review:</strong> We conduct a data audit at least once per year to identify and delete records that have exceeded their retention period. This review takes place in January each year.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 8 -->
+  <div class="policy-section" id="s8">
+    <h2>8. Data subject requests</h2>
+    <p>Any individual has the right to request deletion of their personal data at any time, regardless of the retention periods set out in this policy. We will process such requests within <strong>30 days</strong> of receipt.</p>
+
+    <h3>How to make a request</h3>
+    <p>Email <a href="mailto:shaun.silva@gaia-search.com" style="color: var(--forest);">shaun.silva@gaia-search.com</a> with the subject line <strong>"Data Deletion Request"</strong> or <strong>"Data Access Request"</strong>. We may need to verify your identity before processing the request.</p>
+
+    <h3>Exceptions</h3>
+    <p>We may decline a deletion request in limited circumstances — for example, where we have a legal obligation to retain the data (such as a financial record required by HMRC). In such cases, we will explain why and delete all other data relating to the individual.</p>
+
+    <h3>Response timeframe</h3>
+    <p>We will acknowledge your request within 5 working days and complete the deletion (or provide a reasoned response if we are unable to comply) within 30 days. Where the request is complex, we may extend this by a further 2 months, but will notify you within the first 30 days if this is the case.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 9 -->
+  <div class="policy-section" id="s9">
+    <h2>9. Review and compliance</h2>
+    <p>This policy will be reviewed at least annually, or sooner if there is a change in our data processing activities, a relevant change in the law, or following any data incident.</p>
+
+    <h3>Annual data audit</h3>
+    <p>In January each year, we will review all personal data held by Gaia Search to:</p>
+    <ul>
+      <li>Identify records that have exceeded their retention period and delete them</li>
+      <li>Identify candidates who have not been contacted in 12 months and initiate re-consent or deletion</li>
+      <li>Review any third-party tools to ensure data held there is consistent with this policy</li>
+      <li>Update this policy if our data processing activities have changed</li>
+    </ul>
+
+    <h3>Breach of this policy</h3>
+    <p>Retaining personal data beyond the periods set out in this policy without a documented justification constitutes a breach of UK GDPR. Any suspected breach should be reported promptly so it can be assessed and, if necessary, reported to the ICO within 72 hours.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 10 -->
+  <div class="policy-section" id="s10">
+    <h2>10. Contact</h2>
+    <p>For questions about this policy, to make a data access or deletion request, or to raise a concern about how your data has been handled:</p>
+    <div class="contact-box">
+      <p><strong style="color:white;">Gaia Search Ltd</strong></p>
+      <p>Email: <a href="mailto:shaun.silva@gaia-search.com">shaun.silva@gaia-search.com</a></p>
+      <p>Subject line: "Data Request" or "Data Retention Query"</p>
+      <p>Company Registration No: 15162203</p>
+      <p>London, UK</p>
+    </div>
+    <p style="margin-top: 1.2rem;">If you are unhappy with how we have handled your data, you have the right to complain to the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" style="color: var(--forest);">ico.org.uk</a> or on 0303 123 1113.</p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
+    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
+  </div>
+</footer>
+
+</body>
+</html>
