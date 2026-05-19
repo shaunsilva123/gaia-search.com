@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work With Us | Gaia Search</title>
+<meta name="description" content="Interested in joining the Gaia Search team? We're a growing specialist recruitment agency in the environmental and clean energy sector. Register your interest for future roles.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.gaia-search.com/work-with-us.html">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+  :root {
+    --leaf: #5bb544; --leaf-light: #7ccc66;
+    --forest: #2a6b2a; --forest-dark: #1b4a1b;
+    --cream: #f5f5dc; --cream-mid: #eceacc; --cream-pale: #fafaed;
+    --text-dark: #1a1a1a; --text-mid: #383838; --text-light: #686868;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); }
+
+  nav {
+    background: var(--forest-dark); padding: 0 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta { background: var(--leaf); color: #fff !important; padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 600 !important; }
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .nav-hamburger span { display: block; width: 24px; height: 2px; background: rgba(255,255,255,0.85); border-radius: 2px; transition: all 0.3s; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 7rem 4rem 5rem; text-align: center;
+  }
+  .hero-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--leaf-light); font-weight: 600; display: block; margin-bottom: 1rem; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); color: white; font-weight: 700; line-height: 1.2; margin-bottom: 1.2rem; }
+  .hero h1 em { font-style: italic; color: var(--leaf-light); font-weight: 600; }
+  .hero p { color: rgba(255,255,255,0.65); font-size: 1rem; font-weight: 300; max-width: 560px; margin: 0 auto; line-height: 1.8; }
+
+  /* NO VACANCIES BANNER */
+  .no-vacancies-banner {
+    background: var(--cream-mid); border-bottom: 1px solid #d0cea8;
+    padding: 1.2rem 4rem; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+  }
+  .no-vacancies-banner .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #d4a017; flex-shrink: 0;
+  }
+  .no-vacancies-banner p { font-size: 0.85rem; color: var(--text-mid); font-weight: 400; }
+  .no-vacancies-banner strong { color: var(--text-dark); }
+
+  /* CONTENT */
+  .content-wrap { max-width: 1000px; margin: 0 auto; padding: 5rem 4rem 6rem; }
+
+  /* ABOUT WORKING HERE */
+  .about-section { margin-bottom: 5rem; }
+  .about-section h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--forest-dark); margin-bottom: 1.5rem; line-height: 1.2; }
+  .about-section h2 em { font-style: italic; color: var(--forest); }
+  .about-section p { font-size: 0.95rem; color: var(--text-mid); line-height: 1.85; font-weight: 300; margin-bottom: 1.2rem; max-width: 680px; }
+
+  /* VALUES GRID */
+  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 3rem 0 5rem; }
+  .value-card {
+    background: var(--cream-pale); border: 1px solid #d8d6b8;
+    border-radius: 3px; padding: 1.8rem 1.5rem;
+    border-top: 3px solid var(--leaf);
+  }
+  .value-card h3 { font-size: 0.88rem; font-weight: 700; color: var(--forest-dark); margin-bottom: 0.6rem; letter-spacing: 0.02em; }
+  .value-card p { font-size: 0.84rem; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid #d8d6b8; margin: 0 0 4rem; }
+
+  /* REGISTER INTEREST FORM */
+  .register-section h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; color: var(--forest-dark); margin-bottom: 0.8rem; }
+  .register-section > p { font-size: 0.92rem; color: var(--text-mid); line-height: 1.8; font-weight: 300; margin-bottom: 2.5rem; max-width: 600px; }
+
+  .interest-form { background: var(--cream-pale); border: 1px solid #d8d6b8; border-radius: 3px; padding: 2.5rem; max-width: 620px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+  .form-group label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-mid); }
+  .form-group input, .form-group select, .form-group textarea { padding: 0.75rem 1rem; border: 1px solid #d0cea8; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: white; transition: border-color 0.2s; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--leaf); }
+  .form-group textarea { resize: vertical; }
+  .form-group select { cursor: pointer; }
+  .form-check { display: flex; gap: 0.7rem; align-items: flex-start; margin-bottom: 1.5rem; }
+  .form-check input { accent-color: var(--leaf); margin-top: 3px; flex-shrink: 0; }
+  .form-check label { font-size: 0.78rem; color: var(--text-light); line-height: 1.5; }
+  .form-submit { background: var(--forest); color: white; border: none; padding: 0.9rem 2rem; border-radius: 2px; width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .form-submit:hover { background: var(--leaf); }
+
+  .form-success { display: none; text-align: center; background: var(--cream-pale); padding: 3rem 2rem; border: 1px solid #b8d6a8; border-radius: 3px; max-width: 620px; }
+  .success-icon { width: 56px; height: 56px; background: var(--leaf); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin: 0 auto 1rem; }
+  .form-success h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--forest); margin-bottom: 0.8rem; }
+  .form-success p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.7; }
+
+  /* FOOTER */
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 2rem 4rem; }
+  .footer-bottom { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+  .footer-logo img { height: 32px; width: auto; }
+
+  /* WHATSAPP FLOAT */
+  .whatsapp-float { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; background: #25D366; color: white; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(37,211,102,0.4); text-decoration: none; transition: transform 0.2s; flex-shrink: 0; }
+  .whatsapp-float:hover { transform: scale(1.1); }
+  .whatsapp-float svg { width: 30px; height: 30px; }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; } .nav-links { display: none; } .nav-hamburger { display: flex; }
+    .hero { padding: 5rem 1.5rem 4rem; }
+    .no-vacancies-banner { padding: 1rem 1.5rem; }
+    .content-wrap { padding: 3rem 1.5rem 4rem; }
+    .values-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .form-row { grid-template-columns: 1fr; }
+    footer { padding: 2rem 1.5rem; } .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
+  <button class="nav-hamburger" onclick="this.classList.toggle('open')" aria-label="Open navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <span class="hero-label">Join the team</span>
+  <h1>Work with <em>Gaia Search</em></h1>
+  <p>We're building a team that's as passionate about the environmental and clean energy sector as the candidates we place. If that sounds like you, we'd love to hear from you.</p>
+</div>
+
+<div class="no-vacancies-banner">
+  <div class="dot"></div>
+  <p><strong>No vacancies right now</strong> — but we're growing and plan to hire. Register your interest below and we'll be in touch when something opens up.</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="about-section">
+    <h2>What it's like to work <em>here</em></h2>
+    <p>Gaia Search is a specialist recruitment agency focused entirely on the UK's environmental consulting and clean energy sectors. We're not a generalist firm with an environmental desk — this is all we do, and we take it seriously.</p>
+    <p>We're a small, close-knit team. That means no bureaucracy, no politics and no rigid processes that get in the way of doing great work. It also means every person on the team has real ownership, real responsibility and a genuine stake in how the business grows.</p>
+    <p>We work with candidates and clients who care about the sector — ecologists, flood risk engineers, offshore wind specialists, sustainability directors — and we take pride in making introductions that genuinely move careers forward and teams forward at the same time.</p>
+  </div>
+
+  <div class="values-grid">
+    <div class="value-card">
+      <h3>Sector first</h3>
+      <p>We only work in environmental and clean energy recruitment. Deep specialism is our edge — and it's what we look for in our team too.</p>
+    </div>
+    <div class="value-card">
+      <h3>Quality over volume</h3>
+      <p>We'd rather make fewer, better placements than flood clients with unsuitable candidates. That ethos runs through everything we do.</p>
+    </div>
+    <div class="value-card">
+      <h3>People, not numbers</h3>
+      <p>Candidates and clients trust us because we listen, don't pressure and are honest. We hire people who work the same way.</p>
+    </div>
+    <div class="value-card">
+      <h3>Real ownership</h3>
+      <p>In a small team, everyone's contribution is visible. You'll have genuine responsibility from day one, not a two-year apprenticeship.</p>
+    </div>
+    <div class="value-card">
+      <h3>Long-term thinking</h3>
+      <p>We're building something sustainable — not optimising for this quarter. The people we hire now will shape what Gaia Search becomes.</p>
+    </div>
+    <div class="value-card">
+      <h3>Honest culture</h3>
+      <p>We say what we think, give real feedback and treat people like adults. No spin, no performative enthusiasm — just straightforward good work.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="register-section" id="register">
+    <h2>Register your interest</h2>
+    <p>We don't have any open roles right now, but we're always keen to hear from people who share our values and know the environmental or clean energy sector well. Fill in the form below and we'll reach out when something opens up.</p>
+
+    <form class="interest-form" id="interestForm" onsubmit="submitInterest(event)">
+      <div class="form-row">
+        <div class="form-group"><label for="firstName">First Name *</label><input type="text" id="firstName" placeholder="Jane" required></div>
+        <div class="form-group"><label for="lastName">Last Name *</label><input type="text" id="lastName" placeholder="Smith" required></div>
+      </div>
+      <div class="form-group"><label for="email">Email Address *</label><input type="email" id="email" placeholder="jane.smith@email.com" required></div>
+      <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" placeholder="+44 7700 000000"></div>
+      <div class="form-group">
+        <label for="background">Your background *</label>
+        <select id="background" required>
+          <option value="" disabled selected>Select your background</option>
+          <option>Recruitment — environmental / clean energy sector</option>
+          <option>Recruitment — other sector</option>
+          <option>Environmental consulting professional</option>
+          <option>Clean energy professional</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">Tell us about yourself</label>
+        <textarea id="message" rows="4" placeholder="A bit about your background, what draws you to Gaia Search, and what kind of role you'd be interested in…"></textarea>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="consent" required>
+        <label for="consent">I agree to Gaia Search storing my details and contacting me about future opportunities. See our <a href="privacy.html" style="color:var(--forest);">Privacy Policy</a>.</label>
+      </div>
+      <button type="submit" class="form-submit">Register interest →</button>
+    </form>
+
+    <div class="form-success" id="formSuccess">
+      <div class="success-icon">✓</div>
+      <h3>Thanks for getting in touch!</h3>
+      <p>We'll keep your details on file and reach out when something relevant opens up. In the meantime, feel free to connect with us on LinkedIn.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
+    <div style="display:flex;flex-direction:column;gap:0.4rem;">
+      <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;">hello@gaia-search.com</a> · Company Registration Number: 15162203</span>
+      <span style="font-size:0.72rem;">
+        <a href="privacy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Privacy Policy</a> ·
+        <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Cookie Policy</a> ·
+        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Data Retention Policy</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/447484855801" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+function submitInterest(e) {
+  e.preventDefault();
+  const name = document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value || 'Not provided';
+  const background = document.getElementById('background').value;
+  const message = document.getElementById('message').value || 'No additional message';
+  const subject = encodeURIComponent(`Work With Us — Interest Registration: ${name}`);
+  const body = encodeURIComponent(`New Interest Registration from Gaia Search Website\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nBackground: ${background}\n\nAbout them:\n${message}`);
+  window.location.href = `mailto:hello@gaia-search.com?subject=${subject}&body=${body}`;
+  document.getElementById('interestForm').style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+}
+</script>
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #0f200f; color: rgba(245,245,220,0.9); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; border-top: 2px solid #5bb544; box-shadow: 0 -4px 24px rgba(0,0,0,0.3); font-family: 'DM Sans', sans-serif; transform: translateY(100%); transition: transform 0.4s ease; }
+  #cookie-banner.visible { transform: translateY(0); }
+  #cookie-banner p { font-size: 0.85rem; line-height: 1.6; flex: 1; min-width: 200px; margin: 0; color: rgba(245,245,220,0.85); }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; }
+  .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="setCookieConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="setCookieConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+<script>
+  var GA_ID = "G-XXXXXXXXXX";
+  function loadGA() { if (document.getElementById("ga-script")) return; var s = document.createElement("script"); s.id = "ga-script"; s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID; document.head.appendChild(s); window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} window.gtag = gtag; gtag("js", new Date()); gtag("config", GA_ID, { anonymize_ip: true }); }
+  function setCookieConsent(accepted) { localStorage.setItem("gaia_cookie_consent", accepted ? "accepted" : "declined"); document.getElementById("cookie-banner").style.transform = "translateY(100%)"; if (accepted) loadGA(); }
+  (function() { var consent = localStorage.getItem("gaia_cookie_consent"); if (consent === "accepted") { loadGA(); } else if (!consent) { setTimeout(function() { document.getElementById("cookie-banner").classList.add("visible"); }, 800); } })();
+</script>
+
+</body>
+</html>
