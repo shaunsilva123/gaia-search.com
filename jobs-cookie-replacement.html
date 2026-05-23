@@ -1,0 +1,91 @@
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+    background: #0f200f; color: rgba(245,245,220,0.9);
+    padding: 1.2rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+    border-top: 2px solid #5bb544;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    font-family: 'DM Sans', sans-serif;
+  }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-btn-accept {
+    background: #5bb544; color: white; border: none;
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline {
+    background: transparent; color: rgba(245,245,220,0.6);
+    border: 1px solid rgba(245,245,220,0.25);
+    padding: 0.6rem 1.4rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p style="font-size:0.85rem;line-height:1.6;flex:1;min-width:200px;margin:0;color:rgba(245,245,220,0.85);">
+    We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent.
+    See our <a href="cookies.html">Cookie Policy</a> for details.
+  </p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="gaiaSetConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="gaiaSetConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  var banner = document.getElementById('cookie-banner');
+  var GA_ID = 'G-ETWYEH3Q3N';
+
+  function gaiaLoadGA() {
+    if (document.getElementById('ga-script')) return;
+    var s = document.createElement('script');
+    s.id = 'ga-script';
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', GA_ID, { anonymize_ip: true });
+  }
+
+  window.gaiaSetConsent = function(accepted) {
+    try { localStorage.setItem('gaia_cookie_consent', accepted ? 'accepted' : 'declined'); } catch(e) {}
+    try { document.cookie = 'gaia_cookie_consent=' + (accepted ? 'accepted' : 'declined') + '; max-age=31536000; path=/; SameSite=Lax'; } catch(e) {}
+    banner.style.display = 'none';
+    if (accepted) gaiaLoadGA();
+  };
+
+  function gaiaGetConsent() {
+    try {
+      var ls = localStorage.getItem('gaia_cookie_consent');
+      if (ls) return ls;
+    } catch(e) {}
+    try {
+      var match = document.cookie.match(/gaia_cookie_consent=([^;]+)/);
+      if (match) return match[1];
+    } catch(e) {}
+    return null;
+  }
+
+  var consent = gaiaGetConsent();
+  if (consent === 'accepted') {
+    banner.style.display = 'none';
+    gaiaLoadGA();
+  } else if (consent === 'declined') {
+    banner.style.display = 'none';
+  }
+  // If no consent stored, banner stays visible (display is not set to none)
+})();
+</script>
