@@ -210,15 +210,36 @@
   .nav-hamburger.open span:nth-child(2) { opacity: 0; }
   .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
+  /* Mobile filter drawer */
+  .mobile-filter-btn { display: none; align-items: center; gap: 0.5rem; background: var(--forest); color: white; border: none; border-radius: 2px; padding: 0.5rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .mobile-filter-btn:hover { background: var(--leaf); }
+  .mobile-filter-badge { background: var(--leaf); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: none; align-items: center; justify-content: center; font-weight: 700; }
+  .mobile-filter-badge.visible { display: inline-flex; }
+  .filter-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; }
+  .filter-drawer-overlay.open { display: block; }
+  .filter-drawer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 501; background: var(--cream); border-radius: 16px 16px 0 0; padding: 0 1.5rem 2rem; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); max-height: 85vh; overflow-y: auto; }
+  .filter-drawer.open { transform: translateY(0); }
+  .filter-drawer-handle { width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 12px auto 1.2rem; display: block; }
+  .filter-drawer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid #d8d6b8; }
+  .filter-drawer-header h3 { font-size: 1rem; font-weight: 600; color: var(--text-dark); }
+  .filter-drawer-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-light); padding: 0; line-height: 1; }
+  .filter-drawer .sidebar-section { background: transparent; padding: 0; border: none; margin-bottom: 1.2rem; padding-bottom: 1.2rem; border-bottom: 1px solid #e8e6c8; }
+  .filter-drawer-footer { display: flex; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #d8d6b8; position: sticky; bottom: 0; background: var(--cream); padding-bottom: 0.5rem; }
+  .filter-drawer-apply { flex: 1; background: var(--leaf); color: white; border: none; padding: 0.85rem 1rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .filter-drawer-apply:hover { background: var(--leaf-light); }
+  .filter-drawer-clear { background: transparent; color: var(--forest); border: 1px solid var(--forest); padding: 0.85rem 1rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .filter-drawer-clear:hover { background: var(--forest); color: white; }
+
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
     .nav-hamburger { display: flex; }
     .nav-links { display: none; }
     .nav-links.open { display: flex; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; background: rgba(27,74,27,0.98); padding: 1rem 1.5rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
     .jobs-hero { padding: 8rem 1.5rem 4rem; }
-    .filters-bar { padding: 1rem 1.5rem; }
+    .filters-bar { padding: 1rem 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
     .jobs-main { grid-template-columns: 1fr; padding: 2rem 1.5rem 4rem; }
     .sidebar { display: none; }
+    .mobile-filter-btn { display: flex; }
     .cant-find { padding: 4rem 1.5rem; }
     footer { padding: 2rem 1.5rem; }
   }
@@ -284,6 +305,11 @@
   <button class="filter-btn" onclick="setFilter('permanent', this)">Permanent</button>
   <button class="filter-btn" onclick="setFilter('contract', this)">Contract</button>
   <button class="filter-btn" onclick="setFilter('interim', this)">Interim</button>
+  <button class="mobile-filter-btn" onclick="openFilterDrawer()" aria-label="Open filters">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+    Filters
+    <span class="mobile-filter-badge" id="filterBadge">0</span>
+  </button>
   <span class="results-count" id="resultsCount">Showing all roles</span>
 </div>
 
@@ -866,6 +892,104 @@
   if (consent === 'accepted') { banner.style.display = 'none'; gaiaLoadGA(); }
   else if (consent === 'declined') { banner.style.display = 'none'; }
 })();
+</script>
+
+
+<!-- MOBILE FILTER DRAWER -->
+<div class="filter-drawer-overlay" id="filterOverlay" onclick="closeFilterDrawer()"></div>
+<div class="filter-drawer" id="filterDrawer" role="dialog" aria-label="Filter jobs">
+  <span class="filter-drawer-handle"></span>
+  <div class="filter-drawer-header">
+    <h3>Filter roles</h3>
+    <button class="filter-drawer-close" onclick="closeFilterDrawer()" aria-label="Close filters">&times;</button>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Sector</h3>
+    <div class="sidebar-option"><input type="checkbox" id="ds1" onchange="syncFromDrawer('ds1','s1')"><label for="ds1">Offshore Wind</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="ds2" onchange="syncFromDrawer('ds2','s2')"><label for="ds2">Environmental Consulting</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="ds3" onchange="syncFromDrawer('ds3','s3')"><label for="ds3">Infrastructure &amp; Net Zero</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="ds4" onchange="syncFromDrawer('ds4','s4')"><label for="ds4">Sustainability</label></div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Location</h3>
+    <div class="sidebar-option"><input type="checkbox" id="dl1" onchange="syncFromDrawer('dl1','l1')"><label for="dl1">London</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl2" onchange="syncFromDrawer('dl2','l2')"><label for="dl2">Scotland</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl3" onchange="syncFromDrawer('dl3','l3')"><label for="dl3">South East</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl4" onchange="syncFromDrawer('dl4','l4')"><label for="dl4">Remote / Hybrid</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl5" onchange="syncFromDrawer('dl5','l5')"><label for="dl5">Nationwide</label></div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3>Salary</h3>
+    <div class="sidebar-option"><input type="checkbox" id="dp2" onchange="syncFromDrawer('dp2','p2')"><label for="dp2">£40k – £60k</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dp3" onchange="syncFromDrawer('dp3','p3')"><label for="dp3">£60k – £80k</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dp4" onchange="syncFromDrawer('dp4','p4')"><label for="dp4">£80k+</label></div>
+  </div>
+
+  <div class="filter-drawer-footer">
+    <button class="filter-drawer-clear" onclick="clearDrawerFilters()">Clear all</button>
+    <button class="filter-drawer-apply" onclick="applyDrawerFilters()">Show results</button>
+  </div>
+</div>
+
+<script>
+  function openFilterDrawer() {
+    // Sync drawer checkboxes from sidebar state
+    var pairs = [['ds1','s1'],['ds2','s2'],['ds3','s3'],['ds4','s4'],
+                 ['dl1','l1'],['dl2','l2'],['dl3','l3'],['dl4','l4'],['dl5','l5'],
+                 ['dp2','p2'],['dp3','p3'],['dp4','p4']];
+    pairs.forEach(function(p) {
+      var s = document.getElementById(p[1]);
+      var d = document.getElementById(p[0]);
+      if (s && d) d.checked = s.checked;
+    });
+    document.getElementById('filterDrawer').classList.add('open');
+    document.getElementById('filterOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterDrawer() {
+    document.getElementById('filterDrawer').classList.remove('open');
+    document.getElementById('filterOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function syncFromDrawer(drawerId, sidebarId) {
+    var d = document.getElementById(drawerId);
+    var s = document.getElementById(sidebarId);
+    if (s && d) s.checked = d.checked;
+  }
+
+  function applyDrawerFilters() {
+    updateSidebarActions();
+    filterJobs();
+    updateFilterBadge();
+    closeFilterDrawer();
+  }
+
+  function clearDrawerFilters() {
+    ['ds1','ds2','ds3','ds4','dl1','dl2','dl3','dl4','dl5','dp2','dp3','dp4'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.checked = false;
+    });
+    clearFilters();
+    updateFilterBadge();
+    closeFilterDrawer();
+  }
+
+  function updateFilterBadge() {
+    var count = document.querySelectorAll('.sidebar input[type="checkbox"]:checked').length;
+    var badge = document.getElementById('filterBadge');
+    if (!badge) return;
+    badge.textContent = count;
+    badge.classList.toggle('visible', count > 0);
+  }
+
+  // Close drawer on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeFilterDrawer();
+  });
 </script>
 
 </body>
