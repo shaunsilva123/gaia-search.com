@@ -108,29 +108,20 @@
     position: absolute; inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(27,74,27,0.65) 0%,
-      rgba(27,74,27,0.45) 50%,
-      rgba(27,74,27,0.75) 100%
+      rgba(10,20,10,0.55) 0%,
+      rgba(10,20,10,0.30) 40%,
+      rgba(10,20,10,0.65) 100%
     );
     z-index: 1;
   }
 
-  .wind-scene {
+  .video-scene {
     position: absolute; inset: 0; z-index: 0;
-    background: linear-gradient(
-      180deg,
-      #7bb3cc 0%,
-      #9ec6d8 35%,
-      #b8d8e8 55%,
-      #8ab4a0 65%,
-      #6a9a88 75%,
-      #4a7a68 100%
-    );
+    overflow: hidden; background: #0a1a0a;
   }
-
-  .wind-scene svg {
+  .video-scene video {
     width: 100%; height: 100%;
-    position: absolute; top: 0; left: 0;
+    object-fit: cover; object-position: center center;
   }
 
   .blades-1 { animation: spin 8s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
@@ -616,128 +607,10 @@
 </div>
 
 <section class="hero" id="home">
-  <div class="wind-scene">
-    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#5a9abf"/>
-          <stop offset="40%" stop-color="#7bb3cc"/>
-          <stop offset="65%" stop-color="#a8ccd8"/>
-        </linearGradient>
-        <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4a8a78"/>
-          <stop offset="100%" stop-color="#2a5a48"/>
-        </linearGradient>
-        <linearGradient id="cloudGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.7)"/>
-          <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
-        </linearGradient>
-        <clipPath id="skyClip">
-          <rect x="0" y="0" width="1440" height="562"/>
-        </clipPath>
-      </defs>
-      <rect width="1440" height="900" fill="url(#skyGrad)"/>
-      <g opacity="0.5">
-        <ellipse cx="200" cy="120" rx="120" ry="35" fill="url(#cloudGrad)"/>
-        <ellipse cx="260" cy="105" rx="80" ry="28" fill="url(#cloudGrad)"/>
-        <ellipse cx="150" cy="115" rx="70" ry="22" fill="url(#cloudGrad)"/>
-      </g>
-      <g opacity="0.35">
-        <ellipse cx="800" cy="80" rx="160" ry="30" fill="white"/>
-        <ellipse cx="870" cy="65" rx="100" ry="25" fill="white"/>
-      </g>
-      <g opacity="0.25">
-        <ellipse cx="1200" cy="140" rx="130" ry="28" fill="white"/>
-        <ellipse cx="1260" cy="125" rx="90" ry="22" fill="white"/>
-      </g>
-      <g>
-      <g transform="translate(100, 390) scale(0.42)">
-        <rect x="-5" y="0" width="10" height="476" rx="3" fill="rgba(240,245,242,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="10s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-75" stroke="rgba(240,245,242,0.28)" stroke-width="8" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="65" y2="37" stroke="rgba(240,245,242,0.28)" stroke-width="8" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-65" y2="37" stroke="rgba(240,245,242,0.28)" stroke-width="8" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="7" fill="rgba(210,225,218,0.3)"/>
-        </g>
-      </g>
-      <g transform="translate(260, 330) scale(0.52)">
-        <rect x="-6" y="0" width="12" height="500" rx="3" fill="rgba(240,245,242,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="7s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-88" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="76" y2="44" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-76" y2="44" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="8" fill="rgba(210,225,218,0.3)"/>
-        </g>
-      </g>
-      <g transform="translate(430, 245) scale(0.75)">
-        <rect x="-7" y="0" width="14" height="460" rx="4" fill="rgba(235,242,240,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="8s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-120" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="104" y2="60" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-104" y2="60" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="10" fill="rgba(210,225,218,0.3)"/>
-        </g>
-      </g>
-      <g transform="translate(680, 185) scale(0.92)">
-        <rect x="-8" y="0" width="16" height="500" rx="5" fill="rgba(235,242,240,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="9s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-138" stroke="rgba(235,242,240,0.28)" stroke-width="13" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="120" y2="69" stroke="rgba(235,242,240,0.28)" stroke-width="13" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-120" y2="69" stroke="rgba(235,242,240,0.28)" stroke-width="13" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="12" fill="rgba(210,225,218,0.3)"/>
-        </g>
-      </g>
-      <g transform="translate(920, 260) scale(0.7)">
-        <rect x="-7" y="0" width="13" height="471" rx="4" fill="rgba(235,242,240,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="11s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-112" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="97" y2="56" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-97" y2="56" stroke="rgba(235,242,240,0.28)" stroke-width="11" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="9" fill="rgba(210,225,218,0.3)"/>
-        </g>
-      </g>
-      <g transform="translate(1130, 340) scale(0.5)">
-        <rect x="-6" y="0" width="11" height="440" rx="3" fill="rgba(240,245,242,0.25)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="8.5s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-85" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="74" y2="42" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-74" y2="42" stroke="rgba(240,245,242,0.28)" stroke-width="9" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="8" fill="rgba(210,225,218,0.28)"/>
-        </g>
-      </g>
-      <g transform="translate(1320, 400) scale(0.38)">
-        <rect x="-5" y="0" width="9" height="500" rx="3" fill="rgba(240,245,242,0.22)"/>
-        <g>
-          <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="7.5s" repeatCount="indefinite"/>
-          <line x1="0" y1="0" x2="0" y2="-68" stroke="rgba(240,245,242,0.25)" stroke-width="7" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="59" y2="34" stroke="rgba(240,245,242,0.25)" stroke-width="7" stroke-linecap="round"/>
-          <line x1="0" y1="0" x2="-59" y2="34" stroke="rgba(240,245,242,0.25)" stroke-width="7" stroke-linecap="round"/>
-          <circle cx="0" cy="0" r="6" fill="rgba(210,225,218,0.25)"/>
-        </g>
-      </g>
-      </g>
-      <ellipse cx="720" cy="570" rx="500" ry="60" fill="rgba(180,210,200,0.18)"/>
-      <rect y="560" width="1440" height="340" fill="url(#seaGrad)"/>
-      <g class="wave" opacity="0.5">
-        <path d="M0,570 Q120,555 240,570 Q360,585 480,570 Q600,555 720,570 Q840,585 960,570 Q1080,555 1200,570 Q1320,585 1440,570 L1440,580 Q1320,595 1200,580 Q1080,565 960,580 Q840,595 720,580 Q600,565 480,580 Q360,595 240,580 Q120,565 0,580 Z" fill="rgba(150,200,190,0.35)"/>
-      </g>
-      <g opacity="0.3">
-        <path d="M0,600 Q180,588 360,600 Q540,612 720,600 Q900,588 1080,600 Q1260,612 1440,600 L1440,608 Q1260,620 1080,608 Q900,596 720,608 Q540,620 360,608 Q180,596 0,608 Z" fill="rgba(180,220,210,0.4)"/>
-      </g>
-      <g opacity="0.25">
-        <path d="M0,630 Q240,618 480,630 Q720,642 960,630 Q1200,618 1440,630 L1440,636 Q1200,648 960,636 Q720,624 480,636 Q240,648 0,636 Z" fill="rgba(180,220,210,0.5)"/>
-      </g>
-      <g opacity="0.2">
-        <path d="M0,655 Q180,645 360,655 Q540,665 720,655 Q900,645 1080,655 Q1260,665 1440,655 L1440,660 Q1200,670 960,660 Q720,650 480,660 Q240,670 0,660 Z" fill="rgba(200,230,220,0.4)"/>
-      </g>
-      <rect y="700" width="1440" height="200" fill="rgba(20,50,40,0.5)"/>
-    </svg>
+  <div class="video-scene">
+    <video autoplay muted loop playsinline poster="">
+      <source src="hero-video.mp4" type="video/mp4">
+    </video>
   </div>
 
   <div class="hero-bg"></div>
@@ -1004,7 +877,6 @@
           <li><a href="jobs.html#register">Register with us</a></li>
           <li><a href="career-advice.html">Career advice</a></li>
           <li><a href="ecologist-salary-guide-uk-2026.html">Ecologist Salary Guide 2026</a></li>
-          <li><a href="flood-risk-salary-guide-uk-2026.html">Flood Risk Salary Guide 2026</a></li>
         </ul>
       </div>
       <div class="footer-col">
