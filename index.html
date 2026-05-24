@@ -248,14 +248,18 @@
   }
   .section-title em { font-style: italic; color: var(--forest); }
 
-  .intro { background: var(--cream); }
+  .intro { background: var(--cream); position: relative; overflow: hidden; }
+  .intro-video-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .intro-video-bg video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .intro-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(15,35,15,0.72); }
+  .intro-inner { position: relative; z-index: 2; }
   .intro-inner {
     max-width: 1200px; margin: 0 auto;
     display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 5rem; align-items: center;
   }
   .intro-text p {
-    color: var(--text-mid); line-height: 1.85; font-size: 1rem;
-    margin-top: 1.5rem; font-weight: 500;
+    color: rgba(245,245,220,0.9); line-height: 1.85; font-size: 1rem;
+    margin-top: 1.5rem; font-weight: 400;
   }
   .intro-text .btn-earth {
     display: inline-block; margin-top: 2rem;
@@ -267,6 +271,12 @@
   .intro-text .btn-earth:hover { opacity: 0.6; }
 
   .intro-right { display: flex; flex-direction: column; gap: 2rem; }
+  .intro .section-label { color: var(--leaf-light); }
+  .intro .section-title { color: #ffffff; }
+  .intro-text .btn-earth { color: var(--leaf-light); border-bottom-color: var(--leaf-light); }
+  .stat-card { background: rgba(245,245,220,0.12); border-left: 3px solid var(--leaf); }
+  .stat-num { color: var(--leaf-light); }
+  .stat-label { color: rgba(245,245,220,0.75); }
   .founder-photo-wrap {
     position: relative; border-radius: 4px; overflow: hidden;
     box-shadow: 0 8px 32px rgba(42,107,42,0.15);
@@ -674,6 +684,12 @@
 
 
 <section class="intro" id="about">
+  <div class="intro-video-bg">
+    <video autoplay muted loop playsinline>
+      <source src="about-section-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="intro-video-overlay"></div>
   <div class="intro-inner">
     <div class="intro-text">
       <span class="section-label">About Gaia Search</span>
