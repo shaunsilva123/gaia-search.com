@@ -155,7 +155,7 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(3rem, 7vw, 5.5rem);
     font-weight: 700; line-height: 1.1;
-    color: var(--cream); margin-bottom: 1.5rem;
+    color: #ffffff; margin-bottom: 1.5rem;
     letter-spacing: -0.01em;
     opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
   }
@@ -181,6 +181,8 @@
     display: inline-block;
   }
   .btn-primary:hover { background: var(--sand-light); transform: translateY(-1px); }
+  .hero-buttons .btn-primary { background: #ffffff; color: var(--forest-dark); }
+  .hero-buttons .btn-primary:hover { background: rgba(255,255,255,0.88); }
 
   .btn-linkedin {
     background: #0077b5; color: white;
@@ -626,7 +628,6 @@
   <div class="hero-bg"></div>
 
   <div class="hero-content">
-    <p class="hero-eyebrow">Specialist Recruitment · Environmental & Energy</p>
     <h1 class="hero-title">Connecting the UK's<br><em>leading energy talent</em></h1>
     <p class="hero-sub">We place outstanding professionals at the centre of the UK's environmental and clean energy transition - powering projects from early strategy and consultancy through to hands-on delivery.</p>
     <div class="hero-buttons">
