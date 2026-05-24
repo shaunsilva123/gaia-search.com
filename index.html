@@ -155,14 +155,14 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(3rem, 7vw, 5.5rem);
     font-weight: 700; line-height: 1.1;
-    color: var(--cream); margin-bottom: 1.5rem;
+    color: #ffffff; margin-bottom: 1.5rem;
     letter-spacing: -0.01em;
     opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
   }
   .hero-title em { font-style: italic; color: #f5e6a0; font-weight: 600; }
 
   .hero-sub {
-    font-size: 1.05rem; font-weight: 500; color: rgba(255,255,255,0.92);
+    font-size: 1.05rem; font-weight: 400; color: rgba(255,255,255,0.88);
     line-height: 1.7; margin-bottom: 3rem;
     opacity: 0; animation: fadeUp 0.9s 0.7s forwards;
   }
@@ -181,6 +181,10 @@
     display: inline-block;
   }
   .btn-primary:hover { background: var(--sand-light); transform: translateY(-1px); }
+  .hero-buttons .btn-primary {
+    background: #ffffff; color: var(--forest-dark);
+  }
+  .hero-buttons .btn-primary:hover { background: rgba(255,255,255,0.88); }
 
   .btn-linkedin {
     background: #0077b5; color: white;
@@ -193,14 +197,14 @@
   .btn-linkedin:hover { background: #005f8e; transform: translateY(-1px); }
 
   .btn-outline {
-    border: 1px solid rgba(255,255,255,0.6); color: white;
+    border: 1.5px solid rgba(255,255,255,0.8); color: white;
     padding: 0.9rem 2.2rem; border-radius: 2px;
     text-decoration: none; font-size: 0.85rem;
     font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
     transition: border-color 0.2s, background 0.2s, transform 0.15s;
     display: inline-block;
   }
-  .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+  .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.15); transform: translateY(-1px); }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -250,8 +254,8 @@
 
   .intro { background: var(--cream); }
   .intro-inner {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 5rem; align-items: center;
   }
   .intro-text p {
     color: var(--text-mid); line-height: 1.85; font-size: 1rem;
@@ -284,11 +288,13 @@
     font-weight: 400;
   }
 
-  .intro-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .intro-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
   .stat-card {
     background: var(--cream-mid); padding: 2rem 1.5rem;
     border-radius: 2px; border-left: 3px solid var(--leaf);
+    transition: transform 0.2s;
   }
+  .stat-card:hover { transform: translateY(-2px); }
   .stat-num {
     font-family: 'Cormorant Garamond', serif;
     font-size: 3rem; font-weight: 700; color: var(--forest);
@@ -616,7 +622,6 @@
   <div class="hero-bg"></div>
 
   <div class="hero-content">
-    <p class="hero-eyebrow">Specialist Recruitment · Environmental & Energy</p>
     <h1 class="hero-title">Connecting the UK's<br><em>leading energy talent</em></h1>
     <p class="hero-sub">We place outstanding professionals at the centre of the UK's environmental and clean energy transition - powering projects from early strategy and consultancy through to hands-on delivery.</p>
     <div class="hero-buttons">
@@ -684,17 +689,11 @@
     <div class="intro-text">
       <span class="section-label">About Gaia Search</span>
       <h2 class="section-title">Built by specialists,<br>for the sector</h2>
-      <p>Gaia Search was founded in 2023 by Shaun Silva — and Brendan — on a simple belief: that progress in environmental consulting and clean energy starts with the right people in the right roles.</p>
-      <p>Shaun spends his days speaking with clients and candidates across the UK, getting to know the people behind the CVs and the teams behind the projects. He cares deeply about the sector, and even more about making sure the right people end up in the right roles — not just the fastest fill.</p>
-      <p>Today, Gaia Search works with candidates and clients across ecology, EIA, flood risk, offshore wind, sustainability and beyond — placing people from graduate level through to director, at everything from independent boutiques to the UK's largest infrastructure consultancies.</p>
-      <p>Every great team has someone who keeps morale high. That's Brendan — self-appointed Chief Morale Officer, strict enforcer of walk schedules, and firm believer that no important decision should be made without a tennis ball in hand.</p>
-      <a href="work-with-us.html" class="btn-earth">Work with us →</a>
+      <p>Gaia Search was founded by Shaun Silva on a simple belief: that the right people in the right roles is what moves the sector forward. We work across ecology, EIA, flood risk, offshore wind, sustainability and beyond — from graduate through to director.</p>
+      <p>We're not a generalist firm with an environmental desk. This is all we do — and that focus makes all the difference.</p>
+      <a href="about.html" class="btn-earth">Our story →</a>
     </div>
     <div class="intro-right">
-      <div class="founder-photo-wrap">
-        <img src="brendan.jpg" alt="Shaun and Brendan, founders of Gaia Search" class="founder-photo">
-        <div class="founder-photo-caption">The Gaia Search team — London, UK</div>
-      </div>
       <div class="intro-stats">
         <div class="stat-card">
           <div class="stat-num" data-target="100" data-suffix="+">0+</div>
@@ -760,35 +759,35 @@
   <div class="why-gaia-inner">
     <span class="section-label">Why Gaia Search</span>
     <h2 class="section-title">Recruitment that actually <em>feels different</em></h2>
-    <p class="why-gaia-intro">Most recruitment agencies operate at volume — sending CVs, ticking boxes, moving on. Gaia Search was built to work differently. We are a specialist agency, not a generalist firm with an environmental desk, and that distinction matters every time we pick up the phone.</p>
+    <p class="why-gaia-intro">Most agencies operate at volume — sending CVs, ticking boxes, moving on. We work differently.</p>
     <div class="why-grid">
       <div class="why-card">
         <div class="why-icon">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         </div>
         <h3>Sector knowledge, not sector guesswork</h3>
-        <p>Environmental and clean energy recruitment is all we do — across every discipline and level, from graduate to director. That focus means we understand your world, your career ladder, and what a genuinely good move looks like. You won't need to explain the basics.</p>
+        <p>Environmental and clean energy recruitment is all we do. That focus means we understand your world and what a genuinely good move looks like — you won't need to explain the basics.</p>
       </div>
       <div class="why-card">
         <div class="why-icon">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
         <h3>A dedicated team, not a call centre</h3>
-        <p>When you work with Gaia Search, you work with a close-knit team that genuinely knows your brief — from first conversation to placement and beyond. No handoffs between strangers, no chasing different people for updates. Just consistent, personal service built on actually listening to what you need.</p>
+        <p>You work with a team that genuinely knows your brief from first conversation to placement. No handoffs, no chasing. Just consistent, personal service built on actually listening.</p>
       </div>
       <div class="why-card">
         <div class="why-icon">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
         </div>
         <h3>No pressure, no scattergun</h3>
-        <p>We won't send your CV anywhere without asking first, won't push you towards roles that don't fit, and won't flood clients with unsuitable candidates to appear busy. Every introduction we make is considered. That's how we maintain trust on both sides — and why candidates come back to us.</p>
+        <p>We won't send your CV anywhere without asking first. Every introduction we make is considered — that's how we maintain trust on both sides, and why candidates keep coming back.</p>
       </div>
       <div class="why-card">
         <div class="why-icon">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         </div>
         <h3>Built for the long term</h3>
-        <p>The environmental and clean energy sector is small and well-connected. Reputations — for candidates and consultancies alike — travel fast. We are invested in getting placements right, not just getting them done. The people we place today are the hiring managers we work with tomorrow.</p>
+        <p>The sector is small and well-connected — reputations travel fast. We're invested in getting placements right, not just getting them done. The people we place today are the hiring managers we work with tomorrow.</p>
       </div>
     </div>
   </div>
@@ -824,7 +823,7 @@
     <h2 class="section-title">Trusted by candidates <em>and clients alike</em></h2>
     <div class="testi-grid">
       <div class="testi-card">
-        <p class="testi-quote">"Shaun was great when helping me find my new role. I had been apprehensive about working with recruiters to look for my first professional move (imagining the impersonal scattergun-like approach that I've experienced from estate agents in finding rental properties in the past) but Shaun was great at listening to my brief and my feedback and at applying those to propose roles that suited my requirements, was very supportive throughout the whole process, always made time to chat through anything (even when my schedule meant catching up at odd hours), and was friendly and professional throughout. I'd highly recommend working with Shaun to others!"</p>
+        <p class="testi-quote">"Shaun was great at listening to my brief and applying that to propose roles that suited my requirements. Always made time to chat, even at odd hours. Friendly, professional throughout — I'd highly recommend working with him."</p>
         <div class="testi-author">
           <strong>Senior EIA Consultant</strong>
           Leading UK Infrastructure Consultancy

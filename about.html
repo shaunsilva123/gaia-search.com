@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us | Gaia Search — Environmental & Clean Energy Recruitment</title>
+<meta name="description" content="Gaia Search was founded by Shaun Silva on a simple belief: that the right people in the right roles is what moves the environmental and clean energy sector forward.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.gaia-search.com/about.html">
+<meta property="og:title" content="About Us | Gaia Search">
+<meta property="og:description" content="Gaia Search was founded by Shaun Silva on a simple belief: that the right people in the right roles is what moves the sector forward.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.gaia-search.com/about.html">
+<meta property="og:site_name" content="Gaia Search">
+<meta property="og:image" content="https://www.gaia-search.com/logo.png">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+
+  :root {
+    --leaf: #5bb544; --leaf-light: #7ccc66;
+    --forest: #2a6b2a; --forest-dark: #1b4a1b;
+    --cream: #f5f5dc; --cream-mid: #eceacc; --cream-pale: #fafaed;
+    --text-dark: #1a1a1a; --text-mid: #383838; --text-light: #686868;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem; background: rgba(27,74,27,0.97);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta { background: var(--leaf); color: #fff !important; padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 500 !important; }
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+  .nav-hamburger span { display: block; width: 24px; height: 2px; background: rgba(255,255,255,0.85); border-radius: 2px; }
+
+  .page-hero {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 9rem 4rem 5rem; text-align: center;
+  }
+  .page-hero-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--leaf-light); margin-bottom: 1rem; display: block; font-weight: 600; }
+  .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 400; color: var(--cream); line-height: 1.15; margin-bottom: 1.2rem; }
+  .page-hero h1 em { font-style: italic; color: var(--leaf-light); }
+  .page-hero-sub { font-size: 1rem; color: rgba(245,245,220,0.8); max-width: 580px; margin: 0 auto; line-height: 1.7; font-weight: 300; }
+
+  /* STORY SECTION */
+  .story { background: var(--cream); padding: 6rem 4rem; }
+  .story-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+  .story-text h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--text-dark); margin-bottom: 1.5rem; line-height: 1.2; }
+  .story-text h2 em { font-style: italic; color: var(--forest); }
+  .story-text p { font-size: 0.95rem; color: var(--text-mid); line-height: 1.85; margin-bottom: 1.2rem; font-weight: 400; }
+  .story-text .section-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--forest); margin-bottom: 1rem; display: block; font-weight: 700; }
+
+  .founder-photo-wrap { position: relative; border-radius: 4px; overflow: hidden; box-shadow: 0 8px 32px rgba(42,107,42,0.15); }
+  .founder-photo { width: 100%; height: 520px; object-fit: cover; object-position: center 20%; display: block; }
+  .founder-photo-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(27,74,27,0.85), transparent); color: var(--cream); font-size: 0.78rem; letter-spacing: 0.06em; padding: 1.5rem 1rem 0.8rem; font-weight: 400; }
+
+  /* STATS */
+  .stats-band { background: var(--forest-dark); padding: 4rem; }
+  .stats-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; text-align: center; }
+  .stat-item { }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; font-weight: 700; color: var(--leaf-light); line-height: 1; }
+  .stat-label { font-size: 0.78rem; color: rgba(245,245,220,0.65); margin-top: 0.5rem; letter-spacing: 0.05em; font-weight: 500; }
+
+  /* VALUES */
+  .values { background: var(--cream-pale); padding: 6rem 4rem; border-top: 1px solid #d8d6b8; border-bottom: 1px solid #d8d6b8; }
+  .values-inner { max-width: 1100px; margin: 0 auto; }
+  .values-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--forest); margin-bottom: 1rem; display: block; font-weight: 700; }
+  .values h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--forest-dark); margin-bottom: 3rem; line-height: 1.2; }
+  .values h2 em { font-style: italic; color: var(--forest); }
+  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .value-card { background: white; border: 1px solid #d8d6b8; border-radius: 3px; padding: 2rem; position: relative; }
+  .value-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--leaf); border-radius: 3px 3px 0 0; }
+  .value-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--leaf); font-weight: 700; line-height: 1; margin-bottom: 0.8rem; }
+  .value-card h3 { font-size: 0.92rem; font-weight: 700; color: var(--forest-dark); margin-bottom: 0.6rem; }
+  .value-card p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.75; font-weight: 300; }
+
+  /* BRENDAN */
+  .brendan { background: var(--cream-mid); padding: 5rem 4rem; }
+  .brendan-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+  .brendan-inner .section-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--forest); margin-bottom: 1rem; display: block; font-weight: 700; }
+  .brendan-inner h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 400; color: var(--text-dark); margin-bottom: 1.5rem; line-height: 1.2; font-style: italic; }
+  .brendan-inner p { font-size: 0.95rem; color: var(--text-mid); line-height: 1.85; max-width: 680px; margin: 0 auto; font-weight: 400; }
+
+  /* CTA */
+  .cta-band { background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%); padding: 5rem 4rem; text-align: center; }
+  .cta-band h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 400; color: white; margin-bottom: 1rem; line-height: 1.2; }
+  .cta-band p { color: rgba(255,255,255,0.8); margin-bottom: 2rem; font-size: 0.95rem; }
+  .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--leaf); color: white; padding: 0.9rem 2.2rem; border-radius: 2px; text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; transition: background 0.2s; display: inline-block; }
+  .btn-primary:hover { background: var(--leaf-light); }
+  .btn-outline { border: 1px solid rgba(255,255,255,0.6); color: white; padding: 0.9rem 2.2rem; border-radius: 2px; text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.2s; display: inline-block; }
+  .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 3rem 4rem 1.5rem; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo img { height: 36px; width: auto; }
+
+  .whatsapp-float { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; background: #25D366; color: white; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(37,211,102,0.4); text-decoration: none; transition: transform 0.2s; overflow: hidden; }
+  .whatsapp-float:hover { transform: scale(1.1); }
+  .whatsapp-float svg { width: 30px; height: 30px; min-width: 30px; max-width: 30px; }
+
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    .page-hero { padding: 8rem 1.5rem 4rem; }
+    .story { padding: 4rem 1.5rem; }
+    .story-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .stats-band { padding: 3rem 1.5rem; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+    .values { padding: 4rem 1.5rem; }
+    .values-grid { grid-template-columns: 1fr; }
+    .brendan { padding: 4rem 1.5rem; }
+    .cta-band { padding: 4rem 1.5rem; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+    footer { padding: 2rem 1.5rem; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="toggleNav()" aria-label="Open navigation">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="page-hero">
+  <span class="page-hero-label">Our Story</span>
+  <h1>Built by specialists,<br><em>for the sector</em></h1>
+  <p class="page-hero-sub">Gaia Search exists for one reason — to put the right people in the right roles across the UK's environmental consulting and clean energy sectors.</p>
+</div>
+
+<!-- STORY -->
+<section class="story">
+  <div class="story-inner">
+    <div class="story-text">
+      <span class="section-label">How we started</span>
+      <h2>A simple belief that <em>still drives everything</em></h2>
+      <p>Gaia Search was founded in 2023 by Shaun Silva after spending years working in recruitment and seeing the same problem play out repeatedly — generalist agencies pitching into specialist sectors they didn't understand, sending candidates they hadn't properly briefed, and moving on the moment a fee was paid.</p>
+      <p>The environmental and clean energy sector deserved better. The people building the UK's net zero future — ecologists, EIA consultants, flood risk engineers, offshore wind specialists — were being let down by recruiters who simply didn't understand the sector.</p>
+      <p>So Shaun built something different. A specialist agency focused entirely on environmental consulting and clean energy, where every conversation is informed by genuine sector knowledge — not a script.</p>
+      <p>Today, Gaia Search places professionals from graduate level through to director, working with everything from independent boutique consultancies to the UK's largest infrastructure firms. The belief that started it hasn't changed: get the right people into the right roles, and everything else follows.</p>
+    </div>
+    <div>
+      <div class="founder-photo-wrap">
+        <img src="brendan.jpg" alt="Shaun and Brendan, the Gaia Search team" class="founder-photo">
+        <div class="founder-photo-caption">The Gaia Search team — London, UK</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num" data-target="100" data-suffix="+">100+</div>
+      <div class="stat-label">Placements across the UK</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="100" data-suffix="%">100%</div>
+      <div class="stat-label">Client satisfaction rate</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="5" data-suffix="+">5+</div>
+      <div class="stat-label">Years sector expertise</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="20" data-suffix="+">20+</div>
+      <div class="stat-label">Active clients</div>
+    </div>
+  </div>
+</div>
+
+<!-- VALUES -->
+<section class="values">
+  <div class="values-inner">
+    <span class="values-label">How we work</span>
+    <h2>The things we <em>won't compromise on</em></h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-num">01</div>
+        <h3>Sector knowledge first</h3>
+        <p>Environmental and clean energy recruitment is all we do. We understand the career ladders, the qualifications, the software, the projects. You won't need to explain what CIEEM means or why BNG matters.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-num">02</div>
+        <h3>No CV without consent</h3>
+        <p>We will never send your CV to a client without asking first. Every introduction is considered and deliberate. This is how we maintain trust on both sides of every placement.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-num">03</div>
+        <h3>Long-term thinking</h3>
+        <p>The sector is small and well-connected. We're invested in getting placements right, not just getting them done. The people we place today are the hiring managers we work with tomorrow.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-num">04</div>
+        <h3>Personal, not transactional</h3>
+        <p>When you work with Gaia Search, you speak to someone who knows your brief inside out — from first conversation through to day one in the new role and beyond.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-num">05</div>
+        <h3>Quality over volume</h3>
+        <p>We won't flood you with speculative CVs to appear busy. A shortlist from Gaia Search means every candidate has been thoroughly spoken with and genuinely considered for the role.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-num">06</div>
+        <h3>Purpose-driven</h3>
+        <p>We believe in the work our candidates and clients do. The people building the UK's clean energy future deserve a recruitment partner who takes that seriously.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRENDAN -->
+<section class="brendan">
+  <div class="brendan-inner">
+    <span class="section-label">The full team</span>
+    <h2>"No important decision should be made without a tennis ball in hand."</h2>
+    <p>Every great team needs someone to keep morale high. That's Brendan — self-appointed Chief Morale Officer, strict enforcer of walk schedules, and the reason no client call ever feels too serious. He has never successfully placed a candidate, but his track record on emotional support is second to none.</p>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Want to work with us?</h2>
+  <p>Whether you're looking for your next role or building a team, we'd love to hear from you.</p>
+  <div class="cta-buttons">
+    <a href="jobs.html" class="btn-primary">Browse live roles</a>
+    <a href="mailto:hello@gaia-search.com" class="btn-outline">Get in touch</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;">hello@gaia-search.com</a> &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a></span>
+  </div>
+</footer>
+
+<a href="https://wa.me/447484855801?text=Hi%20Shaun%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+  function toggleNav() {
+    const links = document.querySelector('.nav-links');
+    links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+  }
+</script>
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #0f200f; color: rgba(245,245,220,0.9); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; border-top: 2px solid #5bb544; box-shadow: 0 -4px 24px rgba(0,0,0,0.3); font-family: 'DM Sans', sans-serif; }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+</style>
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p style="font-size:0.85rem;line-height:1.6;flex:1;min-width:200px;margin:0;color:rgba(245,245,220,0.85);">
+    We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.
+  </p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="gaiaSetConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="gaiaSetConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+<script>
+(function() {
+  var banner = document.getElementById('cookie-banner');
+  var GA_ID = 'G-ETWYEH3Q3N';
+  function gaiaLoadGA() {
+    if (document.getElementById('ga-script')) return;
+    var s = document.createElement('script'); s.id = 'ga-script'; s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} window.gtag = gtag;
+    gtag('js', new Date()); gtag('config', GA_ID, { anonymize_ip: true });
+  }
+  window.gaiaSetConsent = function(accepted) {
+    try { localStorage.setItem('gaia_cookie_consent', accepted ? 'accepted' : 'declined'); } catch(e) {}
+    try { document.cookie = 'gaia_cookie_consent=' + (accepted ? 'accepted' : 'declined') + '; max-age=31536000; path=/; SameSite=Lax'; } catch(e) {}
+    banner.style.display = 'none';
+    if (accepted) gaiaLoadGA();
+  };
+  function gaiaGetConsent() {
+    try { var ls = localStorage.getItem('gaia_cookie_consent'); if (ls) return ls; } catch(e) {}
+    try { var match = document.cookie.match(/gaia_cookie_consent=([^;]+)/); if (match) return match[1]; } catch(e) {}
+    return null;
+  }
+  var consent = gaiaGetConsent();
+  if (consent === 'accepted') { banner.style.display = 'none'; gaiaLoadGA(); }
+  else if (consent === 'declined') { banner.style.display = 'none'; }
+})();
+</script>
+</body>
+</html>
