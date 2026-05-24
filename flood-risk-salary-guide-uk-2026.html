@@ -119,10 +119,10 @@
   .article-layout {
     max-width: 1200px; margin: 0 auto;
     display: grid; grid-template-columns: 1fr 300px; gap: 4rem;
-    padding: 4rem 4rem 6rem; align-items: start;
+    padding: 4rem 4rem 6rem; align-items: start; overflow: visible;
   }
 
-  .article-content { min-width: 0; word-break: break-word; overflow-wrap: break-word; }
+  .article-content { min-width: 0; word-break: break-word; overflow-wrap: break-word; overflow-x: visible; }
   .article-content h2 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 2rem; font-weight: 700; color: var(--text-dark);
@@ -206,9 +206,12 @@
     .article-hero-sub { font-size: 0.9rem; }
     .article-layout { grid-template-columns: 1fr; padding: 2rem 1.2rem 4rem; gap: 2.5rem; }
     .article-sidebar { position: static; }
-    .article-content { width: 100%; max-width: 100%; overflow: hidden; }
+    .article-content { width: 100%; max-width: 100%; overflow: visible; }
     .article-content p, .article-content li, .article-content h2, .article-content h3 { word-break: break-word; overflow-wrap: break-word; max-width: 100%; }
-    .salary-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-left: 0; margin-right: 0; }
+    .salary-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-left: 0; margin-right: 0; display: block; width: 100%; }
+    .salary-table { min-width: 520px; font-size: 0.82rem; }
+    .salary-table td, .salary-table th { padding: 0.7rem 0.9rem; }
+    .salary-table td:first-child { white-space: nowrap; }
     .highlight-box { padding: 1.2rem; }
     .insight-box { padding: 1rem 1.2rem; }
     .cta-band { padding: 4rem 1.5rem; }
