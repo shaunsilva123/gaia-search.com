@@ -50,12 +50,30 @@
   .nav-hamburger span { display: block; width: 24px; height: 2px; background: rgba(255,255,255,0.85); border-radius: 2px; }
 
   .page-hero {
-    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    position: relative;
     padding: 9rem 4rem 5rem; text-align: center;
+    overflow: hidden; background: #0a1a0a;
   }
+  .page-hero-video {
+    position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  }
+  .page-hero-video video {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center center;
+  }
+  .page-hero-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(10,20,10,0.60) 0%,
+      rgba(10,20,10,0.38) 45%,
+      rgba(10,20,10,0.70) 100%
+    );
+  }
+  .page-hero-content { position: relative; z-index: 2; }
   .page-hero-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--leaf-light); margin-bottom: 1rem; display: block; font-weight: 600; }
-  .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 400; color: var(--cream); line-height: 1.15; margin-bottom: 1.2rem; }
-  .page-hero h1 em { font-style: italic; color: var(--leaf-light); }
+  .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 400; color: #ffffff; line-height: 1.15; margin-bottom: 1.2rem; }
+  .page-hero h1 em { font-style: italic; color: #f5e6a0; }
   .page-hero-sub { font-size: 1rem; color: rgba(245,245,220,0.8); max-width: 580px; margin: 0 auto; line-height: 1.7; font-weight: 300; }
 
   /* STORY SECTION */
@@ -151,9 +169,17 @@
 </nav>
 
 <div class="page-hero">
-  <span class="page-hero-label">Our Story</span>
-  <h1>Built by specialists,<br><em>for the sector</em></h1>
-  <p class="page-hero-sub">Gaia Search exists for one reason — to put the right people in the right roles across the UK's environmental consulting and clean energy sectors.</p>
+  <div class="page-hero-video">
+    <video autoplay muted loop playsinline>
+      <source src="about-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <span class="page-hero-label">Our Story</span>
+    <h1>Built by specialists,<br><em>for the sector</em></h1>
+    <p class="page-hero-sub">Gaia Search exists for one reason — to put the right people in the right roles across the UK's environmental consulting and clean energy sectors.</p>
+  </div>
 </div>
 
 <!-- STORY -->
@@ -180,19 +206,19 @@
 <div class="stats-band">
   <div class="stats-inner">
     <div class="stat-item">
-      <div class="stat-num" data-target="100" data-suffix="+">100+</div>
+      <div class="stat-num" data-target="100" data-suffix="+">0+</div>
       <div class="stat-label">Placements across the UK</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num" data-target="100" data-suffix="%">100%</div>
+      <div class="stat-num" data-target="100" data-suffix="%">0%</div>
       <div class="stat-label">Client satisfaction rate</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num" data-target="5" data-suffix="+">5+</div>
+      <div class="stat-num" data-target="5" data-suffix="+">0+</div>
       <div class="stat-label">Years sector expertise</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num" data-target="20" data-suffix="+">20+</div>
+      <div class="stat-num" data-target="20" data-suffix="+">0+</div>
       <div class="stat-label">Active clients</div>
     </div>
   </div>
@@ -321,6 +347,46 @@
   if (consent === 'accepted') { banner.style.display = 'none'; gaiaLoadGA(); }
   else if (consent === 'declined') { banner.style.display = 'none'; }
 })();
+</script>
+
+<script>
+  function animateCounter(el) {
+    var target = parseInt(el.dataset.target, 10);
+    var suffix = el.dataset.suffix || '';
+    var duration = 2000;
+    var startTime = null;
+
+    function easeOutQuart(t) {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var elapsed = timestamp - startTime;
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = easeOutQuart(progress);
+      var current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target + suffix;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  var counters = document.querySelectorAll('.stat-num[data-target]');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(function(c) { observer.observe(c); });
 </script>
 </body>
 </html>
