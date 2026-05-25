@@ -2048,11 +2048,19 @@ function PlacementsPage(){
         <h3>Record Placement</h3>
         <div className="fr2">
           <div className="fr" style={{margin:0}}><label>Candidate Name *</label>
-            <input value={f.candidate_name} onChange={s("candidate_name")} placeholder="Full name"/>
+            <input value={f.candidate_name} onChange={s("candidate_name")} placeholder="Full name" list="placement-candidates"/>
+            <datalist id="placement-candidates">
+              {candidates.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
+            </datalist>
           </div>
           <div className="fr" style={{margin:0}}><label>Job Title</label><input value={f.job_title} onChange={s("job_title")}/></div>
         </div>
-        <div className="fr"><label>Company</label><input value={f.company_name} onChange={s("company_name")}/></div>
+        <div className="fr"><label>Company</label>
+          <input value={f.company_name} onChange={s("company_name")} list="placement-companies"/>
+          <datalist id="placement-companies">
+            {jobs.map(j=>j.companies?.name).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).map(n=><option key={n} value={n}/>)}
+          </datalist>
+        </div>
         <div className="fr2">
           <div className="fr" style={{margin:0}}><label>Start Date</label><input type="date" value={f.start_date} onChange={s("start_date")}/></div>
           <div className="fr" style={{margin:0}}><label>Salary (£)</label><input value={f.salary} onChange={s("salary")} placeholder="45000"/></div>
