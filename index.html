@@ -374,7 +374,11 @@
     .why-grid { grid-template-columns: 1fr; gap: 1.2rem; }
   }
 
-  .services { background: var(--cream-mid); }
+  .services { background: var(--cream-mid); position: relative; overflow: hidden; }
+  .services-video-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .services-video-bg video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .services-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(236,234,204,0.88); }
+  .services-inner { position: relative; z-index: 2; }
   .services-inner { max-width: 1200px; margin: 0 auto; }
   .services-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
@@ -801,6 +805,12 @@
 </section>
 
 <section class="services" id="services">
+  <div class="services-video-bg">
+    <video autoplay muted loop playsinline>
+      <source src="services-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="services-video-overlay"></div>
   <div class="services-inner">
     <span class="section-label">How we work</span>
     <h2 class="section-title">Recruitment solutions <em>tailored to you</em></h2>
@@ -818,7 +828,7 @@
       <div class="service-card">
         <div class="service-num">03</div>
         <div class="service-name">Contract & Interim</div>
-        <div class="service-desc">Flexible specialist support when you need it — experienced contractors who can hit the ground running on time-critical projects.</div>
+        <div class="service-desc">Flexible specialist support exactly when you need it, with experienced contractors who integrate seamlessly into your business and deliver immediate impact on time critical projects.</div>
       </div>
     </div>
   </div>
