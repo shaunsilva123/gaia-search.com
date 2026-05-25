@@ -242,7 +242,15 @@
     nav { padding: 1rem 1.5rem; }
     .nav-hamburger { display: flex; }
     .nav-links { display: none; }
-    .nav-links.open { display: flex; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; background: rgba(27,74,27,0.98); padding: 1rem 1.5rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .nav-links.open { display: none; }
+    .mobile-menu { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(27,74,27,0.98); z-index: 150; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: white; text-decoration: none; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+    .mobile-menu a:hover { color: #7ccc66; }
+    .mobile-menu .mobile-cta { background: #5bb544; padding: 0.8rem 2rem; border-radius: 2px; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
     .jobs-hero { padding: 8rem 1.5rem 4rem; }
     .filters-bar { padding: 1rem 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
     .jobs-main { grid-template-columns: 1fr; padding: 2rem 1.5rem 4rem; }
@@ -292,6 +300,14 @@
     <li><a href="#register" class="nav-cta">Register CV</a></li>
   </ul>
 </nav>
+
+<div class="mobile-menu" id="mobileMenuJobs">
+  <a href="index.html#about" onclick="closeMobileMenuJobs()">About</a>
+  <a href="index.html#specialisms" onclick="closeMobileMenuJobs()">Specialisms</a>
+  <a href="index.html#services" onclick="closeMobileMenuJobs()">Services</a>
+  <a href="jobs.html" onclick="closeMobileMenuJobs()">Jobs</a>
+  <a href="jobs.html#register" class="mobile-cta" onclick="closeMobileMenuJobs()">Register CV</a>
+</div>
 
 <div class="jobs-hero">
   <div class="jobs-hero-video">
@@ -676,10 +692,16 @@
 <script>
   function toggleMobileMenu() {
     const btn = document.getElementById('hamburgerBtn');
-    const links = document.getElementById('navLinks');
-    const isOpen = links.classList.toggle('open');
+    const menu = document.getElementById('mobileMenuJobs');
+    const isOpen = menu.classList.toggle('open');
     btn.classList.toggle('open', isOpen);
     btn.setAttribute('aria-expanded', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeMobileMenuJobs() {
+    document.getElementById('mobileMenuJobs').classList.remove('open');
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.body.style.overflow = '';
   }
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.nav-links a').forEach(link => {

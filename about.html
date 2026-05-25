@@ -137,6 +137,14 @@
     nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
     .nav-hamburger { display: flex; }
+    .mobile-menu { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(27,74,27,0.98); z-index: 150; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { color: white; text-decoration: none; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; transition: color 0.2s; }
+    .mobile-menu a:hover { color: #7ccc66; }
+    .mobile-menu .mobile-cta { background: #5bb544; padding: 0.8rem 2rem; border-radius: 2px; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
     .page-hero { padding: 8rem 1.5rem 4rem; }
     .story { padding: 4rem 1.5rem; }
     .story-inner { grid-template-columns: 1fr; gap: 3rem; }
@@ -167,6 +175,14 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+
+<div class="mobile-menu" id="mobileMenuAbout">
+  <a href="about.html" onclick="closeMobileMenuAbout()">About</a>
+  <a href="index.html#specialisms" onclick="closeMobileMenuAbout()">Specialisms</a>
+  <a href="index.html#services" onclick="closeMobileMenuAbout()">Services</a>
+  <a href="jobs.html" onclick="closeMobileMenuAbout()">Jobs</a>
+  <a href="index.html#contact" class="mobile-cta" onclick="closeMobileMenuAbout()">Contact Us</a>
+</div>
 
 <div class="page-hero">
   <div class="page-hero-video">
@@ -289,8 +305,16 @@
 
 <script>
   function toggleNav() {
-    const links = document.querySelector('.nav-links');
-    links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+    const menu = document.getElementById('mobileMenuAbout');
+    const btn = document.querySelector('.nav-hamburger');
+    const isOpen = menu.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeMobileMenuAbout() {
+    document.getElementById('mobileMenuAbout').classList.remove('open');
+    document.querySelector('.nav-hamburger').classList.remove('open');
+    document.body.style.overflow = '';
   }
 </script>
 
