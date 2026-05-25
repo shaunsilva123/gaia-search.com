@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>recruitCRM — AI Powered</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("MadIajEVnrBSCAMNb");</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px}
+:root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#4f6ef7}
+select,input,button,textarea{font-family:inherit}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b68' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px!important}
+select,input[type=text],input[type=password],input[type=email],input[type=tel],input[type=date],textarea{width:100%;padding:7px 10px;border:0.5px solid var(--brm);border-radius:7px;font-size:13px;color:var(--t1);background:var(--bg);outline:none}
+textarea{resize:vertical;min-height:70px}
+select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(79,110,247,0.15)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid #c0c8ff;border-top-color:#4f6ef7;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:-2px;margin-right:5px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:10px}
+.banner{width:100%;max-width:980px;background:#fff3cd;border:0.5px solid #ffc107;border-radius:8px;padding:10px 16px;font-size:12px;color:#856404;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.banner input{width:240px;font-size:12px;padding:5px 9px}
+.banner button{background:#4f6ef7;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;border:0.5px solid var(--br)}
+.modal h3{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:16px}
+.fr{margin-bottom:12px}
+.fr label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.btn-a{background:#4f6ef7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-a:disabled{opacity:0.6;cursor:default}
+.btn-o{background:transparent;border:0.5px solid var(--brm);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--t1);display:inline-flex;align-items:center;gap:5px}
+.btn-o:hover{background:var(--bg2)}
+.btn-d{background:transparent;border:0.5px solid #f09595;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:#a32d2d}
+.err{background:#fff0f0;border:0.5px solid #f09595;border-radius:7px;padding:8px 12px;font-size:12px;color:#a32d2d;margin-top:8px}
+.th{text-align:left;font-size:11px;font-weight:500;color:var(--t2);padding:8px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:0.4px}
+.td{padding:10px 12px;border-bottom:0.5px solid var(--br);color:var(--t1);font-size:13px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="banner" id="apiBanner">
+  <span>⚠️ Anthropic API key (for AI features):</span>
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..."/>
+  <button onclick="saveKey()">Save</button>
+  <span id="keyStatus"></span>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const {useState,useCallback,useEffect,Fragment} = React;
+
+const SUPABASE_URL = "https://wnzpeyrdtdxcodeezqxb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nH49MFdJkjkc0GXTk_Z9rw_02yreXHN";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ACCENT = "#4f6ef7";
+const SIDEBAR = "#1a1f2e";
+
+const PILL_MAP = {
+  "New":{bg:"#eef1ff",fg:"#4f6ef7"},"Active":{bg:"#eaf3de",fg:"#3b6d11"},
+  "Offer stage":{bg:"#eef1ff",fg:"#4f6ef7"},"Placed":{bg:"#e1f5ee",fg:"#0f6e56"},
+  "Interview":{bg:"#fbeaf0",fg:"#993556"},"Pipeline":{bg:"#faeeda",fg:"#854f0b"},
+  "Open":{bg:"#eaf3de",fg:"#3b6d11"},"Filled":{bg:"#e1f5ee",fg:"#0f6e56"},
+  "On hold":{bg:"#faeeda",fg:"#854f0b"},"Cold":{bg:"#f1efe8",fg:"#5f5e5a"},
+  "Client":{bg:"#e1f5ee",fg:"#0f6e56"},"Closed":{bg:"#fcebeb",fg:"#a32d2d"},
+};
+
+const AV_COLORS = [
+  {bg:"#eef1ff",fg:"#4f6ef7"},{bg:"#eaf3de",fg:"#3b6d11"},{bg:"#fbeaf0",fg:"#993556"},
+  {bg:"#e6f1fb",fg:"#185fa5"},{bg:"#faece7",fg:"#993c1d"},{bg:"#e1f5ee",fg:"#0f6e56"},
+  {bg:"#faeeda",fg:"#854f0b"},{bg:"#eeedfe",fg:"#534ab7"},
+];
+
+function getColor(name){let h=0;for(let c of(name||""))h=(h*31+c.charCodeAt(0))%AV_COLORS.length;return AV_COLORS[h];}
+function ini(name){return(name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();}
+function getKey(){return window._apiKey||localStorage.getItem("rcrm_key")||"";}
+
+function Pill({label}){const s=PILL_MAP[label]||{bg:"#f1efe8",fg:"#5f5e5a"};return <span style={{display:"inline-flex",alignItems:"center",padding:"2px 9px",borderRadius:10,fontSize:11,fontWeight:500,background:s.bg,color:s.fg}}>{label}</span>;}
+function Av({name,size=30}){const{bg,fg}=getColor(name);return <div style={{width:size,height:size,borderRadius:"50%",background:bg,color:fg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size<36?11:14,fontWeight:500,flexShrink:0}}>{ini(name)}</div>;}
+function AiTag(){return <span style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,color:ACCENT,marginBottom:6}}>✦ Claude AI</span>;}
+function Err({msg}){return msg?<div className="err">{msg}</div>:null;}
+function Spin(){return <div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}><span className="spin"></span>Loading…</div>;}
+
+function Panel({title,badge,actions,children,style={}}){
+  return <div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,overflow:"hidden",...style}}>
+    <div style={{padding:"11px 15px",borderBottom:"0.5px solid var(--br)",fontWeight:500,fontSize:13,color:"var(--t1)",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+      <span style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>{title}{badge&&<span>{badge}</span>}</span>
+      {actions}
+    </div>
+    {children}
+  </div>;
+}
+
+function StreamText({text,loading}){
+  return <div style={{fontSize:13,color:"var(--t1)",lineHeight:1.75,whiteSpace:"pre-wrap",minHeight:32}}>
+    {loading&&!text&&<span style={{color:"var(--t3)"}}>Generating…</span>}
+    {text}
+    {loading&&text&&<span style={{display:"inline-block",width:7,height:13,background:ACCENT,marginLeft:2,verticalAlign:"middle",borderRadius:1,animation:"blink 1s step-end infinite"}}/>}
+  </div>;
+}
+
+async function claude(system,user,onChunk){
+  const key=getKey();
+  if(!key)throw new Error("No Anthropic API key — enter it in the yellow banner above.");
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,stream:true,system,messages:[{role:"user",content:user}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||"API error");}
+  const reader=res.body.getReader(),dec=new TextDecoder();let buf="";
+  while(true){
+    const{done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split("\n");buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith("data: "))continue;
+      const d=line.slice(6).trim();if(d==="[DONE]")return;
+      try{const p=JSON.parse(d);if(p.type==="content_block_delta"&&p.delta?.text)onChunk(p.delta.text);}catch{}
+    }
+  }
+}
+
+// ── Modals ─────────────────────────────────────────────────────────────────
+function CandModal({cand,onClose,onSaved}){
+  const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:""};
+  const [f,setF]=useState(cand?{...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||""}:blank);
+  const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+  const save=async()=>{
+    if(!f.name.trim()){setErr("Name is required");return;}
+    setSaving(true);setErr("");
+    const payload={...f,skills:f.skills.split(",").map(x=>x.trim()).filter(Boolean),initials:ini(f.name)};
+    const{error}=cand?await db.from("candidates").update(payload).eq("id",cand.id):await db.from("candidates").insert(payload);
+    setSaving(false);if(error){setErr(error.message);return;}
+    onSaved();onClose();
+  };
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal">
+      <h3>{cand?"Edit candidate":"Add candidate"}</h3>
+      <div className="fr2">
+        <div><label>Full name *</label><input type="text" value={f.name} onChange={s("name")} placeholder="Sophie Archer"/></div>
+        <div><label>Role</label><input type="text" value={f.role||""} onChange={s("role")} placeholder="Data Analyst"/></div>
+      </div>
+      <div className="fr2">
+        <div><label>Email</label><input type="email" value={f.email||""} onChange={s("email")} placeholder="sophie@email.com"/></div>
+        <div><label>Phone</label><input type="tel" value={f.phone||""} onChange={s("phone")} placeholder="+44 7700 000000"/></div>
+      </div>
+      <div className="fr2">
+        <div><label>Location</label><input type="text" value={f.location||""} onChange={s("location")} placeholder="London"/></div>
+        <div><label>Experience</label><input type="text" value={f.experience||""} onChange={s("experience")} placeholder="5 years"/></div>
+      </div>
+      <div className="fr2">
+        <div><label>Current salary</label><input type="text" value={f.salary||""} onChange={s("salary")} placeholder="£52,000"/></div>
+        <div><label>Notice period</label><input type="text" value={f.notice||""} onChange={s("notice")} placeholder="1 month"/></div>
+      </div>
+      <div className="fr"><label>Skills (comma separated)</label><input type="text" value={f.skills||""} onChange={s("skills")} placeholder="Python, SQL, Tableau"/></div>
+      <div className="fr"><label>Status</label>
+        <select value={f.status} onChange={s("status")}>{["New","Active","Pipeline","Interview","Offer stage","Placed","Cold"].map(x=><option key={x}>{x}</option>)}</select>
+      </div>
+      <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")} placeholder="Additional notes…"/></div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save candidate"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+function CoModal({co,onClose,onSaved}){
+  const blank={name:"",industry:"",website:"",notes:"",status:"Active",fee_type:"percentage",fee_percentage:"",fee_fixed:"",terms_notes:""};
+  const [f,setF]=useState(co||blank);const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+  const save=async()=>{
+    if(!f.name.trim()){setErr("Company name is required");return;}
+    setSaving(true);setErr("");
+    const payload={...f,fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,fee_fixed:f.fee_fixed?parseFloat(f.fee_fixed):null};
+    const{error}=co?await db.from("companies").update(payload).eq("id",co.id):await db.from("companies").insert(payload);
+    setSaving(false);if(error){setErr(error.message);return;}
+    onSaved();onClose();
+  };
+  const termsPreview=React.useMemo(()=>{
+    if(f.fee_type==="percentage"&&f.fee_percentage) return `${f.fee_percentage}% of basic annual salary`;
+    if(f.fee_type==="fixed"&&f.fee_fixed) return `Fixed fee of £${parseFloat(f.fee_fixed).toLocaleString()}`;
+    return null;
+  },[f.fee_type,f.fee_percentage,f.fee_fixed]);
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal">
+      <h3>{co?"Edit company":"Add company"}</h3>
+      <div className="fr2">
+        <div><label>Company name *</label><input type="text" value={f.name} onChange={s("name")} placeholder="Barclays"/></div>
+        <div><label>Industry</label><input type="text" value={f.industry||""} onChange={s("industry")} placeholder="Financial services"/></div>
+      </div>
+      <div className="fr"><label>Website</label><input type="text" value={f.website||""} onChange={s("website")} placeholder="barclays.com"/></div>
+      <div className="fr"><label>Status</label>
+        <select value={f.status} onChange={s("status")}>{["Active","On hold","Cold","Client"].map(x=><option key={x}>{x}</option>)}</select>
+      </div>
+      {/* Terms agreed */}
+      <div style={{borderTop:"0.5px solid var(--br)",margin:"12px 0",paddingTop:12}}>
+        <div style={{fontSize:12,fontWeight:500,color:"var(--t1)",marginBottom:10}}>🤝 Terms agreed</div>
+        <div className="fr2">
+          <div><label>Fee structure</label>
+            <select value={f.fee_type||"percentage"} onChange={s("fee_type")}>
+              <option value="percentage">% of basic annual salary</option>
+              <option value="fixed">Fixed fee per placement</option>
+              <option value="none">Not agreed yet</option>
+            </select>
+          </div>
+          {f.fee_type==="percentage"&&<div><label>Agreed % rate</label>
+            <input type="text" value={f.fee_percentage||""} onChange={s("fee_percentage")} placeholder="e.g. 15"/>
+          </div>}
+          {f.fee_type==="fixed"&&<div><label>Fixed fee (£)</label>
+            <input type="text" value={f.fee_fixed||""} onChange={s("fee_fixed")} placeholder="e.g. 8000"/>
+          </div>}
+        </div>
+        {termsPreview&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#3b6d11",marginBottom:10}}>
+          ✓ Terms: <strong>{termsPreview}</strong>
+        </div>}
+        <div className="fr"><label>Terms notes (optional)</label>
+          <input type="text" value={f.terms_notes||""} onChange={s("terms_notes")} placeholder="e.g. Rebate period 12 weeks, invoiced on start date"/>
+        </div>
+      </div>
+      <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")}/></div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save company"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+function JobModal({job,companies,onClose,onSaved}){
+  const blank={title:"",company_id:"",salary:"",industry:"",description:"",status:"Open",salary_value:"",fee_override:false,fee_type_override:"percentage",fee_value_override:"",actual_fee:""};
+  const [f,setF]=useState(job?{...job,fee_override:!!(job.fee_type_override)}:blank);
+  const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+  const sb=k=>e=>setF(p=>({...p,[k]:e.target.checked}));
+
+  // Find selected company to pull terms
+  const selCo=companies.find(c=>c.id===f.company_id);
+
+  // Determine effective fee terms (override or company)
+  const effFeeType=f.fee_override?(f.fee_type_override||"percentage"):(selCo?.fee_type||"none");
+  const effFeeVal=f.fee_override
+    ?(parseFloat(f.fee_value_override||0))
+    :(effFeeType==="percentage"?parseFloat(selCo?.fee_percentage||0):parseFloat(selCo?.fee_fixed||0));
+
+  // Auto-calculate potential fee
+  const potFee=React.useMemo(()=>{
+    const sv=parseFloat((f.salary_value||"").replace(/[^0-9.]/g,""));
+    if(!sv||!effFeeVal||effFeeType==="none")return null;
+    return effFeeType==="percentage"?Math.round(sv*(effFeeVal/100)):Math.round(effFeeVal);
+  },[f.salary_value,effFeeVal,effFeeType]);
+
+  // When company changes, reset override
+  const onCoChange=e=>{setF(p=>({...p,company_id:e.target.value,fee_override:false}));};
+
+  const save=async()=>{
+    if(!f.title.trim()){setErr("Job title is required");return;}
+    setSaving(true);setErr("");
+    const payload={
+      title:f.title,company_id:f.company_id||null,salary:f.salary,salary_value:f.salary_value,
+      industry:f.industry,description:f.description,status:f.status,
+      actual_fee:f.actual_fee?parseFloat(f.actual_fee):null,
+      potential_fee:potFee||null,
+      fee_type_override:f.fee_override?f.fee_type_override:null,
+      fee_value_override:f.fee_override&&f.fee_value_override?parseFloat(f.fee_value_override):null,
+    };
+    const{error}=job?await db.from("jobs").update(payload).eq("id",job.id):await db.from("jobs").insert(payload);
+    setSaving(false);if(error){setErr(error.message);return;}
+    onSaved();onClose();
+  };
+
+  const termsLabel=selCo
+    ?(selCo.fee_type==="percentage"&&selCo.fee_percentage?`${selCo.fee_percentage}% of salary (from ${selCo.name} terms)`
+      :selCo.fee_type==="fixed"&&selCo.fee_fixed?`Fixed £${parseFloat(selCo.fee_fixed).toLocaleString()} (from ${selCo.name} terms)`
+      :"No terms agreed for this company")
+    :"Select a company to inherit terms";
+
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal">
+      <h3>{job?"Edit job":"Add job"}</h3>
+      <div className="fr"><label>Job title *</label><input type="text" value={f.title} onChange={s("title")} placeholder="Senior Data Analyst"/></div>
+      <div className="fr2">
+        <div><label>Client company</label>
+          <select value={f.company_id||""} onChange={onCoChange}>
+            <option value="">— Select company —</option>
+            {companies.map(c=><option key={c.id} value={c.id}>{c.name}{c.fee_percentage?` (${c.fee_percentage}%)`:c.fee_fixed?` (£${parseFloat(c.fee_fixed).toLocaleString()} fixed)`:""}</option>)}
+          </select>
+        </div>
+        <div><label>Candidate salary (£)</label>
+          <input type="text" value={f.salary_value||""} onChange={s("salary_value")} placeholder="e.g. 65000"/>
+        </div>
+      </div>
+      <div className="fr2">
+        <div><label>Display salary range</label><input type="text" value={f.salary||""} onChange={s("salary")} placeholder="£55–65k"/></div>
+        <div><label>Industry</label><input type="text" value={f.industry||""} onChange={s("industry")} placeholder="Finance"/></div>
+      </div>
+
+      {/* Fee terms block */}
+      <div style={{background:"var(--bg2)",borderRadius:8,padding:"12px 14px",marginBottom:12}}>
+        <div style={{fontSize:11,fontWeight:500,color:"var(--t2)",marginBottom:6,textTransform:"uppercase",letterSpacing:"0.4px"}}>Fee terms</div>
+        {!f.fee_override&&<div style={{fontSize:12,color:selCo?.fee_percentage||selCo?.fee_fixed?"#3b6d11":"var(--t3)",marginBottom:8}}>
+          {selCo?.fee_percentage||selCo?.fee_fixed?"✓ ":""}{termsLabel}
+          {selCo?.terms_notes&&<div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>📋 {selCo.terms_notes}</div>}
+        </div>}
+        <label style={{display:"flex",alignItems:"center",gap:7,fontSize:12,color:"var(--t2)",cursor:"pointer",marginBottom:f.fee_override?8:0}}>
+          <input type="checkbox" checked={!!f.fee_override} onChange={sb("fee_override")} style={{width:"auto"}}/>
+          Override terms for this job
+        </label>
+        {f.fee_override&&<div style={{display:"flex",gap:8,marginTop:4}}>
+          <select value={f.fee_type_override||"percentage"} onChange={s("fee_type_override")} style={{flex:1}}>
+            <option value="percentage">% of salary</option>
+            <option value="fixed">Fixed fee (£)</option>
+          </select>
+          <input type="text" value={f.fee_value_override||""} onChange={s("fee_value_override")} placeholder={f.fee_type_override==="percentage"?"e.g. 20":"e.g. 9000"} style={{flex:1}}/>
+        </div>}
+        {potFee&&<div style={{marginTop:10,background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:7,padding:"8px 12px",fontSize:13,color:"#4f6ef7"}}>
+          💰 Potential fee: <strong>£{potFee.toLocaleString()}</strong>
+          {effFeeType==="percentage"&&<span style={{fontSize:11,color:"#7f77dd",marginLeft:6}}>({effFeeVal}% × £{parseFloat(f.salary_value||0).toLocaleString()})</span>}
+        </div>}
+      </div>
+
+      <div className="fr2">
+        <div><label>Status</label>
+          <select value={f.status} onChange={s("status")}>{["Open","On hold","Filled","Closed"].map(x=><option key={x}>{x}</option>)}</select>
+        </div>
+        <div><label>Actual fee received (£)</label>
+          <input type="text" value={f.actual_fee||""} onChange={s("actual_fee")} placeholder="Fill in when placed & paid"/>
+        </div>
+      </div>
+      <div className="fr"><label>Job description</label><textarea value={f.description||""} onChange={s("description")} placeholder="Required skills, experience, location…" style={{minHeight:80}}/></div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save job"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── Pages ──────────────────────────────────────────────────────────────────
+// ── Animated counter hook ──────────────────────────────────────────────────
+function useCountUp(target, duration=1200){
+  const [val,setVal]=useState(0);
+  useEffect(()=>{
+    if(!target)return;
+    let start=null;
+    const from=0;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/duration,1);
+      const ease=1-Math.pow(1-p,3);
+      setVal(Math.round(from+(target-from)*ease));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  },[target]);
+  return val;
+}
+
+function RevenueTicker({label,value,sub,color,prefix="£",loading}){
+  const animated=useCountUp(loading?0:value,1400);
+  const fmt=n=>n>=1000000?"£"+(n/1000000).toFixed(2)+"m":n>=1000?"£"+(n/1000).toFixed(1)+"k":"£"+n.toLocaleString();
+  return <div style={{background:"var(--bg)",border:`1.5px solid ${color}22`,borderRadius:10,padding:"16px 18px",position:"relative",overflow:"hidden"}}>
+    <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:color,borderRadius:"10px 0 0 10px"}}/>
+    <div style={{fontSize:11,color:"var(--t2)",marginBottom:4,fontWeight:500,textTransform:"uppercase",letterSpacing:"0.5px"}}>{label}</div>
+    <div style={{fontSize:28,fontWeight:600,color:loading?"var(--t3)":color,letterSpacing:"-0.5px",fontVariantNumeric:"tabular-nums",marginBottom:2}}>
+      {loading?"…":fmt(animated)}
+    </div>
+    {sub&&<div style={{fontSize:11,color:"var(--t3)"}}>{sub}</div>}
+  </div>;
+}
+
+function DashboardPage({setPage}){
+  const [stats,setStats]=useState({c:0,j:0,t:0,co:0});
+  const [revenue,setRevenue]=useState({potential:0,actual:0,placed:0,interviewJobs:[]});
+  const [recent,setRecent]=useState([]);
+  const [topJobs,setTopJobs]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [lastRefresh,setLastRefresh]=useState(null);
+
+  // Interview-qualifying stages
+  const INTERVIEW_STAGES=["Interview","2nd Interview","Offer","Placed"];
+
+  // Always calculate from company terms — never rely on stored potential_fee
+  // because that may not have been saved if job was added before fee terms existed
+  const calcFee=(job)=>{
+    const co=job.companies||{};
+    // Use override if set on job, otherwise fall back to company terms
+    const feeType=job.fee_type_override||co.fee_type||"none";
+    const feeVal=job.fee_type_override
+      ?(parseFloat(job.fee_value_override||0))
+      :(feeType==="percentage"
+          ?parseFloat(co.fee_percentage||0)
+          :parseFloat(co.fee_fixed||0));
+    // salary_value may be a string like "65000" or "£65,000" — strip non-numeric
+    const salNum=parseFloat((job.salary_value||"").toString().replace(/[^0-9.]/g,""));
+    if(feeType==="none"||!feeVal) return 0;
+    if(feeType==="fixed") return Math.round(feeVal);
+    if(!salNum) return 0;
+    return Math.round(salNum*(feeVal/100));
+  };
+
+  const loadData=useCallback(async()=>{
+    setLoading(true);
+    try {
+      const [c,j,t,co,r,openJobs,filledJobs,topFeeJobs] = await Promise.all([
+        db.from("candidates").select("*",{count:"exact",head:true}),
+        db.from("jobs").select("*",{count:"exact",head:true}),
+        db.from("tasks").select("*",{count:"exact",head:true}).eq("done",false),
+        db.from("companies").select("*",{count:"exact",head:true}),
+        db.from("candidates").select("id,name,role,status").order("created_at",{ascending:false}).limit(5),
+        // Critical: fetch job_candidates with stage so we can check interview status
+        db.from("jobs")
+          .select("id,title,salary_value,potential_fee,actual_fee,status,fee_type_override,fee_value_override,companies(name,fee_type,fee_percentage,fee_fixed),job_candidates(id,stage)")
+          .eq("status","Open"),
+        db.from("jobs")
+          .select("id,title,actual_fee,potential_fee,status,companies(name)")
+          .in("status",["Filled","Placed"]),
+        db.from("jobs")
+          .select("id,title,potential_fee,actual_fee,status,companies(name)")
+          .or("potential_fee.not.is.null,actual_fee.not.is.null")
+          .order("potential_fee",{ascending:false,nullsFirst:false})
+          .limit(6),
+      ]);
+
+      setStats({c:c.count||0,j:j.count||0,t:t.count||0,co:co.count||0});
+      setRecent(r.data||[]);
+      setTopJobs(topFeeJobs.data||[]);
+
+      const open=openJobs.data||[];
+      const filled=filledJobs.data||[];
+
+      // A job qualifies for potential revenue only if at least one candidate
+      // in its pipeline has reached Interview, 2nd Interview, Offer, or Placed
+      const interviewQualified=open.filter(job=>{
+        const entries=job.job_candidates||[];
+        return entries.some(e=>INTERVIEW_STAGES.includes(e.stage));
+      });
+
+      const placedFromPipeline=open.filter(job=>{
+        const entries=job.job_candidates||[];
+        return entries.some(e=>e.stage==="Placed");
+      });
+
+      const potential=interviewQualified.reduce((sum,job)=>sum+calcFee(job),0);
+      const actual=filled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0)
+        + placedFromPipeline.reduce((sum,job)=>sum+calcFee(job),0);
+      const placed=filled.length+placedFromPipeline.length;
+
+      setRevenue({potential,actual,placed,interviewJobs:interviewQualified});
+      setLastRefresh(new Date());
+    } catch(e) { console.error("Dashboard load error",e); }
+    setLoading(false);
+  },[]);
+
+  // Load on mount and auto-refresh every 60 seconds
+  useEffect(()=>{ loadData(); const id=setInterval(loadData,60000); return()=>clearInterval(id); },[loadData]);
+
+  const statCards=[
+    {l:"Candidates",v:loading?"…":stats.c,col:"#4f6ef7"},
+    {l:"Active jobs",v:loading?"…":stats.j,col:"#1d9e75"},
+    {l:"Companies",v:loading?"…":stats.co,col:"#ba7517"},
+    {l:"Pending tasks",v:loading?"…":stats.t,col:"#993556"},
+  ];
+
+  const fmtTime=d=>d?d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"—";
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+      <div>
+        <div style={{fontSize:14,fontWeight:500,color:"var(--t1)",marginBottom:3}}>Dashboard</div>
+        <div style={{fontSize:12,color:"var(--t3)"}}>
+          AI-powered · Supabase connected
+          {lastRefresh&&<span> · Last updated {fmtTime(lastRefresh)}</span>}
+        </div>
+      </div>
+      <button
+        className="btn-o"
+        style={{fontSize:12,padding:"5px 12px",display:"flex",alignItems:"center",gap:5}}
+        onClick={loadData}
+        disabled={loading}>
+        {loading?<><span className="spin"></span>Refreshing…</>:<>↻ Refresh</>}
+      </button>
+    </div>
+
+    {/* Revenue tickers */}
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:6}}>
+      <RevenueTicker
+        label="Potential sales revenue"
+        value={revenue.potential}
+        sub={loading?"…":`${revenue.interviewJobs?.length||0} job${revenue.interviewJobs?.length!==1?"s":""} with candidates at interview+`}
+        color="#4f6ef7"
+        loading={loading}/>
+      <RevenueTicker
+        label="Actual revenue earned"
+        value={revenue.actual}
+        sub={`${revenue.placed||0} placement${revenue.placed!==1?"s":""} confirmed`}
+        color="#1d9e75"
+        loading={loading}/>
+    </div>
+
+    {/* Interview-qualified jobs breakdown */}
+    {!loading&&revenue.interviewJobs?.length>0&&<div style={{background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"10px 14px",marginBottom:14}}>
+      <div style={{fontSize:11,fontWeight:500,color:"#4f6ef7",marginBottom:6,textTransform:"uppercase",letterSpacing:"0.5px"}}>
+        💰 Jobs contributing to potential revenue (interview stage or beyond)
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:5}}>
+        {revenue.interviewJobs.map(job=>{
+          const fee=calcFee(job);
+          const co=job.companies||{};
+          const feeType=job.fee_type_override||co.fee_type||"none";
+          const feeVal=job.fee_type_override?(job.fee_value_override||0):(feeType==="percentage"?parseFloat(co.fee_percentage||0):parseFloat(co.fee_fixed||0));
+          const highestStage=(job.job_candidates||[])
+            .map(jc=>jc.stage)
+            .filter(s=>INTERVIEW_STAGES.includes(s))
+            .sort((a,b)=>INTERVIEW_STAGES.indexOf(b)-INTERVIEW_STAGES.indexOf(a))[0];
+          return <div key={job.id} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",borderRadius:6,padding:"7px 10px",border:"0.5px solid #c0c8ff"}}>
+            <div style={{flex:1,minWidth:0}}>
+              <span style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{job.title}</span>
+              <span style={{fontSize:11,color:"var(--t2)",marginLeft:6}}>{co.name||"—"}</span>
+            </div>
+            <span style={{fontSize:11,color:"#7f77dd",flexShrink:0}}>
+              {feeType==="percentage"?`${feeVal}% × £${parseFloat(job.salary_value||0).toLocaleString()}`:`Fixed £${feeVal.toLocaleString()}`}
+            </span>
+            <span style={{fontSize:11,background:"#fbeaf0",color:"#993556",borderRadius:8,padding:"2px 7px",flexShrink:0}}>{highestStage}</span>
+            <span style={{fontSize:13,fontWeight:500,color:"#4f6ef7",flexShrink:0}}>£{fee.toLocaleString()}</span>
+          </div>;
+        })}
+      </div>
+    </div>}
+
+    {!loading&&revenue.interviewJobs?.length===0&&<div style={{background:"var(--bg2)",border:"0.5px solid var(--br)",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"var(--t3)"}}>
+      ℹ️ Potential revenue will appear here once candidates reach Interview stage on an active job.
+    </div>}
+
+    {/* Stat cards */}
+    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+      {statCards.map(c=><div key={c.l} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"12px 14px"}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>{c.l}</div>
+        <div style={{fontSize:22,fontWeight:500,color:loading?"var(--t3)":c.col}}>{c.v}</div>
+      </div>)}
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+      {/* Recent candidates */}
+      <Panel title="Recent candidates" actions={<button className="btn-o" style={{fontSize:11,padding:"3px 8px"}} onClick={()=>setPage("candidates")}>View all</button>}>
+        {loading?<Spin/>:recent.length===0
+          ?<div style={{padding:"28px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet.</div>
+          :<div>{recent.map(c=><div key={c.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)"}}>
+            <Av name={c.name}/><div style={{flex:1}}><div style={{fontWeight:500,color:"var(--t1)",fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div>
+            <Pill label={c.status||"New"}/>
+          </div>)}</div>}
+      </Panel>
+
+      {/* Top fee jobs */}
+      <Panel title="Top fee opportunities" actions={<button className="btn-o" style={{fontSize:11,padding:"3px 8px"}} onClick={()=>setPage("jobs")}>View all</button>}>
+        {loading?<Spin/>:topJobs.length===0
+          ?<div style={{padding:"28px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No jobs with fees set yet.<br/><span style={{fontSize:11}}>Edit a job to add fee details.</span></div>
+          :<div>{topJobs.map(j=>{
+            const fee=j.actual_fee||j.potential_fee;
+            const isActual=!!j.actual_fee;
+            return <div key={j.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)"}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:500,color:"var(--t1)",fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{j.title}</div>
+                <div style={{fontSize:11,color:"var(--t2)"}}>{j.companies?.name||"—"}</div>
+              </div>
+              <div style={{textAlign:"right",flexShrink:0}}>
+                <div style={{fontSize:13,fontWeight:500,color:isActual?"#1d9e75":"#4f6ef7"}}>£{(fee||0).toLocaleString()}</div>
+                <div style={{fontSize:10,color:"var(--t3)"}}>{isActual?"actual":"potential"}</div>
+              </div>
+              <Pill label={j.status||"Open"}/>
+            </div>;
+          })}</div>}
+      </Panel>
+    </div>
+
+    {/* Quick actions */}
+    <Panel title="Quick actions" style={{marginTop:14}}>
+      <div style={{padding:12,display:"flex",gap:8,flexWrap:"wrap"}}>
+        {[["👥","Candidates","candidates"],["💼","Jobs","jobs"],["🏢","Companies","companies"],["✅","Tasks","tasks"],["🎯","Match","match"],["✍️","Pitch","pitch"],["📥","Import CSV","import"]].map(([icon,label,pg])=>(
+          <button key={pg} className="btn-o" style={{padding:"8px 14px",gap:6,fontSize:12}} onClick={()=>setPage(pg)}>
+            <span>{icon}</span>{label}
+          </button>
+        ))}
+      </div>
+    </Panel>
+  </div>;
+}
+
+function CandidatesPage(){
+  const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);
+  const [search,setSearch]=useState("");const [statusF,setStatusF]=useState("All");
+  const [modal,setModal]=useState(false);const [editRow,setEditRow]=useState(null);
+  const [err,setErr]=useState("");const [delId,setDelId]=useState(null);
+  const load=useCallback(async()=>{
+    setLoading(true);const{data,error}=await db.from("candidates").select("*").order("created_at",{ascending:false});
+    if(error)setErr(error.message);else setRows(data||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const del=async id=>{if(!confirm("Delete this candidate?"))return;setDelId(id);await db.from("candidates").delete().eq("id",id);setDelId(null);load();};
+  const statuses=["All",...new Set(rows.map(r=>r.status).filter(Boolean))];
+  const filtered=rows.filter(r=>{
+    const ms=!search||[r.name,r.role,r.location].some(v=>v?.toLowerCase().includes(search.toLowerCase()));
+    const mf=statusF==="All"||r.status===statusF;return ms&&mf;
+  });
+  return <div>
+    {modal&&<CandModal onClose={()=>setModal(false)} onSaved={load}/>}
+    {editRow&&<CandModal cand={editRow} onClose={()=>setEditRow(null)} onSaved={load}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Candidates ({filtered.length})</span>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <input type="text" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
+        <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{width:"auto"}}>{statuses.map(s=><option key={s}>{s}</option>)}</select>
+        <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate</button>
+      </div>
+    </div>
+    <Err msg={err}/>
+    <Panel title={`${filtered.length} records`}>
+      {loading?<Spin/>:filtered.length===0
+        ?<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet. Click "Add candidate" to get started.</div>
+        :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:600}}>
+          <thead><tr><th className="th">Candidate</th><th className="th">Role</th><th className="th">Location</th><th className="th">Skills</th><th className="th">Status</th><th className="th" style={{width:80}}></th></tr></thead>
+          <tbody>{filtered.map(c=><tr key={c.id}>
+            <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div><div style={{fontWeight:500}}>{c.name}</div>{c.email&&<div style={{fontSize:11,color:ACCENT}}>{c.email}</div>}</div></div></td>
+            <td className="td" style={{color:"var(--t2)"}}>{c.role||"—"}</td>
+            <td className="td" style={{color:"var(--t2)"}}>{c.location||"—"}</td>
+            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px"}}>{s}</span>)}{(c.skills||[]).length>3&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-3}</span>}</div></td>
+            <td className="td"><Pill label={c.status||"New"}/></td>
+            <td className="td"><div style={{display:"flex",gap:5}}>
+              <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
+              <button className="btn-d" onClick={()=>del(c.id)} disabled={delId===c.id}>{delId===c.id?"…":"Del"}</button>
+            </div></td>
+          </tr>)}</tbody>
+        </table></div>}
+    </Panel>
+  </div>;
+}
+
+function CompaniesPage(){
+  const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);const [editRow,setEditRow]=useState(null);const [err,setErr]=useState("");
+  const load=useCallback(async()=>{setLoading(true);const{data,error}=await db.from("companies").select("*").order("created_at",{ascending:false});if(error)setErr(error.message);else setRows(data||[]);setLoading(false);},[]);
+  const termsStr=c=>c.fee_type==="percentage"&&c.fee_percentage?`${c.fee_percentage}% of salary`:c.fee_type==="fixed"&&c.fee_fixed?`Fixed £${parseFloat(c.fee_fixed).toLocaleString()}`:"Not set";
+  useEffect(()=>{load();},[load]);
+  const del=async id=>{if(!confirm("Delete this company?"))return;await db.from("companies").delete().eq("id",id);load();};
+  return <div>
+    {modal&&<CoModal onClose={()=>setModal(false)} onSaved={load}/>}
+    {editRow&&<CoModal co={editRow} onClose={()=>setEditRow(null)} onSaved={load}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Companies ({rows.length})</span>
+      <button className="btn-a" onClick={()=>setModal(true)}>+ Add company</button>
+    </div>
+    <Err msg={err}/>
+    <Panel title="All companies">
+      {loading?<Spin/>:rows.length===0?<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No companies yet.</div>:
+      <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed"}}>
+        <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th" style={{width:80}}></th></tr></thead>
+        <tbody>{rows.map(c=><tr key={c.id}>
+          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div><div style={{fontWeight:500}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:ACCENT}}>{c.website}</div>}</div></div></td>
+          <td className="td" style={{color:"var(--t2)"}}>{c.industry||"—"}</td>
+          <td className="td">
+            <div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>
+              {termsStr(c)}
+            </div>
+            {c.terms_notes&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.terms_notes}</div>}
+          </td>
+          <td className="td"><Pill label={c.status||"Active"}/></td>
+          <td className="td"><div style={{display:"flex",gap:5}}>
+            <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
+            <button className="btn-d" onClick={()=>del(c.id)}>Del</button>
+          </div></td>
+        </tr>)}</tbody>
+      </table>}
+    </Panel>
+  </div>;
+}
+
+function JobsPage({onOpenJob}){
+  const [rows,setRows]=useState([]);const [companies,setCompanies]=useState([]);const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);const [editRow,setEditRow]=useState(null);const [err,setErr]=useState("");
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data:j,error:je},{data:c}]=await Promise.all([
+      db.from("jobs").select("*,companies(name,fee_type,fee_percentage,fee_fixed,terms_notes),job_candidates(id)").order("created_at",{ascending:false}),
+      db.from("companies").select("id,name,fee_type,fee_percentage,fee_fixed,terms_notes")
+    ]);
+    if(je)setErr(je.message);else{setRows(j||[]);setCompanies(c||[]);}setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const del=async id=>{if(!confirm("Delete this job?"))return;await db.from("jobs").delete().eq("id",id);load();};
+  const live=rows.filter(r=>r.status==="Open");
+  const other=rows.filter(r=>r.status!=="Open");
+  const JobCard=({j})=>{
+    const cnt=(j.job_candidates||[]).length;
+    const co=j.companies||{};
+    // Compute effective fee terms
+    const feeType=j.fee_type_override||co.fee_type||"none";
+    const feeVal=j.fee_type_override
+      ?(j.fee_value_override||0)
+      :(feeType==="percentage"?parseFloat(co.fee_percentage||0):parseFloat(co.fee_fixed||0));
+    const salNum=parseFloat((j.salary_value||"").replace(/[^0-9.]/g,""));
+    const potFee=j.potential_fee||(salNum&&feeVal&&feeType!=="none"
+      ?(feeType==="percentage"?Math.round(salNum*(feeVal/100)):Math.round(feeVal))
+      :null);
+    const termsStr=feeType==="percentage"&&feeVal?`${feeVal}% of salary`
+      :feeType==="fixed"&&feeVal?`Fixed £${parseFloat(feeVal).toLocaleString()}`
+      :null;
+    return <div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"14px 16px",marginBottom:10}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+        <div style={{flex:1,minWidth:0,marginRight:10}}>
+          <div style={{fontWeight:500,fontSize:14,color:"var(--t1)",marginBottom:3}}>{j.title}</div>
+          <div style={{fontSize:12,color:"var(--t2)"}}>{co.name||"No client"} · {j.salary||"Salary TBC"}{j.industry?` · ${j.industry}`:""}</div>
+        </div>
+        <Pill label={j.status||"Open"}/>
+      </div>
+      {/* Fee bar */}
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
+        {potFee
+          ?<div style={{display:"flex",alignItems:"center",gap:6,background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"6px 12px"}}>
+            <span style={{fontSize:16}}>💰</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:500,color:"#4f6ef7"}}>£{potFee.toLocaleString()} potential fee</div>
+              {termsStr&&<div style={{fontSize:11,color:"#7f77dd"}}>{termsStr}{j.fee_type_override?" (overridden)":co.name?` · ${co.name} terms`:""}</div>}
+            </div>
+          </div>
+          :<div style={{fontSize:11,color:"var(--t3)",fontStyle:"italic"}}>No fee terms set — edit job or company to add terms</div>
+        }
+        {j.actual_fee&&<div style={{display:"flex",alignItems:"center",gap:6,background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:8,padding:"6px 12px"}}>
+          <span style={{fontSize:16}}>✅</span>
+          <div>
+            <div style={{fontSize:13,fontWeight:500,color:"#3b6d11"}}>£{parseFloat(j.actual_fee).toLocaleString()} actual fee</div>
+            <div style={{fontSize:11,color:"#639922"}}>Confirmed received</div>
+          </div>
+        </div>}
+      </div>
+      {j.description&&<div style={{fontSize:12,color:"var(--t3)",lineHeight:1.55,marginBottom:10}}>{j.description.slice(0,110)}{j.description.length>110?"…":""}</div>}
+      {co.terms_notes&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:8}}>📋 {co.terms_notes}</div>}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
+        <span style={{fontSize:12,color:"var(--t2)"}}>👥 {cnt} candidate{cnt!==1?"s":""} in pipeline</span>
+        <div style={{display:"flex",gap:6}}>
+          <button className="btn-o" style={{padding:"5px 10px",fontSize:12}} onClick={()=>setEditRow(j)}>Edit</button>
+          <button className="btn-d" style={{padding:"5px 10px"}} onClick={()=>del(j.id)}>Delete</button>
+          {j.status==="Open"&&<button className="btn-a" style={{padding:"5px 12px",fontSize:12}} onClick={()=>onOpenJob(j)}>Open pipeline →</button>}
+        </div>
+      </div>
+    </div>;
+  };
+  return <div>
+    {modal&&<JobModal companies={companies} onClose={()=>setModal(false)} onSaved={load}/>}
+    {editRow&&<JobModal job={editRow} companies={companies} onClose={()=>setEditRow(null)} onSaved={load}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Jobs ({rows.length})</span>
+      <button className="btn-a" onClick={()=>setModal(true)}>+ Add job</button>
+    </div>
+    <Err msg={err}/>
+    {loading?<Spin/>:<>
+      {live.length>0&&<>
+        <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Live jobs ({live.length})</div>
+        {live.map(j=><JobCard key={j.id} j={j}/>)}
+      </>}
+      {other.length>0&&<>
+        <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",margin:"16px 0 8px"}}>Other ({other.length})</div>
+        {other.map(j=><JobCard key={j.id} j={j}/>)}
+      </>}
+      {rows.length===0&&<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No jobs yet. Click "Add job" to create your first role.</div>}
+    </>}
+  </div>;
+}
+
+// ── Add Candidate to Job Modal ─────────────────────────────────────────────
+function AddCandToJobModal({job, existingIds, onClose, onAdded}){
+  const [candidates,setCandidates]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [search,setSearch]=useState("");
+  const [selected,setSelected]=useState([]);
+  const [stage,setStage]=useState("Applied");
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+
+  useEffect(()=>{
+    db.from("candidates").select("*").order("name").then(({data})=>{ setCandidates(data||[]); setLoading(false); });
+  },[]);
+
+  const filtered=(candidates||[]).filter(c=>{
+    const notIn=!existingIds.includes(c.id);
+    const matchSearch=!search||c.name?.toLowerCase().includes(search.toLowerCase())||c.role?.toLowerCase().includes(search.toLowerCase());
+    return notIn&&matchSearch;
+  });
+
+  const toggle=id=>setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
+
+  const save=async()=>{
+    if(!selected.length){setErr("Select at least one candidate");return;}
+    setSaving(true);setErr("");
+    const rows=selected.map(cid=>({job_id:job.id,candidate_id:cid,stage,notes:""}));
+    const{error}=await db.from("job_candidates").insert(rows);
+    setSaving(false);
+    if(error){setErr(error.message);return;}
+    onAdded();onClose();
+  };
+
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal" style={{maxWidth:560}}>
+      <h3>Add candidates to: {job.title}</h3>
+      <div className="fr">
+        <label>Starting pipeline stage</label>
+        <select value={stage} onChange={e=>setStage(e.target.value)}>
+          {["Applied","Screening","Interview","2nd Interview","Offer","Placed"].map(s=><option key={s}>{s}</option>)}
+        </select>
+      </div>
+      <div className="fr">
+        <label>Search candidates</label>
+        <input type="text" placeholder="Search by name or role…" value={search} onChange={e=>setSearch(e.target.value)}/>
+      </div>
+      {selected.length>0&&<div style={{fontSize:12,color:ACCENT,marginBottom:10,fontWeight:500}}>{selected.length} selected</div>}
+      <div style={{maxHeight:280,overflowY:"auto",border:"0.5px solid var(--br)",borderRadius:8,marginBottom:12}}>
+        {loading?<Spin/>:filtered.length===0
+          ?<div style={{padding:"20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>{search?"No results.":"All candidates already added to this job."}</div>
+          :filtered.map(c=>{
+            const sel=selected.includes(c.id);
+            return <div key={c.id} onClick={()=>toggle(c.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer",background:sel?"#eef1ff":"transparent"}}>
+              <div style={{width:18,height:18,borderRadius:4,border:`1.5px solid ${sel?ACCENT:"var(--brm)"}`,background:sel?ACCENT:"transparent",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {sel&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+              </div>
+              <Av name={c.name}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}</div>
+                <div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"} · {c.location||"—"}</div>
+              </div>
+              <Pill label={c.status||"New"}/>
+            </div>;
+          })
+        }
+      </div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving||!selected.length}>
+          {saving?<><span className="spin"></span>Adding…</>:`Add ${selected.length||""} candidate${selected.length!==1?"s":""}`}
+        </button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── Job Pipeline Page ──────────────────────────────────────────────────────
+const STAGES=["Applied","Screening","Interview","2nd Interview","Offer","Placed"];
+const STAGE_COLORS={
+  "Applied":    {bg:"#eef1ff",fg:"#4f6ef7",bar:"#4f6ef7"},
+  "Screening":  {bg:"#faeeda",fg:"#854f0b",bar:"#ba7517"},
+  "Interview":  {bg:"#fbeaf0",fg:"#993556",bar:"#d4537e"},
+  "2nd Interview":{bg:"#eeedfe",fg:"#534ab7",bar:"#7f77dd"},
+  "Offer":      {bg:"#e6f1fb",fg:"#185fa5",bar:"#378add"},
+  "Placed":     {bg:"#eaf3de",fg:"#3b6d11",bar:"#639922"},
+};
+
+function JobPipelinePage({job, onBack}){
+  const [entries,setEntries]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [addModal,setAddModal]=useState(false);
+  const [noteEntry,setNoteEntry]=useState(null);
+  const [noteText,setNoteText]=useState("");
+  const [movingId,setMovingId]=useState(null);
+  const [err,setErr]=useState("");
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data,error}=await db.from("job_candidates")
+      .select("*,candidates(id,name,role,location,salary,skills,status,email)")
+      .eq("job_id",job.id)
+      .order("created_at",{ascending:true});
+    if(error)setErr(error.message);else setEntries(data||[]);
+    setLoading(false);
+  },[job.id]);
+
+  useEffect(()=>{load();},[load]);
+
+  const moveStage=async(entry,newStage)=>{
+    setMovingId(entry.id);
+    await db.from("job_candidates").update({stage:newStage}).eq("id",entry.id);
+    setMovingId(null);load();
+  };
+
+  const removeFromJob=async(id)=>{
+    if(!confirm("Remove this candidate from the job?"))return;
+    await db.from("job_candidates").delete().eq("id",id);
+    load();
+  };
+
+  const saveNote=async()=>{
+    if(!noteEntry)return;
+    await db.from("job_candidates").update({notes:noteText}).eq("id",noteEntry.id);
+    setNoteEntry(null);setNoteText("");load();
+  };
+
+  const existingIds=entries.map(e=>e.candidates?.id).filter(Boolean);
+
+  const byStage=STAGES.reduce((acc,s)=>{acc[s]=entries.filter(e=>e.stage===s);return acc;},{});
+
+  return <div>
+    {addModal&&<AddCandToJobModal job={job} existingIds={existingIds} onClose={()=>setAddModal(false)} onAdded={load}/>}
+
+    {/* Note modal */}
+    {noteEntry&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget){setNoteEntry(null);setNoteText("");}}}>
+      <div className="modal" style={{maxWidth:420}}>
+        <h3>Notes — {noteEntry.candidates?.name}</h3>
+        <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Add notes about this candidate for this role…" style={{minHeight:120}}/>
+        <div style={{display:"flex",gap:8,marginTop:12,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={()=>{setNoteEntry(null);setNoteText("");}}>Cancel</button>
+          <button className="btn-a" onClick={saveNote}>Save note</button>
+        </div>
+      </div>
+    </div>}
+
+    {/* Header */}
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4,flexWrap:"wrap"}}>
+      <button className="btn-o" style={{padding:"5px 10px",fontSize:12}} onClick={onBack}>← All jobs</button>
+      <div style={{flex:1}}>
+        <div style={{fontSize:15,fontWeight:500,color:"var(--t1)"}}>{job.title}</div>
+        <div style={{fontSize:12,color:"var(--t2)"}}>{job.companies?.name||"No client"} · {job.salary||"Salary TBC"} · {entries.length} candidates</div>
+      </div>
+      <button className="btn-a" onClick={()=>setAddModal(true)}>+ Add candidates</button>
+    </div>
+
+    {/* Progress bar */}
+    <div style={{display:"flex",height:4,borderRadius:10,overflow:"hidden",marginBottom:16,gap:1}}>
+      {STAGES.map(s=>{
+        const cnt=byStage[s].length,total=entries.length||1;
+        return <div key={s} style={{flex:cnt||0.05,background:STAGE_COLORS[s].bar,transition:"flex 0.4s",minWidth:2}}/>;
+      })}
+    </div>
+
+    <Err msg={err}/>
+
+    {loading?<Spin/>:entries.length===0
+      ?<div style={{padding:"50px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>
+          No candidates in this pipeline yet.<br/>
+          <button className="btn-a" style={{marginTop:14}} onClick={()=>setAddModal(true)}>+ Add your first candidate</button>
+        </div>
+      :<div style={{overflowX:"auto",paddingBottom:8}}>
+        <div style={{display:"flex",gap:10,minWidth:760}}>
+          {STAGES.map(stage=>{
+            const sc=STAGE_COLORS[stage];
+            const stageCands=byStage[stage];
+            return <div key={stage} style={{flex:1,minWidth:148}}>
+              {/* Column header */}
+              <div style={{background:sc.bg,borderRadius:8,padding:"8px 10px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:12,fontWeight:500,color:sc.fg}}>{stage}</span>
+                <span style={{fontSize:11,color:sc.fg,background:"rgba(255,255,255,0.5)",borderRadius:10,padding:"1px 7px"}}>{stageCands.length}</span>
+              </div>
+              {/* Cards */}
+              {stageCands.map(entry=>{
+                const c=entry.candidates||{};
+                const isMoving=movingId===entry.id;
+                return <div key={entry.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"10px 12px",marginBottom:8,opacity:isMoving?0.5:1,transition:"opacity 0.2s"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                    <Av name={c.name||"?"} size={28}/>
+                    <div style={{minWidth:0}}>
+                      <div style={{fontWeight:500,fontSize:12,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name||"Unknown"}</div>
+                      <div style={{fontSize:11,color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</div>
+                    </div>
+                  </div>
+                  {c.location&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>📍 {c.location}</div>}
+                  {c.salary&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>💰 {c.salary}</div>}
+                  {entry.notes&&<div style={{fontSize:11,color:"var(--t2)",background:"var(--bg2)",borderRadius:6,padding:"5px 7px",marginBottom:6,lineHeight:1.5}}>{entry.notes.slice(0,80)}{entry.notes.length>80?"…":""}</div>}
+                  {/* Move stage */}
+                  <div style={{marginBottom:6}}>
+                    <select value={stage} onChange={e=>moveStage(entry,e.target.value)} disabled={isMoving} style={{fontSize:11,padding:"4px 6px",width:"100%",background:sc.bg,color:sc.fg,border:`0.5px solid ${sc.bar}`,borderRadius:6}}>
+                      {STAGES.map(s=><option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div style={{display:"flex",gap:4}}>
+                    <button className="btn-o" style={{flex:1,justifyContent:"center",padding:"3px 0",fontSize:11}} onClick={()=>{setNoteEntry(entry);setNoteText(entry.notes||"");}}>📝</button>
+                    <button className="btn-d" style={{flex:1,padding:"3px 0",fontSize:11,textAlign:"center"}} onClick={()=>removeFromJob(entry.id)}>×</button>
+                  </div>
+                </div>;
+              })}
+              {stageCands.length===0&&<div style={{border:"1px dashed var(--br)",borderRadius:8,padding:"16px 8px",textAlign:"center",color:"var(--t3)",fontSize:11}}>Empty</div>}
+            </div>;
+          })}
+        </div>
+      </div>
+    }
+
+    {/* Summary strip */}
+    {entries.length>0&&<div style={{marginTop:16,background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"12px 16px",display:"flex",gap:16,flexWrap:"wrap"}}>
+      {STAGES.map(s=><div key={s} style={{textAlign:"center"}}>
+        <div style={{fontSize:18,fontWeight:500,color:STAGE_COLORS[s].fg}}>{byStage[s].length}</div>
+        <div style={{fontSize:11,color:"var(--t3)"}}>{s}</div>
+      </div>)}
+    </div>}
+  </div>;
+}
+
+
+// ── Task helpers ───────────────────────────────────────────────────────────
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function tomorrowStr(){const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+function dueLabel(due_date,due_time){
+  if(!due_date)return null;
+  const today=todayStr(),tom=tomorrowStr();
+  const label=due_date===today?"Today":due_date===tom?"Tomorrow":due_date<today?"Overdue":due_date;
+  return{label,overdue:due_date<today,today:due_date===today};
+}
+function requestNotifPerm(){
+  if("Notification" in window && Notification.permission==="default") Notification.requestPermission();
+}
+function sendNotif(title,body){
+  if("Notification" in window && Notification.permission==="granted"){
+    new Notification("recruitCRM: "+title,{body,icon:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%234f6ef7'/%3E%3Ctext x='16' y='21' text-anchor='middle' fill='white' font-size='16'%3E✓%3C/text%3E%3C/svg%3E"});
+  }
+}
+
+function TasksPage(){
+  const [tasks,setTasks]=useState([]);const [loading,setLoading]=useState(true);
+  const [text,setText]=useState("");const [due,setDue]=useState(todayStr());
+  const [dueTime,setDueTime]=useState("");const [priority,setPriority]=useState("normal");
+  const [adding,setAdding]=useState(false);const [err,setErr]=useState("");
+  const [filter,setFilter]=useState("pending");
+  const [notifStatus,setNotifStatus]=useState(typeof Notification!=="undefined"?Notification.permission:"unsupported");
+  const [toast,setToast]=useState(null);
+  const [snoozeId,setSnoozeId]=useState(null);
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data,error}=await db.from("tasks").select("*").order("due_date",{ascending:true,nullsFirst:false});
+    if(error)setErr(error.message);else setTasks(data||[]);
+    setLoading(false);
+  },[]);
+
+  useEffect(()=>{load();requestNotifPerm();},[load]);
+
+  // Poll every minute for due reminders
+  useEffect(()=>{
+    const check=()=>{
+      const now=new Date();const todayD=todayStr();
+      tasks.filter(t=>!t.done&&t.due_date&&t.due_time).forEach(t=>{
+        if(t.due_date!==todayD)return;
+        const[h,m]=(t.due_time||"").split(":");
+        const due=new Date();due.setHours(+h,+m,0,0);
+        const diff=due-now;
+        if(diff>0&&diff<60000){// fires within next 60s window
+          sendNotif(t.title,"Due at "+t.due_time);
+          showToast(t);
+          // Send email reminder via EmailJS
+          emailjs.send("service_09b4hfs","template_34xvbwa",{
+            task_title: t.title,
+            due_date: t.due_date,
+            priority: t.priority||"normal"
+          },"MadIajEVnrBSCAMNb").catch(err=>console.error("EmailJS error:",err));
+        }
+      });
+    };
+    const id=setInterval(check,30000);check();
+    return()=>clearInterval(id);
+  },[tasks]);
+
+  const showToast=(t)=>{
+    setToast(t);
+    setTimeout(()=>setToast(null),8000);
+  };
+
+  const enableNotifs=async()=>{
+    const perm=await Notification.requestPermission();
+    setNotifStatus(perm);
+  };
+
+  const add=async()=>{
+    if(!text.trim())return;
+    setAdding(true);setErr("");
+    const payload={title:text.trim(),due_date:due||null,due_time:dueTime||null,priority,done:false};
+    const{error}=await db.from("tasks").insert(payload);
+    if(error){setErr(error.message);}else{setText("");setDue(todayStr());setDueTime("");setPriority("normal");load();}
+    setAdding(false);
+  };
+
+  const toggle=async t=>{
+    await db.from("tasks").update({done:!t.done}).eq("id",t.id);
+    load();
+  };
+
+  const del=async id=>{await db.from("tasks").delete().eq("id",id);load();};
+
+  const snooze=async(t,mins)=>{
+    const d=new Date();d.setMinutes(d.getMinutes()+mins);
+    const newTime=d.toTimeString().slice(0,5);
+    await db.from("tasks").update({due_time:newTime,due_date:todayStr()}).eq("id",t.id);
+    setSnoozeId(null);setToast(null);load();
+  };
+
+  const PRIORITY_STYLES={
+    urgent:{bg:"#fcebeb",fg:"#a32d2d",label:"Urgent"},
+    high:{bg:"#faeeda",fg:"#854f0b",label:"High"},
+    normal:{bg:"#eef1ff",fg:"#4f6ef7",label:"Normal"},
+    low:{bg:"#f1efe8",fg:"#5f5e5a",label:"Low"},
+  };
+
+  const pending=tasks.filter(t=>!t.done);
+  const done=tasks.filter(t=>t.done);
+  const overdue=pending.filter(t=>t.due_date&&t.due_date<todayStr());
+  const todayTasks=pending.filter(t=>t.due_date===todayStr());
+  const upcoming=pending.filter(t=>t.due_date&&t.due_date>todayStr());
+  const undated=pending.filter(t=>!t.due_date);
+
+  const renderTask=(t)=>{
+    const dl=dueLabel(t.due_date,t.due_time);
+    const ps=PRIORITY_STYLES[t.priority||"normal"];
+    return <div key={t.id} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"0.5px solid var(--br)",background:dl?.overdue?"#fffaf9":"transparent"}}>
+      <div onClick={()=>toggle(t)} style={{width:18,height:18,borderRadius:4,border:"0.5px solid var(--brm)",cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:t.done?"#1d9e75":"transparent"}}>
+        {t.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:13,color:t.done?"var(--t3)":"var(--t1)",textDecoration:t.done?"line-through":"none",marginBottom:2}}>{t.title}</div>
+        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+          {dl&&<span style={{fontSize:11,fontWeight:500,color:dl.overdue?"#a32d2d":dl.today?"#854f0b":"var(--t3)",background:dl.overdue?"#fcebeb":dl.today?"#faeeda":"transparent",padding:dl.overdue||dl.today?"1px 6px":"0",borderRadius:8}}>
+            {dl.overdue?"⚠️ ":dl.today?"📅 ":""}{dl.label}{t.due_time?" · "+t.due_time:""}
+          </span>}
+          <span style={{fontSize:11,background:ps.bg,color:ps.fg,padding:"1px 6px",borderRadius:8}}>{ps.label}</span>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:4,flexShrink:0}}>
+        {!t.done&&<button className="btn-o" style={{padding:"3px 7px",fontSize:11}} onClick={()=>setSnoozeId(snoozeId===t.id?null:t.id)}>⏰</button>}
+        <button className="btn-d" style={{padding:"3px 8px"}} onClick={()=>del(t.id)}>×</button>
+      </div>
+      {snoozeId===t.id&&<div style={{position:"absolute",right:60,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:8,padding:10,zIndex:10,boxShadow:"0 4px 16px rgba(0,0,0,0.12)"}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:6,fontWeight:500}}>Snooze for…</div>
+        {[[15,"15 min"],[30,"30 min"],[60,"1 hour"],[120,"2 hours"]].map(([m,l])=>(
+          <div key={m} onClick={()=>snooze(t,m)} style={{fontSize:12,padding:"5px 10px",cursor:"pointer",borderRadius:6,color:"var(--t1)"}} onMouseOver={e=>e.target.style.background="var(--bg2)"} onMouseOut={e=>e.target.style.background="transparent"}>{l}</div>
+        ))}
+      </div>}
+    </div>;
+  };
+
+  const Section=({title,items,emptyMsg})=>items.length===0?null:<>
+    <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",padding:"10px 14px 4px",textTransform:"uppercase",letterSpacing:"0.5px",background:"var(--bg2)",borderBottom:"0.5px solid var(--br)"}}>{title} ({items.length})</div>
+    <div style={{position:"relative"}}>{items.map(renderTask)}</div>
+  </>;
+
+  return <div>
+    {/* Toast notification */}
+    {toast&&<div style={{position:"fixed",top:20,right:20,zIndex:9999,background:"var(--bg)",border:"2px solid "+ACCENT,borderRadius:10,padding:"14px 16px",maxWidth:320,boxShadow:"0 8px 32px rgba(0,0,0,0.15)"}}>
+      <div style={{fontSize:12,color:ACCENT,fontWeight:500,marginBottom:4}}>⏰ Reminder</div>
+      <div style={{fontSize:13,color:"var(--t1)",marginBottom:10}}>{toast.title}</div>
+      <div style={{display:"flex",gap:6}}>
+        <button className="btn-o" style={{fontSize:11,padding:"4px 10px"}} onClick={()=>snooze(toast,15)}>Snooze 15m</button>
+        <button className="btn-a" style={{fontSize:11,padding:"4px 10px"}} onClick={()=>{toggle(toast);setToast(null);}}>Mark done</button>
+        <button onClick={()=>setToast(null)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:16,lineHeight:1}}>×</button>
+      </div>
+    </div>}
+
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Tasks & reminders</span>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        {notifStatus==="default"&&<button className="btn-o" style={{fontSize:11}} onClick={enableNotifs}>🔔 Enable reminders</button>}
+        {notifStatus==="granted"&&<span style={{fontSize:11,color:"#1d9e75"}}>🔔 Reminders on</span>}
+        {notifStatus==="denied"&&<span style={{fontSize:11,color:"#a32d2d"}}>🔕 Reminders blocked</span>}
+        <span style={{fontSize:12,color:"var(--t3)"}}>{pending.length} pending · {overdue.length} overdue</span>
+      </div>
+    </div>
+
+    {/* Overdue alert banner */}
+    {overdue.length>0&&<div style={{background:"#fcebeb",border:"0.5px solid #f09595",borderRadius:8,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
+      <span style={{fontSize:16}}>⚠️</span>
+      <div>
+        <div style={{fontSize:13,fontWeight:500,color:"#a32d2d"}}>{overdue.length} overdue task{overdue.length!==1?"s":""}</div>
+        <div style={{fontSize:12,color:"#c53030"}}>{overdue.map(t=>t.title).slice(0,2).join(" · ")}{overdue.length>2?` + ${overdue.length-2} more`:""}</div>
+      </div>
+    </div>}
+
+    {/* Add task */}
+    <Panel title="Add task or reminder" style={{marginBottom:12}}>
+      <div style={{padding:14,display:"flex",flexDirection:"column",gap:10}}>
+        <input type="text" value={text} onChange={e=>setText(e.target.value)} placeholder="What needs doing? e.g. Follow up with Barclays re: Sophie Archer" onKeyDown={e=>e.key==="Enter"&&add()}/>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:3,flex:1,minWidth:120}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Due date</label>
+            <input type="date" value={due} onChange={e=>setDue(e.target.value)}/>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:3,width:120}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Remind me at</label>
+            <input type="time" value={dueTime} onChange={e=>setDueTime(e.target.value)} style={{width:"100%",padding:"7px 10px",border:"0.5px solid var(--brm)",borderRadius:7,fontSize:13,color:"var(--t1)",background:"var(--bg)",outline:"none"}}/>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:3,width:120}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Priority</label>
+            <select value={priority} onChange={e=>setPriority(e.target.value)}>
+              <option value="urgent">🔴 Urgent</option>
+              <option value="high">🟠 High</option>
+              <option value="normal">🔵 Normal</option>
+              <option value="low">⚪ Low</option>
+            </select>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:3,justifyContent:"flex-end"}}>
+            <label style={{fontSize:11,color:"transparent"}}>.</label>
+            <button className="btn-a" onClick={add} disabled={adding||!text.trim()}>{adding?<><span className="spin"></span>Adding…</>:"Add task"}</button>
+          </div>
+        </div>
+        {/* Quick date shortcuts */}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          <span style={{fontSize:11,color:"var(--t3)"}}>Quick:</span>
+          {[["Today",todayStr()],["Tomorrow",tomorrowStr()],["Next week",(()=>{const d=new Date();d.setDate(d.getDate()+7);return d.toISOString().slice(0,10)})()]].map(([l,v])=>(
+            <span key={l} onClick={()=>setDue(v)} style={{fontSize:11,color:ACCENT,cursor:"pointer",textDecoration:"underline"}}>{l}</span>
+          ))}
+          <span onClick={()=>setDue("")} style={{fontSize:11,color:"var(--t3)",cursor:"pointer",textDecoration:"underline"}}>No date</span>
+        </div>
+        <Err msg={err}/>
+      </div>
+    </Panel>
+
+    {/* Filter tabs */}
+    <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+      {[["pending","Pending"],["today","Today"],["overdue","Overdue"],["upcoming","Upcoming"],["done","Completed"]].map(([k,l])=>(
+        <button key={k} onClick={()=>setFilter(k)} style={{fontSize:12,padding:"5px 12px",borderRadius:20,border:"0.5px solid var(--brm)",cursor:"pointer",background:filter===k?ACCENT:"transparent",color:filter===k?"#fff":"var(--t2)",fontFamily:"inherit"}}>
+          {l} {k==="overdue"&&overdue.length>0?`(${overdue.length})`:k==="today"?`(${todayTasks.length})`:k==="pending"?`(${pending.length})`:k==="done"?`(${done.length})`:k==="upcoming"?`(${upcoming.length})`:""}
+        </button>
+      ))}
+    </div>
+
+    <Panel title={filter==="done"?"Completed tasks":filter==="today"?"Today's tasks":filter==="overdue"?"Overdue tasks":filter==="upcoming"?"Upcoming":"All pending tasks"}>
+      {loading?<Spin/>:<div style={{position:"relative"}}>
+        {filter==="pending"&&<>
+          <Section title="Overdue" items={overdue}/>
+          <Section title="Today" items={todayTasks}/>
+          <Section title="Upcoming" items={upcoming}/>
+          <Section title="No due date" items={undated}/>
+          {pending.length===0&&<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>All done! 🎉</div>}
+        </>}
+        {filter==="today"&&(todayTasks.length===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>Nothing due today.</div>:<div>{todayTasks.map(renderTask)}</div>)}
+        {filter==="overdue"&&(overdue.length===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No overdue tasks! 🎉</div>:<div>{overdue.map(renderTask)}</div>)}
+        {filter==="upcoming"&&(upcoming.length===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>Nothing upcoming.</div>:<div>{upcoming.map(renderTask)}</div>)}
+        {filter==="done"&&(done.length===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No completed tasks yet.</div>:<div>{done.map(renderTask)}</div>)}
+      </div>}
+    </Panel>
+  </div>;
+}
+
+function CVParserPage(){
+  const [cands,setCands]=useState([]);const [sel,setSel]=useState(null);
+  const [summary,setSummary]=useState("");const [loading,setLoading]=useState(false);const [listLoading,setListLoading]=useState(true);const [err,setErr]=useState("");
+  useEffect(()=>{db.from("candidates").select("*").order("created_at",{ascending:false}).then(({data})=>{setCands(data||[]);if(data&&data.length)setSel(data[0]);setListLoading(false);});},[]);
+  const run=useCallback(async()=>{
+    if(!sel)return;setSummary("");setLoading(true);setErr("");
+    try{await claude("You are a recruitment AI. Write a concise 3-sentence recruiter summary highlighting the candidate's strongest selling points. Professional, no bullet points.",`Candidate: ${sel.name}, ${sel.role||"?"}, ${sel.experience||"?"} experience, ${sel.location||"?"}, ${sel.salary||"?"}, notice ${sel.notice||"?"}. Skills: ${(sel.skills||[]).join(", ")||"not listed"}. Notes: ${sel.notes||"none"}.`,chunk=>setSummary(s=>s+chunk));}
+    catch(e){setErr(e.message);}setLoading(false);
+  },[sel]);
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI CV parser</span>
+      <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <Panel title="Select candidate">
+          <div style={{padding:14,display:"flex",flexDirection:"column",gap:10}}>
+            {listLoading?<Spin/>:cands.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No candidates in database. Add some first via the Candidates page.</div>:<>
+              <select value={sel?.id||""} onChange={e=>setSel(cands.find(c=>c.id===e.target.value))}>{cands.map(c=><option key={c.id} value={c.id}>{c.name} — {c.role||"no role"}</option>)}</select>
+              <button className="btn-a" style={{justifyContent:"center"}} onClick={run} disabled={loading||!sel}>{loading?<><span className="spin"></span>Generating…</>:<>✦ Generate AI summary</>}</button>
+              <Err msg={err}/>
+            </>}
+          </div>
+        </Panel>
+        {sel&&<Panel title="Candidate details">
+          <div style={{padding:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}><Av name={sel.name} size={42}/><div><div style={{fontWeight:500,fontSize:14,color:"var(--t1)"}}>{sel.name}</div><div style={{fontSize:12,color:"var(--t2)"}}>{sel.role||"—"}</div></div></div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 12px",marginBottom:10}}>
+              {[["Location",sel.location],["Experience",sel.experience],["Salary",sel.salary],["Notice",sel.notice]].map(([l,v])=><div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{v||"—"}</div></div>)}
+            </div>
+            {(sel.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(sel.skills||[]).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
+          </div>
+        </Panel>}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        {(summary||loading)&&<Panel title="AI summary" badge={loading?<span style={{fontSize:11,color:ACCENT}}>Generating…</span>:<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>}>
+          <div style={{padding:14}}><div style={{background:"var(--bg2)",borderRadius:8,padding:"11px 13px"}}><AiTag/><StreamText text={summary} loading={loading}/></div>
+          {summary&&!loading&&<button className="btn-o" style={{marginTop:10,fontSize:12}} onClick={()=>navigator.clipboard?.writeText(summary)}>📋 Copy</button>}
+          </div>
+        </Panel>}
+        <Panel title="All candidates">
+          {cands.slice(0,6).map(c=><div key={c.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)"}}>
+            <Av name={c.name}/><div style={{flex:1}}><div style={{fontWeight:500,color:"var(--t1)",fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div><Pill label={c.status||"New"}/>
+          </div>)}
+          {cands.length===0&&<div style={{padding:"20px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet.</div>}
+        </Panel>
+      </div>
+    </div>
+  </div>;
+}
+
+function MatchingPage(){
+  const [cands,setCands]=useState([]);const [jobs,setJobs]=useState([]);
+  const [cand,setCand]=useState(null);const [job,setJob]=useState(null);
+  const [reasoning,setReasoning]=useState("");const [score,setScore]=useState(null);
+  const [loading,setLoading]=useState(false);const [dataLoading,setDataLoading]=useState(true);const [err,setErr]=useState("");
+  useEffect(()=>{Promise.all([db.from("candidates").select("*").order("created_at",{ascending:false}),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);if(c&&c.length)setCand(c[0]);if(j&&j.length)setJob(j[0]);setDataLoading(false);});},[]);
+  const run=useCallback(async()=>{
+    if(!cand||!job)return;setReasoning("");setScore(null);setLoading(true);setErr("");let full="";
+    try{await claude("You are an expert recruitment AI. Analyse candidate-job fit.\nFirst line MUST be exactly: SCORE: [number 0-100]\nThen 3-4 sentences on experience, skills, gaps, and a recommendation.",`CANDIDATE: ${cand.name}, ${cand.role||"?"}, ${cand.experience||"?"}, ${cand.location||"?"}, ${cand.salary||"?"}, notice ${cand.notice||"?"}. Skills: ${(cand.skills||[]).join(", ")||"unknown"}.\nJOB: ${job.title} at ${job.companies?.name||"?"} (${job.salary||"?"}). ${job.description||"No description."}`,chunk=>{full+=chunk;setReasoning(full);});const m=full.match(/SCORE:\s*(\d+)/);if(m)setScore(parseInt(m[1]));}
+    catch(e){setErr(e.message);}setLoading(false);
+  },[cand,job]);
+  const text=reasoning.replace(/SCORE:\s*\d+\n?/,"").trim();
+  const sb2=score>=80?"#eaf3de":score>=60?"#faeeda":"#fcebeb";const sf=score>=80?"#3b6d11":score>=60?"#854f0b":"#a32d2d";const sl=score>=80?"Excellent":score>=60?"Possible":score!==null?"Low fit":null;
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI job matching</span>
+      <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+    </div>
+    {dataLoading?<Spin/>:<>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
+        <Panel title="Candidate"><div style={{padding:12}}>
+          {cands.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No candidates in database.</div>:<>
+            <select value={cand?.id||""} onChange={e=>setCand(cands.find(c=>c.id===e.target.value))} style={{marginBottom:10}}>{cands.map(c=><option key={c.id} value={c.id}>{c.name} — {c.role||"?"}</option>)}</select>
+            {cand&&<><div style={{display:"flex",alignItems:"center",gap:10}}><Av name={cand.name} size={36}/><div><div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{cand.name}</div><div style={{fontSize:12,color:"var(--t2)"}}>{cand.location||"—"} · {cand.salary||"—"}</div></div></div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:8}}>{(cand.skills||[]).slice(0,4).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div></>}
+          </>}
+        </div></Panel>
+        <Panel title="Job"><div style={{padding:12}}>
+          {jobs.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No jobs in database.</div>:<>
+            <select value={job?.id||""} onChange={e=>setJob(jobs.find(j=>j.id===e.target.value))} style={{marginBottom:10}}>{jobs.map(j=><option key={j.id} value={j.id}>{j.title} — {j.companies?.name||"?"}</option>)}</select>
+            {job&&<><div style={{fontWeight:500,fontSize:13,color:"var(--t1)",marginBottom:3}}>{job.title}</div>
+            <div style={{fontSize:12,color:"var(--t2)",marginBottom:5}}>{job.companies?.name||"—"} · {job.salary||"—"}</div>
+            <div style={{fontSize:12,color:"var(--t3)",lineHeight:1.55}}>{(job.description||"").slice(0,120)}{(job.description||"").length>120?"…":""}</div></>}
+          </>}
+        </div></Panel>
+      </div>
+      <button className="btn-a" onClick={run} disabled={loading||!cand||!job} style={{marginBottom:14}}>{loading?<><span className="spin"></span>Analysing…</>:<>✦ Analyse match with Claude</>}</button>
+      <Err msg={err}/>
+      {(reasoning||loading)&&<Panel title="Match analysis" badge={score!==null?<span style={{background:sb2,color:sf,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>{score}% — {sl}</span>:null}>
+        <div style={{padding:14}}>
+          {score!==null&&<div style={{height:5,background:"var(--bg2)",borderRadius:10,overflow:"hidden",marginBottom:12}}><div style={{height:"100%",width:`${score}%`,background:score>=80?"#639922":score>=60?"#ba7517":"#e24b4a",borderRadius:10}}/></div>}
+          <div style={{background:"var(--bg2)",borderRadius:8,padding:"11px 13px"}}><AiTag/><StreamText text={text} loading={loading}/></div>
+        </div>
+      </Panel>}
+    </>}
+  </div>;
+}
+
+function PitchPage(){
+  const [cands,setCands]=useState([]);const [jobs,setJobs]=useState([]);
+  const [cand,setCand]=useState(null);const [job,setJob]=useState(null);const [tone,setTone]=useState("professional");
+  const [pitch,setPitch]=useState("");const [loading,setLoading]=useState(false);const [dataLoading,setDataLoading]=useState(true);
+  const [err,setErr]=useState("");const [copied,setCopied]=useState(false);
+  useEffect(()=>{Promise.all([db.from("candidates").select("*").order("created_at",{ascending:false}),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);if(c&&c.length)setCand(c[0]);if(j&&j.length)setJob(j[0]);setDataLoading(false);});},[]);
+  const gen=useCallback(async()=>{
+    if(!cand||!job)return;setPitch("");setLoading(true);setErr("");setCopied(false);
+    const td=tone==="professional"?"professional and concise":tone==="enthusiastic"?"enthusiastic and detailed":"executive summary, very brief";
+    try{await claude(`You are an expert recruitment consultant writing a candidate pitch to a hiring manager. Tone: ${td}. Be specific and compelling. No subject line. No bullet points.`,`Write a pitch for ${cand.name} (${cand.role||"?"}, ${cand.experience||"?"} exp, ${cand.location||"?"}, ${cand.salary||"?"}, notice ${cand.notice||"?"}, skills: ${(cand.skills||[]).join(", ")||"not listed"}) for the role of ${job.title} at ${job.companies?.name||"the client"} (${job.salary||"TBC"}). Job: ${job.description||"not specified"}`,chunk=>setPitch(p=>p+chunk));}
+    catch(e){setErr(e.message);}setLoading(false);
+  },[cand,job,tone]);
+  const copy=()=>{navigator.clipboard?.writeText(pitch);setCopied(true);setTimeout(()=>setCopied(false),2000);};
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI pitch writer</span>
+      <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+    </div>
+    {dataLoading?<Spin/>:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <Panel title="Configure pitch"><div style={{padding:14,display:"flex",flexDirection:"column",gap:11}}>
+          <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Candidate</label>
+            <select value={cand?.id||""} onChange={e=>setCand(cands.find(c=>c.id===e.target.value))}>{cands.length===0?<option>No candidates yet</option>:cands.map(c=><option key={c.id} value={c.id}>{c.name} — {c.role||"?"}</option>)}</select></div>
+          <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Target role</label>
+            <select value={job?.id||""} onChange={e=>setJob(jobs.find(j=>j.id===e.target.value))}>{jobs.length===0?<option>No jobs yet</option>:jobs.map(j=><option key={j.id} value={j.id}>{j.title} — {j.companies?.name||"?"}</option>)}</select></div>
+          <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Tone</label>
+            <select value={tone} onChange={e=>setTone(e.target.value)}><option value="professional">Professional & concise</option><option value="enthusiastic">Enthusiastic & detailed</option><option value="executive">Executive summary</option></select></div>
+          <button className="btn-a" onClick={gen} disabled={loading||!cand||!job} style={{justifyContent:"center"}}>{loading?<><span className="spin"></span>Writing…</>:<>✦ Generate pitch</>}</button>
+          <Err msg={err}/>
+        </div></Panel>
+        {cand&&<div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"13px 15px"}}>
+          <div style={{fontSize:11,color:"var(--t2)",marginBottom:8,fontWeight:500}}>Selected candidate</div>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Av name={cand.name} size={36}/><div><div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{cand.name}</div><div style={{fontSize:12,color:"var(--t2)"}}>{cand.location||"—"} · {cand.salary||"—"}</div></div></div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(cand.skills||[]).slice(0,5).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div>
+        </div>}
+      </div>
+      <Panel title="Generated pitch" badge={pitch&&!loading?<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>:loading?<span style={{fontSize:11,color:ACCENT}}>Writing…</span>:null}>
+        <div style={{padding:14}}>
+          {!pitch&&!loading&&<div style={{color:"var(--t3)",fontSize:12,textAlign:"center",padding:"28px 0"}}>Configure and click generate to create your pitch.</div>}
+          {(pitch||loading)&&<div style={{background:"var(--bg2)",borderRadius:8,padding:"11px 13px"}}><AiTag/><StreamText text={pitch} loading={loading}/></div>}
+          {pitch&&!loading&&<div style={{display:"flex",gap:8,marginTop:12}}><button className="btn-o" onClick={copy}>{copied?"✓ Copied":"📋 Copy"}</button><button className="btn-o" onClick={gen}>↻ Regenerate</button></div>}
+        </div>
+      </Panel>
+    </div>}
+  </div>;
+}
+
+
+// ── CSV Import ─────────────────────────────────────────────────────────────
+const CRM_FIELDS = [
+  {key:"name",      label:"Full name",    required:true},
+  {key:"role",      label:"Job title / role"},
+  {key:"email",     label:"Email"},
+  {key:"phone",     label:"Phone"},
+  {key:"location",  label:"Location"},
+  {key:"experience",label:"Experience"},
+  {key:"salary",    label:"Current salary"},
+  {key:"notice",    label:"Notice period"},
+  {key:"skills",    label:"Skills"},
+  {key:"status",    label:"Status"},
+  {key:"notes",     label:"Notes"},
+];
+
+// Auto-detect which CSV column maps to which CRM field
+function autoMap(headers) {
+  const map = {};
+  const rules = {
+    name:       ["name","full name","candidate","firstname","first name","candidate name"],
+    role:       ["role","job title","title","position","job","current role","current position"],
+    email:      ["email","e-mail","email address"],
+    phone:      ["phone","mobile","telephone","tel","contact number","phone number"],
+    location:   ["location","city","area","region","address","country"],
+    experience: ["experience","years","exp","years experience","yrs"],
+    salary:     ["salary","current salary","pay","compensation","ctc","package"],
+    notice:     ["notice","notice period","availability","available"],
+    skills:     ["skills","skill set","technologies","tech stack","competencies","expertise"],
+    status:     ["status","stage","pipeline stage"],
+    notes:      ["notes","comments","additional info","summary","about"],
+  };
+  for (const [field, keywords] of Object.entries(rules)) {
+    for (const h of headers) {
+      if (keywords.some(k => h.toLowerCase().trim().includes(k))) {
+        if (!Object.values(map).includes(h)) { map[field] = h; break; }
+      }
+    }
+  }
+  return map;
+}
+
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return { headers: [], rows: [] };
+  const parseRow = line => {
+    const cells = []; let cur = ""; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ""; }
+      else { cur += c; }
+    }
+    cells.push(cur.trim());
+    return cells;
+  };
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(1).map(l => {
+    const cells = parseRow(l);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = cells[i] || ""; });
+    return obj;
+  });
+  return { headers, rows };
+}
+
+function CSVImportPage() {
+  const [step, setStep] = useState(1); // 1=upload, 2=map, 3=preview, 4=done
+  const [headers, setHeaders] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [mapping, setMapping] = useState({});
+  const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [imported, setImported] = useState(0);
+  const [skipped, setSkipped] = useState(0);
+  const [err, setErr] = useState("");
+  const fileRef = React.useRef();
+
+  const onFile = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setErr("");
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const { headers: h, rows: r } = parseCSV(ev.target.result);
+        if (!h.length) { setErr("Could not read CSV — make sure it has a header row."); return; }
+        setHeaders(h);
+        setRows(r);
+        setMapping(autoMap(h));
+        setStep(2);
+      } catch(ex) { setErr("Failed to parse file: " + ex.message); }
+    };
+    reader.readAsText(file);
+  };
+
+  const setMap = (field, col) => setMapping(m => ({ ...m, [field]: col === "" ? undefined : col }));
+
+  const preview = rows.slice(0, 5).map(row => {
+    const rec = {};
+    for (const [field, col] of Object.entries(mapping)) {
+      if (col) rec[field] = row[col] || "";
+    }
+    return rec;
+  });
+
+  const doImport = async () => {
+    setImporting(true); setProgress(0); setImported(0); setSkipped(0); setErr("");
+    const records = rows.map(row => {
+      const rec = { status: "New" };
+      for (const [field, col] of Object.entries(mapping)) {
+        if (col && row[col]) rec[field] = row[col].trim();
+      }
+      // split skills by comma/semicolon
+      if (rec.skills) rec.skills = rec.skills.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+      if (rec.name) rec.initials = ini(rec.name);
+      return rec;
+    }).filter(r => r.name && r.name.trim());
+
+    let imp = 0, skip = rows.length - records.length;
+    const BATCH = 50;
+    for (let i = 0; i < records.length; i += BATCH) {
+      const batch = records.slice(i, i + BATCH);
+      const { error } = await db.from("candidates").insert(batch);
+      if (error) { setErr("Import error: " + error.message); setImporting(false); return; }
+      imp += batch.length;
+      setImported(imp);
+      setProgress(Math.round((imp / records.length) * 100));
+    }
+    setSkipped(skip);
+    setImporting(false);
+    setStep(4);
+  };
+
+  const reset = () => { setStep(1); setHeaders([]); setRows([]); setMapping({}); setProgress(0); setImported(0); setSkipped(0); setErr(""); if(fileRef.current) fileRef.current.value=""; };
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>CSV import</span>
+      <div style={{display:"flex",gap:8}}>
+        {[["1","Upload"],["2","Map columns"],["3","Preview"],["4","Done"]].map(([n,l],i)=>(
+          <span key={n} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,color:step>i?"var(--t1)":"var(--t3)",fontWeight:step===i+1?500:400}}>
+            <span style={{width:20,height:20,borderRadius:"50%",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,background:step>i+1?"#1d9e75":step===i+1?ACCENT:"var(--bg2)",color:step>=i+1?"#fff":"var(--t3)",fontWeight:500}}>{step>i+1?"✓":n}</span>
+            {l}{i<3&&<span style={{color:"var(--t3)",margin:"0 2px"}}>›</span>}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    {step===1&&<div>
+      <Panel title="Upload your CSV file">
+        <div style={{padding:24}}>
+          <div style={{border:"1.5px dashed var(--brm)",borderRadius:8,padding:"36px 20px",textAlign:"center",cursor:"pointer"}} onClick={()=>fileRef.current?.click()}>
+            <div style={{fontSize:32,marginBottom:10}}>📂</div>
+            <div style={{fontWeight:500,fontSize:14,color:"var(--t1)",marginBottom:6}}>Click to upload a CSV file</div>
+            <div style={{fontSize:12,color:"var(--t3)"}}>Exported from Bullhorn, Vincere, JobAdder, LinkedIn, Excel, Google Sheets, or any other CRM</div>
+            <input ref={fileRef} type="file" accept=".csv,.txt" style={{display:"none"}} onChange={onFile}/>
+          </div>
+          <Err msg={err}/>
+          <div style={{marginTop:20,background:"var(--bg2)",borderRadius:8,padding:"14px 16px"}}>
+            <div style={{fontSize:12,fontWeight:500,color:"var(--t1)",marginBottom:8}}>How to export from popular CRMs</div>
+            {[["Bullhorn","Reports → Candidate Search → Export to CSV"],["Vincere","Candidates → Bulk Actions → Export"],["JobAdder","Candidates → Export → CSV"],["LinkedIn Recruiter","Pipeline → Export → CSV"],["Excel / Google Sheets","File → Download → CSV"]].map(([crm,steps])=>(
+              <div key={crm} style={{display:"flex",gap:8,marginBottom:6,fontSize:12}}>
+                <span style={{fontWeight:500,color:"var(--t1)",minWidth:110}}>{crm}</span>
+                <span style={{color:"var(--t2)"}}>{steps}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Panel>
+    </div>}
+
+    {step===2&&<div>
+      <Panel title={`Map columns — ${rows.length} candidates found in CSV`} actions={<button className="btn-o" style={{fontSize:11}} onClick={reset}>← Start over</button>}>
+        <div style={{padding:14}}>
+          <div style={{fontSize:12,color:"var(--t2)",marginBottom:12}}>Match your CSV columns to the correct CRM fields. We've auto-detected what we can — check and adjust any that look wrong.</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+            {CRM_FIELDS.map(f=>(
+              <div key={f.key} style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:130,fontSize:12,color:"var(--t1)",fontWeight:f.required?500:400,flexShrink:0}}>
+                  {f.label}{f.required&&<span style={{color:"#e24b4a",marginLeft:2}}>*</span>}
+                </div>
+                <select value={mapping[f.key]||""} onChange={e=>setMap(f.key,e.target.value)} style={{fontSize:12}}>
+                  <option value="">— skip this field —</option>
+                  {headers.map(h=><option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+          {!mapping.name&&<div className="err" style={{marginBottom:12}}>⚠️ You must map the "Full name" field to continue.</div>}
+          <div style={{display:"flex",gap:8}}>
+            <button className="btn-o" onClick={reset}>← Back</button>
+            <button className="btn-a" onClick={()=>setStep(3)} disabled={!mapping.name}>Preview import →</button>
+          </div>
+        </div>
+      </Panel>
+    </div>}
+
+    {step===3&&<div>
+      <Panel title={`Preview — first 5 of ${rows.length} candidates`} actions={<button className="btn-o" style={{fontSize:11}} onClick={()=>setStep(2)}>← Edit mapping</button>}>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:500}}>
+            <thead><tr>
+              {["Name","Role","Email","Location","Skills","Status"].map(h=><th key={h} className="th">{h}</th>)}
+            </tr></thead>
+            <tbody>{preview.map((r,i)=><tr key={i} style={{borderBottom:"0.5px solid var(--br)"}}>
+              <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}>{r.name&&<Av name={r.name}/>}<span style={{fontWeight:500}}>{r.name||"—"}</span></div></td>
+              <td className="td" style={{color:"var(--t2)"}}>{r.role||"—"}</td>
+              <td className="td" style={{color:ACCENT,fontSize:12}}>{r.email||"—"}</td>
+              <td className="td" style={{color:"var(--t2)"}}>{r.location||"—"}</td>
+              <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(Array.isArray(r.skills)?r.skills:r.skills?r.skills.split(","):[]).slice(0,3).map((s,j)=><span key={j} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px"}}>{s.trim()}</span>)}</div></td>
+              <td className="td"><Pill label={r.status||"New"}/></td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+        <div style={{padding:14,borderTop:"0.5px solid var(--br)",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <div style={{flex:1,fontSize:13,color:"var(--t2)"}}>
+            Ready to import <strong style={{color:"var(--t1)"}}>{rows.filter(r=>r[mapping.name]).length} candidates</strong> into Supabase.
+            {rows.length-rows.filter(r=>r[mapping.name]).length>0&&<span style={{color:"#e24b4a"}}> {rows.length-rows.filter(r=>r[mapping.name]).length} rows will be skipped (no name).</span>}
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button className="btn-o" onClick={()=>setStep(2)}>← Back</button>
+            <button className="btn-a" onClick={doImport} disabled={importing}>{importing?<><span className="spin"></span>Importing…</>:"Import all candidates"}</button>
+          </div>
+        </div>
+        {importing&&<div style={{padding:"0 14px 14px"}}>
+          <div style={{height:6,background:"var(--bg2)",borderRadius:10,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${progress}%`,background:ACCENT,borderRadius:10,transition:"width 0.3s"}}/>
+          </div>
+          <div style={{fontSize:12,color:"var(--t2)",marginTop:6}}>{imported} of {rows.filter(r=>r[mapping.name]).length} imported…</div>
+        </div>}
+        <Err msg={err}/>
+      </Panel>
+    </div>}
+
+    {step===4&&<div>
+      <Panel title="Import complete!">
+        <div style={{padding:32,textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:16}}>🎉</div>
+          <div style={{fontSize:18,fontWeight:500,color:"var(--t1)",marginBottom:8}}>
+            {imported} candidate{imported!==1?"s":""} imported successfully
+          </div>
+          {skipped>0&&<div style={{fontSize:13,color:"var(--t3)",marginBottom:16}}>{skipped} rows skipped (missing name)</div>}
+          <div style={{fontSize:13,color:"var(--t2)",marginBottom:24}}>All candidates are now in your Supabase database and ready to use.</div>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <button className="btn-a" onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"candidates"}))}>View candidates →</button>
+            <button className="btn-o" onClick={reset}>Import another file</button>
+          </div>
+        </div>
+      </Panel>
+    </div>}
+  </div>;
+}
+
+// ── Shell ──────────────────────────────────────────────────────────────────
+const NAV=[
+  {k:"dashboard",l:"Dashboard",i:"🏠",s:"main"},
+  {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
+  {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
+  {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
+  {k:"tasks",l:"Tasks",i:"✅",s:"recruit"},
+  {k:"parse",l:"CV parser",i:"📄",s:"ai"},
+  {k:"match",l:"Job matching",i:"🎯",s:"ai"},
+  {k:"pitch",l:"Pitch writer",i:"✍️",s:"ai"},
+  {k:"import",l:"CSV import",i:"📥",s:"ai"},
+];
+const SNAMES={main:"Overview",recruit:"Recruitment",ai:"AI tools"};
+
+function ReminderBell({tasks,onNavigate}){
+  const today=todayStr();
+  const overdue=(tasks||[]).filter(t=>!t.done&&t.due_date&&t.due_date<today);
+  const dueToday=(tasks||[]).filter(t=>!t.done&&t.due_date===today);
+  const total=overdue.length+dueToday.length;
+  return <div onClick={onNavigate} style={{position:"relative",cursor:"pointer",padding:"4px 6px"}}>
+    <span style={{fontSize:18}}>🔔</span>
+    {total>0&&<span style={{position:"absolute",top:0,right:0,background:overdue.length>0?"#e24b4a":ACCENT,color:"#fff",fontSize:9,fontWeight:700,borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center"}}>{total>9?"9+":total}</span>}
+  </div>;
+}
+
+const CRM_PASSWORD = "Danielleisthebest_123";
+
+function LoginScreen({onLogin}){
+  const [pw,setPw]=useState("");
+  const [err,setErr]=useState(false);
+  const attempt=()=>{
+    if(pw===CRM_PASSWORD){onLogin();}
+    else{setErr(true);setTimeout(()=>setErr(false),2000);}
+  };
+  return(
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1f2e"}}>
+      <div style={{background:"#fff",borderRadius:16,padding:"40px 36px",width:340,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",textAlign:"center"}}>
+        <div style={{fontSize:22,fontWeight:700,color:"#1a1f2e",marginBottom:4,letterSpacing:0.5}}>recruit<span style={{color:"#4f6ef7"}}>CRM</span></div>
+        <div style={{fontSize:12,color:"#9e9e9b",marginBottom:28}}>Gaia Search · Private Access</div>
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={pw}
+          onChange={e=>setPw(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&attempt()}
+          style={{width:"100%",padding:"10px 14px",borderRadius:8,border:`1.5px solid ${err?"#e53935":"#ddd"}`,fontSize:14,outline:"none",marginBottom:12,boxSizing:"border-box",transition:"border 0.2s"}}
+          autoFocus
+        />
+        {err&&<div style={{color:"#e53935",fontSize:12,marginBottom:8}}>Incorrect password</div>}
+        <button onClick={attempt} style={{width:"100%",padding:"10px",background:"#1a1f2e",color:"#fff",border:"none",borderRadius:8,fontSize:14,fontWeight:600,cursor:"pointer"}}>
+          Sign in
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const [authed,setAuthed]=useState(()=>sessionStorage.getItem("crm_auth")==="1");
+  const login=()=>{sessionStorage.setItem("crm_auth","1");setAuthed(true);};
+  if(!authed)return<LoginScreen onLogin={login}/>;
+  return<AuthedApp/>;
+}
+
+function AuthedApp(){
+  const [page,setPage]=useState("dashboard");
+  const [allTasks,setAllTasks]=useState([]);
+  const [activeJob,setActiveJob]=useState(null);
+  useEffect(()=>{
+    const h=e=>{setPage(e.detail);if(e.detail!=="jobs")setActiveJob(null);};
+    window.addEventListener("nav",h);
+    return()=>window.removeEventListener("nav",h);
+  },[]);
+  useEffect(()=>{
+    const loadTasks=()=>db.from("tasks").select("id,title,due_date,done").eq("done",false).then(({data})=>setAllTasks(data||[]));
+    loadTasks();
+    const id=setInterval(loadTasks,60000);
+    return()=>clearInterval(id);
+  },[]);
+  const pages={
+    dashboard:<DashboardPage setPage={setPage}/>,
+    candidates:<CandidatesPage/>,
+    jobs: activeJob
+      ? <JobPipelinePage job={activeJob} onBack={()=>setActiveJob(null)}/>
+      : <JobsPage onOpenJob={j=>{setActiveJob(j);}}/>,
+    companies:<CompaniesPage/>,tasks:<TasksPage/>,
+    parse:<CVParserPage/>,match:<MatchingPage/>,pitch:<PitchPage/>,
+    import:<CSVImportPage/>,
+  };
+  let lastS=null;
+  return <>
+    <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <div style={{display:"flex",width:"100%",maxWidth:980,minHeight:680,borderRadius:12,overflow:"hidden",border:"0.5px solid rgba(0,0,0,0.12)",boxShadow:"0 4px 32px rgba(0,0,0,0.08)",fontSize:13}}>
+      <div style={{width:200,background:SIDEBAR,display:"flex",flexDirection:"column",flexShrink:0}}>
+        <div style={{padding:"18px 16px 14px",borderBottom:"0.5px solid rgba(255,255,255,0.07)"}}>
+          <div style={{fontSize:15,fontWeight:500,color:"#fff",letterSpacing:"-0.3px"}}>recruit<span style={{color:ACCENT}}>CRM</span></div>
+          <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(79,110,247,0.2)",color:"#a0b4ff",fontSize:10,borderRadius:10,padding:"2px 7px",marginTop:5}}>✦ AI + Supabase</div>
+        </div>
+        <div style={{flex:1,overflowY:"auto",padding:"8px 0"}}>
+          {NAV.map(n=>{
+            const showS=n.s!==lastS;lastS=n.s;
+            return <Fragment key={n.k}>
+              {showS&&<div style={{fontSize:10,color:"rgba(160,168,184,0.45)",padding:"12px 16px 5px",textTransform:"uppercase",letterSpacing:"0.8px"}}>{SNAMES[n.s]}</div>}
+              <div onClick={()=>{setPage(n.k);if(n.k!=="jobs")setActiveJob(null);}} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 16px",color:page===n.k?"#fff":"#a0a8b8",cursor:"pointer",background:page===n.k?"#2d3548":"transparent",borderLeft:page===n.k?`2px solid ${ACCENT}`:"2px solid transparent",fontSize:13}}>
+                <span>{n.i}</span>{n.l}
+              </div>
+            </Fragment>;
+          })}
+        </div>
+      </div>
+      <div style={{flex:1,background:"var(--bg3)",display:"flex",flexDirection:"column",minWidth:0}}>
+        <div style={{background:"var(--bg)",borderBottom:"0.5px solid var(--br)",padding:"0 18px",height:52,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+          <span style={{fontSize:15,fontWeight:500,color:"var(--t1)"}}>
+            {page==="jobs"&&activeJob ? activeJob.title : NAV.find(n=>n.k===page)?.l||""}
+          </span>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <ReminderBell tasks={allTasks} onNavigate={()=>setPage("tasks")}/>
+            <span style={{fontSize:11,color:"#1d9e75"}}>● Supabase connected</span>
+          </div>
+        </div>
+        <div style={{flex:1,overflowY:"auto",padding:18}}>{pages[page]}</div>
+      </div>
+    </div>
+  </>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+<script>
+function saveKey(){
+  const k=document.getElementById("apiKeyInput").value.trim();
+  if(!k)return;
+  window._apiKey=k;localStorage.setItem("rcrm_key",k);
+  document.getElementById("keyStatus").innerHTML='<span style="color:#3b6d11">✓ Saved</span>';
+  document.getElementById("apiKeyInput").value="••••••••••••••••••";
+}
+window.addEventListener("nav", e => {
+  // fired from within React via window.dispatchEvent
+  window._navTo = e.detail;
+});
+window.addEventListener("load",()=>{
+  const s=localStorage.getItem("rcrm_key");
+  if(s){window._apiKey=s;document.getElementById("keyStatus").innerHTML='<span style="color:#3b6d11">✓ Loaded</span>';document.getElementById("apiKeyInput").placeholder="API key saved";}
+});
+</script>
+</body>
+</html>
