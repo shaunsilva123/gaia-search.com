@@ -1990,7 +1990,14 @@ function PlacementsPage(){
   const save=async()=>{
     if(!f.candidate_name.trim())return setErr("Candidate name required");
     setSaving(true);setErr("");
-    const payload={...f,salary:f.salary?parseFloat(f.salary):null,fee_amount:f.fee_amount?parseFloat(f.fee_amount):null,fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,payment_received:f.payment_received==="true"||f.payment_received===true};
+    const payload={...f,
+      candidate_id:f.candidate_id||null,
+      job_id:f.job_id||null,
+      salary:f.salary?parseFloat(f.salary):null,
+      fee_amount:f.fee_amount?parseFloat(f.fee_amount):null,
+      fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,
+      payment_received:f.payment_received==="true"||f.payment_received===true
+    };
     const{error}=await db.from("placements").insert(payload);
     if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
     setSaving(false);
