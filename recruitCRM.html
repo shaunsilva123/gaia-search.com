@@ -1646,15 +1646,655 @@ function CSVImportPage() {
 }
 
 // ── Shell ──────────────────────────────────────────────────────────────────
+// ============================================================
+// FEATURE 1: BD PIPELINE (Client pipeline board)
+// ============================================================
+const BD_STAGES=["Prospect","Qualified","Proposal Sent","Terms Agreed","Live Client","Cold"];
+const BD_COLORS={"Prospect":"#eef1ff","Qualified":"#faeeda","Proposal Sent":"#e6f1fb","Terms Agreed":"#fbeaf0","Live Client":"#eaf3de","Cold":"#f1efe8"};
+const BD_FG={"Prospect":"#4f6ef7","Qualified":"#854f0b","Proposal Sent":"#185fa5","Terms Agreed":"#993556","Live Client":"#3b6d11","Cold":"#5f5e5a"};
+
+function BDPipelinePage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);
+  const [editing,setEditing]=useState(null);
+  const blank={company_name:"",contact_name:"",contact_email:"",contact_phone:"",stage:"Prospect",notes:"",next_action:"",next_action_date:"",value:""};
+  const [f,setF]=useState(blank);
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data}=await db.from("client_pipeline").select("*").order("created_at",{ascending:false});
+    setRows(data||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const save=async()=>{
+    if(!f.company_name.trim())return setErr("Company name required");
+    setSaving(true);setErr("");
+    const payload={...f,value:f.value?parseFloat(f.value):null};
+    const{error}=editing
+      ?await db.from("client_pipeline").update(payload).eq("id",editing.id)
+      :await db.from("client_pipeline").insert(payload);
+    if(error)setErr(error.message);else{setModal(false);setEditing(null);setF(blank);load();}
+    setSaving(false);
+  };
+
+  const updateStage=async(id,stage)=>{
+    await db.from("client_pipeline").update({stage}).eq("id",id);load();
+  };
+
+  const del=async id=>{if(!confirm("Delete this lead?"))return;await db.from("client_pipeline").delete().eq("id",id);load();};
+
+  const openEdit=r=>{setEditing(r);setF({...r,value:r.value||""});setModal(true);};
+
+  const byStage=BD_STAGES.reduce((a,s)=>{a[s]=(rows||[]).filter(r=>r.stage===s);return a;},{});
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>BD Pipeline</div>
+      <button className="btn-a" onClick={()=>{setEditing(null);setF(blank);setModal(true);}}>+ Add Lead</button>
+    </div>
+    {loading?<div style={{color:"var(--t3)",fontSize:13}}>Loading…</div>:
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+      {BD_STAGES.map(stage=><div key={stage} style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",overflow:"hidden"}}>
+        <div style={{background:BD_COLORS[stage],color:BD_FG[stage],padding:"8px 12px",fontSize:11,fontWeight:600,display:"flex",justifyContent:"space-between"}}>
+          <span>{stage}</span><span>{byStage[stage].length}</span>
+        </div>
+        <div style={{padding:8,minHeight:60}}>
+          {byStage[stage].map(r=><div key={r.id} style={{background:"var(--bg2)",borderRadius:8,padding:"10px 12px",marginBottom:8,border:"0.5px solid var(--br)"}}>
+            <div style={{fontWeight:500,fontSize:13,marginBottom:2}}>{r.company_name}</div>
+            {r.contact_name&&<div style={{fontSize:11,color:"var(--t2)"}}>{r.contact_name}</div>}
+            {r.next_action&&<div style={{fontSize:11,color:"var(--t3)",marginTop:4}}>→ {r.next_action}</div>}
+            {r.value&&<div style={{fontSize:11,color:"#3b6d11",marginTop:2}}>£{parseFloat(r.value).toLocaleString()}</div>}
+            <div style={{display:"flex",gap:4,marginTop:8,flexWrap:"wrap"}}>
+              <select value={r.stage} onChange={e=>updateStage(r.id,e.target.value)} style={{fontSize:10,padding:"2px 6px",width:"auto",flex:1}}>
+                {BD_STAGES.map(s=><option key={s}>{s}</option>)}
+              </select>
+              <button className="btn-o" style={{fontSize:10,padding:"2px 7px"}} onClick={()=>openEdit(r)}>Edit</button>
+              <button className="btn-d" style={{fontSize:10,padding:"2px 7px"}} onClick={()=>del(r.id)}>✕</button>
+            </div>
+          </div>)}
+        </div>
+      </div>)}
+    </div>}
+    {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h3>{editing?"Edit Lead":"Add BD Lead"}</h3>
+        <div className="fr"><label>Company Name *</label><input value={f.company_name} onChange={s("company_name")} placeholder="Company name"/></div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Contact Name</label><input value={f.contact_name} onChange={s("contact_name")}/></div>
+          <div className="fr" style={{margin:0}}><label>Stage</label><select value={f.stage} onChange={s("stage")}>{BD_STAGES.map(x=><option key={x}>{x}</option>)}</select></div>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Email</label><input value={f.contact_email} onChange={s("contact_email")}/></div>
+          <div className="fr" style={{margin:0}}><label>Phone</label><input value={f.contact_phone} onChange={s("contact_phone")}/></div>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Next Action</label><input value={f.next_action} onChange={s("next_action")}/></div>
+          <div className="fr" style={{margin:0}}><label>Action Date</label><input type="date" value={f.next_action_date} onChange={s("next_action_date")}/></div>
+        </div>
+        <div className="fr"><label>Est. Value (£)</label><input value={f.value} onChange={s("value")} placeholder="10000"/></div>
+        <div className="fr"><label>Notes</label><textarea value={f.notes} onChange={s("notes")}/></div>
+        {err&&<div className="err">{err}</div>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Save"}</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ============================================================
+// FEATURE 2: SUBMITTALS
+// ============================================================
+const SUBMITTAL_STATUSES=["Submitted","Shortlisted","Interview Booked","Offer Made","Placed","Rejected"];
+
+function SubmittalsPage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);
+  const [candidates,setCandidates]=useState([]);
+  const [jobs,setJobs]=useState([]);
+  const blank={candidate_id:"",job_id:"",status:"Submitted",submitted_date:new Date().toISOString().split("T")[0],client_feedback:"",interview_date:"",notes:""};
+  const [f,setF]=useState(blank);
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data:sub},{data:cands},{data:js}]=await Promise.all([
+      db.from("submittals").select("*,candidates(name,role),jobs(title,companies(name))").order("created_at",{ascending:false}),
+      db.from("candidates").select("id,name,role").order("name"),
+      db.from("jobs").select("id,title,companies(name)").order("title"),
+    ]);
+    setRows(sub||[]);setCandidates(cands||[]);setJobs(js||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const save=async()=>{
+    if(!f.candidate_id||!f.job_id)return setErr("Select candidate and job");
+    setSaving(true);setErr("");
+    const{error}=await db.from("submittals").insert(f);
+    if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
+    setSaving(false);
+  };
+
+  const updateStatus=async(id,status)=>{
+    await db.from("submittals").update({status}).eq("id",id);load();
+  };
+
+  const statusColor=st=>({
+    "Submitted":"#eef1ff","Shortlisted":"#faeeda","Interview Booked":"#e6f1fb",
+    "Offer Made":"#fbeaf0","Placed":"#eaf3de","Rejected":"#fcebeb"
+  }[st]||"#f1efe8");
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>Submittals</div>
+      <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ New Submittal</button>
+    </div>
+    {loading?<div style={{color:"var(--t3)"}}>Loading…</div>:
+    rows.length===0?<div style={{color:"var(--t3)",fontSize:13,padding:"20px 0"}}>No submittals yet.</div>:
+    <table style={{width:"100%",borderCollapse:"collapse",background:"var(--bg)",borderRadius:10,overflow:"hidden",border:"0.5px solid var(--br)"}}>
+      <thead><tr>
+        <th className="th">Candidate</th><th className="th">Role</th><th className="th">Company</th>
+        <th className="th">Submitted</th><th className="th">Status</th><th className="th">Feedback</th>
+      </tr></thead>
+      <tbody>{rows.map(r=><tr key={r.id}>
+        <td className="td">{r.candidates?.name||"—"}</td>
+        <td className="td" style={{color:"var(--t2)"}}>{r.jobs?.title||"—"}</td>
+        <td className="td" style={{color:"var(--t2)"}}>{r.jobs?.companies?.name||"—"}</td>
+        <td className="td" style={{color:"var(--t3)"}}>{r.submitted_date||"—"}</td>
+        <td className="td">
+          <select value={r.status} onChange={e=>updateStatus(r.id,e.target.value)} style={{fontSize:11,padding:"2px 6px",background:statusColor(r.status),border:"none",borderRadius:6,fontWeight:500}}>
+            {SUBMITTAL_STATUSES.map(x=><option key={x}>{x}</option>)}
+          </select>
+        </td>
+        <td className="td" style={{fontSize:11,color:"var(--t2)",maxWidth:200}}>{r.client_feedback||"—"}</td>
+      </tr>)}</tbody>
+    </table>}
+    {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h3>New Submittal</h3>
+        <div className="fr"><label>Candidate *</label>
+          <select value={f.candidate_id} onChange={s("candidate_id")}>
+            <option value="">Select candidate…</option>
+            {candidates.map(c=><option key={c.id} value={c.id}>{c.name} — {c.role}</option>)}
+          </select>
+        </div>
+        <div className="fr"><label>Job *</label>
+          <select value={f.job_id} onChange={s("job_id")}>
+            <option value="">Select job…</option>
+            {jobs.map(j=><option key={j.id} value={j.id}>{j.title} — {j.companies?.name||""}</option>)}
+          </select>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Status</label><select value={f.status} onChange={s("status")}>{SUBMITTAL_STATUSES.map(x=><option key={x}>{x}</option>)}</select></div>
+          <div className="fr" style={{margin:0}}><label>Submitted Date</label><input type="date" value={f.submitted_date} onChange={s("submitted_date")}/></div>
+        </div>
+        <div className="fr"><label>Interview Date (if booked)</label><input type="datetime-local" value={f.interview_date} onChange={s("interview_date")}/></div>
+        <div className="fr"><label>Client Feedback</label><textarea value={f.client_feedback} onChange={s("client_feedback")} placeholder="Client's response…"/></div>
+        <div className="fr"><label>Notes</label><textarea value={f.notes} onChange={s("notes")}/></div>
+        {err&&<div className="err">{err}</div>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Submit"}</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ============================================================
+// FEATURE 3: EMAIL SEQUENCES
+// ============================================================
+function EmailSequencesPage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);
+  const [candidates,setCandidates]=useState([]);
+  const [companies,setCompanies]=useState([]);
+  const blank={name:"",target_type:"candidate",target_id:"",target_name:"",steps:[
+    {day:0,subject:"Introduction",body:"Hi {{name}},\n\nI hope this finds you well.\n\nBest,\nShaun"},
+    {day:3,subject:"Following up",body:"Hi {{name}},\n\nJust following up on my previous message.\n\nBest,\nShaun"},
+    {day:7,subject:"Last chase",body:"Hi {{name}},\n\nI wanted to reach out one more time.\n\nBest,\nShaun"},
+  ],status:"active"};
+  const [f,setF]=useState(blank);
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data:seqs},{data:cands},{data:cos}]=await Promise.all([
+      db.from("email_sequences").select("*").order("created_at",{ascending:false}),
+      db.from("candidates").select("id,name").order("name"),
+      db.from("companies").select("id,name").order("name"),
+    ]);
+    setRows(seqs||[]);setCandidates(cands||[]);setCompanies(cos||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const save=async()=>{
+    if(!f.name.trim())return setErr("Name required");
+    setSaving(true);setErr("");
+    const{error}=await db.from("email_sequences").insert({...f,steps:JSON.stringify(f.steps)});
+    if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
+    setSaving(false);
+  };
+
+  const del=async id=>{if(!confirm("Delete sequence?"))return;await db.from("email_sequences").delete().eq("id",id);load();};
+
+  const targets=f.target_type==="candidate"?candidates:companies;
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>Email Sequences</div>
+      <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ New Sequence</button>
+    </div>
+    <div style={{background:"#faeeda",border:"0.5px solid #e8c97a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#854f0b",marginBottom:14}}>
+      ℹ️ Sequences are a planning tool — use them to track your outreach schedule. Copy the email body and send manually via Outlook.
+    </div>
+    {loading?<div style={{color:"var(--t3)"}}>Loading…</div>:
+    rows.length===0?<div style={{color:"var(--t3)",fontSize:13,padding:"20px 0"}}>No sequences yet.</div>:
+    <div style={{display:"grid",gap:10}}>
+      {rows.map(r=>{
+        const steps=typeof r.steps==="string"?JSON.parse(r.steps):r.steps||[];
+        return <div key={r.id} style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+            <div>
+              <div style={{fontWeight:500,fontSize:14}}>{r.name}</div>
+              <div style={{fontSize:11,color:"var(--t2)",marginTop:2}}>{r.target_type} · Started {r.started_date}</div>
+            </div>
+            <button className="btn-d" onClick={()=>del(r.id)}>Delete</button>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+            {steps.map((step,i)=><div key={i} style={{background:"var(--bg2)",borderRadius:8,padding:"8px 12px",border:"0.5px solid var(--br)",minWidth:120}}>
+              <div style={{fontSize:10,color:"var(--t3)",marginBottom:2}}>Day {step.day}</div>
+              <div style={{fontSize:12,fontWeight:500}}>{step.subject}</div>
+            </div>)}
+          </div>
+        </div>;
+      })}
+    </div>}
+    {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
+      <div className="modal" style={{maxWidth:600}} onClick={e=>e.stopPropagation()}>
+        <h3>New Email Sequence</h3>
+        <div className="fr"><label>Sequence Name</label><input value={f.name} onChange={e=>setF(p=>({...p,name:e.target.value}))} placeholder="e.g. Ecologist BD outreach"/></div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Target Type</label>
+            <select value={f.target_type} onChange={e=>setF(p=>({...p,target_type:e.target.value,target_id:"",target_name:""}))}>
+              <option value="candidate">Candidate</option><option value="company">Company</option>
+            </select>
+          </div>
+          <div className="fr" style={{margin:0}}><label>Target</label>
+            <select value={f.target_id} onChange={e=>{
+              const t=targets.find(x=>x.id===e.target.value);
+              setF(p=>({...p,target_id:e.target.value,target_name:t?.name||""}));
+            }}>
+              <option value="">Select…</option>
+              {targets.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={{fontSize:12,fontWeight:500,marginBottom:8,marginTop:4}}>Steps</div>
+        {f.steps.map((step,i)=><div key={i} style={{background:"var(--bg2)",borderRadius:8,padding:12,marginBottom:8,border:"0.5px solid var(--br)"}}>
+          <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
+            <div style={{fontSize:11,color:"var(--t2)",whiteSpace:"nowrap"}}>Day:</div>
+            <input type="number" value={step.day} onChange={e=>{const st=[...f.steps];st[i]={...st[i],day:parseInt(e.target.value)||0};setF(p=>({...p,steps:st}));}} style={{width:60}}/>
+            <div style={{fontSize:11,color:"var(--t2)",whiteSpace:"nowrap"}}>Subject:</div>
+            <input value={step.subject} onChange={e=>{const st=[...f.steps];st[i]={...st[i],subject:e.target.value};setF(p=>({...p,steps:st}));}}/>
+          </div>
+          <textarea value={step.body} onChange={e=>{const st=[...f.steps];st[i]={...st[i],body:e.target.value};setF(p=>({...p,steps:st}));}} style={{minHeight:80,fontSize:12}}/>
+        </div>)}
+        {err&&<div className="err">{err}</div>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Create Sequence"}</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ============================================================
+// FEATURE 4: PLACEMENTS
+// ============================================================
+function PlacementsPage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);
+  const [candidates,setCandidates]=useState([]);
+  const [jobs,setJobs]=useState([]);
+  const blank={candidate_id:"",job_id:"",candidate_name:"",job_title:"",company_name:"",start_date:"",salary:"",fee_amount:"",fee_percentage:"",invoice_date:"",invoice_number:"",payment_received:false,payment_date:"",notes:""};
+  const [f,setF]=useState(blank);
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data:pl},{data:cands},{data:js}]=await Promise.all([
+      db.from("placements").select("*").order("created_at",{ascending:false}),
+      db.from("candidates").select("id,name").order("name"),
+      db.from("jobs").select("id,title,companies(name)").order("title"),
+    ]);
+    setRows(pl||[]);setCandidates(cands||[]);setJobs(js||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const save=async()=>{
+    if(!f.candidate_name.trim())return setErr("Candidate name required");
+    setSaving(true);setErr("");
+    const payload={...f,salary:f.salary?parseFloat(f.salary):null,fee_amount:f.fee_amount?parseFloat(f.fee_amount):null,fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,payment_received:f.payment_received==="true"||f.payment_received===true};
+    const{error}=await db.from("placements").insert(payload);
+    if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
+    setSaving(false);
+  };
+
+  const togglePaid=async(id,val)=>{await db.from("placements").update({payment_received:val,payment_date:val?new Date().toISOString().split("T")[0]:null}).eq("id",id);load();};
+
+  const totalFees=rows.reduce((sum,r)=>sum+(parseFloat(r.fee_amount)||0),0);
+  const paidFees=rows.filter(r=>r.payment_received).reduce((sum,r)=>sum+(parseFloat(r.fee_amount)||0),0);
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>Placements</div>
+      <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ Record Placement</button>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
+      <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>TOTAL PLACEMENTS</div>
+        <div style={{fontSize:24,fontWeight:700,color:"var(--t1)"}}>{rows.length}</div>
+      </div>
+      <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>TOTAL FEES</div>
+        <div style={{fontSize:24,fontWeight:700,color:"#185fa5"}}>£{totalFees.toLocaleString()}</div>
+      </div>
+      <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>FEES RECEIVED</div>
+        <div style={{fontSize:24,fontWeight:700,color:"#3b6d11"}}>£{paidFees.toLocaleString()}</div>
+      </div>
+    </div>
+    {loading?<div style={{color:"var(--t3)"}}>Loading…</div>:
+    rows.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No placements yet.</div>:
+    <table style={{width:"100%",borderCollapse:"collapse",background:"var(--bg)",borderRadius:10,overflow:"hidden",border:"0.5px solid var(--br)"}}>
+      <thead><tr>
+        <th className="th">Candidate</th><th className="th">Role</th><th className="th">Company</th>
+        <th className="th">Start Date</th><th className="th">Salary</th><th className="th">Fee</th>
+        <th className="th">Invoice</th><th className="th">Paid</th>
+      </tr></thead>
+      <tbody>{rows.map(r=><tr key={r.id}>
+        <td className="td" style={{fontWeight:500}}>{r.candidate_name}</td>
+        <td className="td" style={{color:"var(--t2)"}}>{r.job_title}</td>
+        <td className="td" style={{color:"var(--t2)"}}>{r.company_name}</td>
+        <td className="td" style={{color:"var(--t3)"}}>{r.start_date||"—"}</td>
+        <td className="td">{r.salary?`£${parseFloat(r.salary).toLocaleString()}`:"—"}</td>
+        <td className="td" style={{color:"#185fa5",fontWeight:500}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
+        <td className="td" style={{fontSize:11,color:"var(--t3)"}}>{r.invoice_number||"—"}</td>
+        <td className="td">
+          <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
+            {r.payment_received?"✓ Paid":"Unpaid"}
+          </button>
+        </td>
+      </tr>)}</tbody>
+    </table>}
+    {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h3>Record Placement</h3>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Candidate Name *</label>
+            <input value={f.candidate_name} onChange={s("candidate_name")} placeholder="Full name"/>
+          </div>
+          <div className="fr" style={{margin:0}}><label>Job Title</label><input value={f.job_title} onChange={s("job_title")}/></div>
+        </div>
+        <div className="fr"><label>Company</label><input value={f.company_name} onChange={s("company_name")}/></div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Start Date</label><input type="date" value={f.start_date} onChange={s("start_date")}/></div>
+          <div className="fr" style={{margin:0}}><label>Salary (£)</label><input value={f.salary} onChange={s("salary")} placeholder="45000"/></div>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Fee Amount (£)</label><input value={f.fee_amount} onChange={s("fee_amount")} placeholder="6300"/></div>
+          <div className="fr" style={{margin:0}}><label>Fee %</label><input value={f.fee_percentage} onChange={s("fee_percentage")} placeholder="14"/></div>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Invoice Date</label><input type="date" value={f.invoice_date} onChange={s("invoice_date")}/></div>
+          <div className="fr" style={{margin:0}}><label>Invoice Number</label><input value={f.invoice_number} onChange={s("invoice_number")} placeholder="INV-001"/></div>
+        </div>
+        <div className="fr"><label>Notes</label><textarea value={f.notes} onChange={s("notes")}/></div>
+        {err&&<div className="err">{err}</div>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Save Placement"}</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ============================================================
+// FEATURE 5: ACTIVITY LOG
+// ============================================================
+const ACTIVITY_TYPES=["Note","Call","Email","Meeting","LinkedIn","WhatsApp"];
+const ACTIVITY_ICONS={"Note":"📝","Call":"📞","Email":"✉️","Meeting":"🤝","LinkedIn":"💼","WhatsApp":"💬"};
+
+function ActivityLogPage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);
+  const [candidates,setCandidates]=useState([]);
+  const [companies,setCompanies]=useState([]);
+  const blank={entity_type:"candidate",entity_id:"",entity_name:"",activity_type:"Note",subject:"",body:""};
+  const [f,setF]=useState(blank);
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+  const [filter,setFilter]=useState("All");
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data:acts},{data:cands},{data:cos}]=await Promise.all([
+      db.from("activity_log").select("*").order("created_at",{ascending:false}).limit(100),
+      db.from("candidates").select("id,name").order("name"),
+      db.from("companies").select("id,name").order("name"),
+    ]);
+    setRows(acts||[]);setCandidates(cands||[]);setCompanies(cos||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const save=async()=>{
+    if(!f.body.trim())return setErr("Please add a note");
+    setSaving(true);setErr("");
+    const{error}=await db.from("activity_log").insert(f);
+    if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
+    setSaving(false);
+  };
+
+  const targets=f.entity_type==="candidate"?candidates:companies;
+  const filtered=filter==="All"?rows:rows.filter(r=>r.activity_type===filter);
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>Activity Log</div>
+      <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ Log Activity</button>
+    </div>
+    <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+      {["All",...ACTIVITY_TYPES].map(t=><button key={t} onClick={()=>setFilter(t)} style={{background:filter===t?"#1a1f2e":"var(--bg)",color:filter===t?"#fff":"var(--t2)",border:"0.5px solid var(--br)",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>
+        {ACTIVITY_ICONS[t]||""} {t}
+      </button>)}
+    </div>
+    {loading?<div style={{color:"var(--t3)"}}>Loading…</div>:
+    filtered.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No activities yet.</div>:
+    <div style={{display:"grid",gap:8}}>
+      {filtered.map(r=><div key={r.id} style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:"12px 14px",display:"flex",gap:12}}>
+        <div style={{fontSize:20,flexShrink:0}}>{ACTIVITY_ICONS[r.activity_type]||"📝"}</div>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+            <div style={{fontWeight:500,fontSize:13}}>{r.entity_name||r.entity_type} <span style={{fontSize:11,color:"var(--t3)",fontWeight:400}}>· {r.activity_type}</span></div>
+            <div style={{fontSize:11,color:"var(--t3)"}}>{new Date(r.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>
+          </div>
+          {r.subject&&<div style={{fontSize:12,fontWeight:500,color:"var(--t2)",marginBottom:2}}>{r.subject}</div>}
+          <div style={{fontSize:12,color:"var(--t2)",whiteSpace:"pre-wrap"}}>{r.body}</div>
+        </div>
+      </div>)}
+    </div>}
+    {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h3>Log Activity</h3>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Type</label>
+            <select value={f.entity_type} onChange={e=>setF(p=>({...p,entity_type:e.target.value,entity_id:"",entity_name:""}))}>
+              <option value="candidate">Candidate</option><option value="company">Company</option>
+            </select>
+          </div>
+          <div className="fr" style={{margin:0}}><label>Contact</label>
+            <select value={f.entity_id} onChange={e=>{
+              const t=targets.find(x=>x.id===e.target.value);
+              setF(p=>({...p,entity_id:e.target.value,entity_name:t?.name||""}));
+            }}>
+              <option value="">Select…</option>
+              {targets.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="fr2">
+          <div className="fr" style={{margin:0}}><label>Activity</label>
+            <select value={f.activity_type} onChange={e=>setF(p=>({...p,activity_type:e.target.value}))}>
+              {ACTIVITY_TYPES.map(x=><option key={x}>{x}</option>)}
+            </select>
+          </div>
+          <div className="fr" style={{margin:0}}><label>Subject</label><input value={f.subject} onChange={e=>setF(p=>({...p,subject:e.target.value}))} placeholder="Brief subject…"/></div>
+        </div>
+        <div className="fr"><label>Notes *</label><textarea value={f.body} onChange={e=>setF(p=>({...p,body:e.target.value}))} placeholder="What happened? Key points from the conversation…" style={{minHeight:100}}/></div>
+        {err&&<div className="err">{err}</div>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
+          <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Log Activity"}</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ============================================================
+// FEATURE 6: REPORTING DASHBOARD
+// ============================================================
+function ReportingPage(){
+  const [data,setData]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [period,setPeriod]=useState("month");
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const now=new Date();
+    let from;
+    if(period==="week"){from=new Date(now-7*86400000).toISOString();}
+    else if(period==="month"){from=new Date(now.getFullYear(),now.getMonth(),1).toISOString();}
+    else{from=new Date(now.getFullYear(),0,1).toISOString();}
+
+    const[
+      {count:totalCandidates},{count:totalJobs},{count:totalCompanies},
+      {data:newCandidates},{data:submittals},{data:placements},{data:activities},{data:bdLeads}
+    ]=await Promise.all([
+      db.from("candidates").select("*",{count:"exact",head:true}),
+      db.from("jobs").select("*",{count:"exact",head:true}),
+      db.from("companies").select("*",{count:"exact",head:true}),
+      db.from("candidates").select("id,created_at").gte("created_at",from),
+      db.from("submittals").select("id,status,created_at").gte("created_at",from),
+      db.from("placements").select("id,fee_amount,payment_received,created_at").gte("created_at",from),
+      db.from("activity_log").select("id,activity_type,created_at").gte("created_at",from),
+      db.from("client_pipeline").select("id,stage"),
+    ]);
+
+    const fees=(placements||[]).reduce((s,p)=>s+(parseFloat(p.fee_amount)||0),0);
+    const paidFees=(placements||[]).filter(p=>p.payment_received).reduce((s,p)=>s+(parseFloat(p.fee_amount)||0),0);
+    const interviews=(submittals||[]).filter(s=>["Interview Booked","Offer Made","Placed"].includes(s.status)).length;
+    const offers=(submittals||[]).filter(s=>["Offer Made","Placed"].includes(s.status)).length;
+    const placed=(submittals||[]).filter(s=>s.status==="Placed").length;
+    const actByType=(activities||[]).reduce((a,x)=>{a[x.activity_type]=(a[x.activity_type]||0)+1;return a;},{});
+    const bdByStage=(bdLeads||[]).reduce((a,x)=>{a[x.stage]=(a[x.stage]||0)+1;return a;},{});
+
+    setData({totalCandidates,totalJobs,totalCompanies,newCandidates:newCandidates?.length||0,
+      submittals:submittals?.length||0,interviews,offers,placed,fees,paidFees,
+      actByType,bdByStage,activities:activities?.length||0});
+    setLoading(false);
+  },[period]);
+  useEffect(()=>{load();},[load]);
+
+  const StatBox=({label,value,sub,color})=><div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+    <div style={{fontSize:11,color:"var(--t2)",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.4px"}}>{label}</div>
+    <div style={{fontSize:26,fontWeight:700,color:color||"var(--t1)"}}>{value}</div>
+    {sub&&<div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{sub}</div>}
+  </div>;
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{fontSize:15,fontWeight:500}}>Reporting</div>
+      <div style={{display:"flex",gap:6}}>
+        {["week","month","year"].map(p=><button key={p} onClick={()=>setPeriod(p)} style={{background:period===p?"#1a1f2e":"var(--bg)",color:period===p?"#fff":"var(--t2)",border:"0.5px solid var(--br)",borderRadius:6,padding:"4px 12px",fontSize:11,cursor:"pointer",textTransform:"capitalize"}}>{p}</button>)}
+      </div>
+    </div>
+    {loading||!data?<div style={{color:"var(--t3)"}}>Loading…</div>:<>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+        <StatBox label="Total Candidates" value={data.totalCandidates||0}/>
+        <StatBox label="Total Jobs" value={data.totalJobs||0}/>
+        <StatBox label="Total Companies" value={data.totalCompanies||0}/>
+        <StatBox label="New Candidates" value={data.newCandidates} sub={`This ${period}`} color="#185fa5"/>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+        <StatBox label="CVs Sent" value={data.submittals} sub={`This ${period}`} color="#854f0b"/>
+        <StatBox label="Interviews" value={data.interviews} sub={`This ${period}`} color="#185fa5"/>
+        <StatBox label="Offers Made" value={data.offers} sub={`This ${period}`} color="#993556"/>
+        <StatBox label="Placed" value={data.placed} sub={`This ${period}`} color="#3b6d11"/>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+          <div style={{fontSize:11,color:"var(--t2)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.4px"}}>Fees This {period}</div>
+          <div style={{fontSize:24,fontWeight:700,color:"#185fa5"}}>£{data.fees.toLocaleString()}</div>
+          <div style={{fontSize:12,color:"#3b6d11",marginTop:4}}>£{data.paidFees.toLocaleString()} received</div>
+          <div style={{background:"var(--bg2)",borderRadius:6,height:6,marginTop:8}}>
+            <div style={{background:"#3b6d11",borderRadius:6,height:6,width:data.fees>0?`${Math.min(100,(data.paidFees/data.fees)*100)}%`:"0%"}}/>
+          </div>
+        </div>
+        <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+          <div style={{fontSize:11,color:"var(--t2)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.4px"}}>Activity Breakdown</div>
+          {Object.entries(data.actByType).length===0?<div style={{color:"var(--t3)",fontSize:12}}>No activity logged</div>:
+          Object.entries(data.actByType).map(([type,count])=><div key={type} style={{display:"flex",justifyContent:"space-between",marginBottom:6,alignItems:"center"}}>
+            <div style={{fontSize:12}}>{ACTIVITY_ICONS[type]||"📝"} {type}</div>
+            <div style={{fontSize:12,fontWeight:600}}>{count}</div>
+          </div>)}
+        </div>
+      </div>
+      <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
+        <div style={{fontSize:11,color:"var(--t2)",marginBottom:8,textTransform:"uppercase",letterSpacing:"0.4px"}}>BD Pipeline Summary</div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {BD_STAGES.map(stage=><div key={stage} style={{background:BD_COLORS[stage],color:BD_FG[stage],borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:500}}>
+            {stage}: {data.bdByStage[stage]||0}
+          </div>)}
+        </div>
+      </div>
+    </>}
+  </div>;
+}
+
 const NAV=[
   {k:"dashboard",l:"Dashboard",i:"🏠",s:"main"},
   {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
   {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
   {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
+  {k:"pipeline",l:"BD Pipeline",i:"📈",s:"recruit"},
+  {k:"submittals",l:"Submittals",i:"📨",s:"recruit"},
+  {k:"placements",l:"Placements",i:"🏆",s:"recruit"},
   {k:"tasks",l:"Tasks",i:"✅",s:"recruit"},
+  {k:"activity",l:"Activity Log",i:"📋",s:"recruit"},
+  {k:"reporting",l:"Reporting",i:"📊",s:"main"},
   {k:"parse",l:"CV parser",i:"📄",s:"ai"},
   {k:"match",l:"Job matching",i:"🎯",s:"ai"},
   {k:"pitch",l:"Pitch writer",i:"✍️",s:"ai"},
+  {k:"sequences",l:"Email sequences",i:"✉️",s:"ai"},
   {k:"import",l:"CSV import",i:"📥",s:"ai"},
 ];
 const SNAMES={main:"Overview",recruit:"Recruitment",ai:"AI tools"};
@@ -1733,6 +2373,12 @@ function AuthedApp(){
     companies:<CompaniesPage/>,tasks:<TasksPage/>,
     parse:<CVParserPage/>,match:<MatchingPage/>,pitch:<PitchPage/>,
     import:<CSVImportPage/>,
+    pipeline:<BDPipelinePage/>,
+    submittals:<SubmittalsPage/>,
+    placements:<PlacementsPage/>,
+    activity:<ActivityLogPage/>,
+    reporting:<ReportingPage/>,
+    sequences:<EmailSequencesPage/>,
   };
   let lastS=null;
   return <>
