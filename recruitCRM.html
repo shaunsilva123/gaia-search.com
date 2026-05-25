@@ -414,7 +414,7 @@ function DashboardPage({setPage}){
   const loadData=useCallback(async()=>{
     setLoading(true);
     try {
-      const [c,j,t,co,r,openJobs,filledJobs,topFeeJobs] = await Promise.all([
+      const [c,j,t,co,r,openJobs,filledJobs,topFeeJobs,placementsData] = await Promise.all([
         db.from("candidates").select("*",{count:"exact",head:true}),
         db.from("jobs").select("*",{count:"exact",head:true}),
         db.from("tasks").select("*",{count:"exact",head:true}).eq("done",false),
@@ -432,6 +432,7 @@ function DashboardPage({setPage}){
           .or("potential_fee.not.is.null,actual_fee.not.is.null")
           .order("potential_fee",{ascending:false,nullsFirst:false})
           .limit(6),
+        db.from("placements").select("id,fee_amount,payment_received"),
       ]);
 
       setStats({c:c.count||0,j:j.count||0,t:t.count||0,co:co.count||0});
@@ -440,6 +441,7 @@ function DashboardPage({setPage}){
 
       const open=openJobs.data||[];
       const filled=filledJobs.data||[];
+      const placements=placementsData.data||[];
 
       // A job qualifies for potential revenue only if at least one candidate
       // in its pipeline has reached Interview, 2nd Interview, Offer, or Placed
@@ -454,9 +456,13 @@ function DashboardPage({setPage}){
       });
 
       const potential=interviewQualified.reduce((sum,job)=>sum+calcFee(job),0);
-      const actual=filled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0)
+
+      // Actual revenue: use placements table first, fall back to pipeline
+      const placementActual=placements.reduce((sum,p)=>sum+(parseFloat(p.fee_amount)||0),0);
+      const pipelineActual=filled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0)
         + placedFromPipeline.reduce((sum,job)=>sum+calcFee(job),0);
-      const placed=filled.length+placedFromPipeline.length;
+      const actual=placementActual>0?placementActual:pipelineActual;
+      const placed=placements.length>0?placements.length:filled.length+placedFromPipeline.length;
 
       setRevenue({potential,actual,placed,interviewJobs:interviewQualified});
       setLastRefresh(new Date());
