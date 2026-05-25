@@ -338,7 +338,12 @@
     padding: 7rem 4rem;
     border-top: 1px solid #d8d6b8;
     border-bottom: 1px solid #d8d6b8;
+    position: relative; overflow: hidden;
   }
+  .why-video-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .why-video-bg video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .why-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(250,250,237,0.60); }
+  .why-gaia-inner { position: relative; z-index: 2; }
   .why-gaia-inner { max-width: 1100px; margin: 0 auto; }
   .why-gaia .section-label { color: var(--forest); }
   .why-gaia .section-title { color: var(--forest-dark); margin-bottom: 1.5rem; }
@@ -374,11 +379,7 @@
     .why-grid { grid-template-columns: 1fr; gap: 1.2rem; }
   }
 
-  .services { background: var(--cream-mid); position: relative; overflow: hidden; }
-  .services-video-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-  .services-video-bg video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-  .services-video-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(236,234,204,0.55); }
-  .services-inner { position: relative; z-index: 2; }
+  .services { background: var(--cream-mid); }
   .services-inner { max-width: 1200px; margin: 0 auto; }
   .services-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
@@ -767,6 +768,12 @@
 </section>
 
 <section class="why-gaia">
+  <div class="why-video-bg">
+    <video autoplay muted loop playsinline>
+      <source src="services-video.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="why-video-overlay"></div>
   <div class="why-gaia-inner">
     <span class="section-label">Why Gaia Search</span>
     <h2 class="section-title">Recruitment that actually <em>feels different</em></h2>
@@ -805,12 +812,6 @@
 </section>
 
 <section class="services" id="services">
-  <div class="services-video-bg">
-    <video autoplay muted loop playsinline>
-      <source src="services-video.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="services-video-overlay"></div>
   <div class="services-inner">
     <span class="section-label">How we work</span>
     <h2 class="section-title">Recruitment solutions <em>tailored to you</em></h2>
