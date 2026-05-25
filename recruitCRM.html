@@ -635,13 +635,21 @@ function CandidatesPage(){
     <Panel title={`${filtered.length} records`}>
       {loading?<Spin/>:filtered.length===0
         ?<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet. Click "Add candidate" to get started.</div>
-        :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:600}}>
-          <thead><tr><th className="th">Candidate</th><th className="th">Role</th><th className="th">Location</th><th className="th">Skills</th><th className="th">Status</th><th className="th" style={{width:80}}></th></tr></thead>
+        :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:700}}>
+          <colgroup>
+            <col style={{width:"22%"}}/>
+            <col style={{width:"24%"}}/>
+            <col style={{width:"16%"}}/>
+            <col style={{width:"18%"}}/>
+            <col style={{width:"10%"}}/>
+            <col style={{width:"10%"}}/>
+          </colgroup>
+          <thead><tr><th className="th">Candidate</th><th className="th">Role</th><th className="th">Location</th><th className="th">Skills</th><th className="th">Status</th><th className="th"></th></tr></thead>
           <tbody>{filtered.map(c=><tr key={c.id}>
-            <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div><div style={{fontWeight:500}}>{c.name}</div>{c.email&&<div style={{fontSize:11,color:ACCENT}}>{c.email}</div>}</div></div></td>
-            <td className="td" style={{color:"var(--t2)"}}>{c.role||"—"}</td>
-            <td className="td" style={{color:"var(--t2)"}}>{c.location||"—"}</td>
-            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px"}}>{s}</span>)}{(c.skills||[]).length>3&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-3}</span>}</div></td>
+            <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>{c.email&&<div style={{fontSize:11,color:ACCENT,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}</div></div></td>
+            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
+            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
+            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,2).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
             <td className="td"><Pill label={c.status||"New"}/></td>
             <td className="td"><div style={{display:"flex",gap:5}}>
               <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
@@ -670,11 +678,18 @@ function CompaniesPage(){
     <Err msg={err}/>
     <Panel title="All companies">
       {loading?<Spin/>:rows.length===0?<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No companies yet.</div>:
-      <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed"}}>
-        <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th" style={{width:80}}></th></tr></thead>
+      <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:600}}>
+        <colgroup>
+          <col style={{width:"25%"}}/>
+          <col style={{width:"20%"}}/>
+          <col style={{width:"28%"}}/>
+          <col style={{width:"12%"}}/>
+          <col style={{width:"15%"}}/>
+        </colgroup>
+        <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th"></th></tr></thead>
         <tbody>{rows.map(c=><tr key={c.id}>
-          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div><div style={{fontWeight:500}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:ACCENT}}>{c.website}</div>}</div></div></td>
-          <td className="td" style={{color:"var(--t2)"}}>{c.industry||"—"}</td>
+          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:ACCENT,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
+          <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
           <td className="td">
             <div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>
               {termsStr(c)}
