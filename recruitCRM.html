@@ -605,12 +605,18 @@ function DashboardPage({setPage}){
 }
 
 // ── Candidate Detail Panel ─────────────────────────────────────────────────
-function CandidateDetailPanel({cand, onClose, onEdit}){
+function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
   const [activities,setActivities]=useState([]);
   const [jobs,setJobs]=useState([]);
   const [loadingActs,setLoadingActs]=useState(true);
+  const [cvUploading,setCvUploading]=useState(false);
+  const [cvUrl,setCvUrl]=useState(cand?.cv_url||null);
+  const [cvErr,setCvErr]=useState("");
+  const cvRef=React.useRef();
+
   useEffect(()=>{
     if(!cand)return;
+    setCvUrl(cand.cv_url||null);
     setLoadingActs(true);
     Promise.all([
       db.from("activity_log").select("*").eq("entity_id",cand.id).order("created_at",{ascending:false}).limit(10),
@@ -621,6 +627,34 @@ function CandidateDetailPanel({cand, onClose, onEdit}){
       setLoadingActs(false);
     });
   },[cand]);
+
+  const uploadCV=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const maxMB=10;
+    if(file.size>maxMB*1024*1024){setCvErr(`File too large (max ${maxMB}MB)`);return;}
+    setCvUploading(true);setCvErr("");
+    const ext=file.name.split(".").pop();
+    const path=`cvs/${cand.id}_${Date.now()}.${ext}`;
+    const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,file,{upsert:true,contentType:file.type});
+    if(upErr){setCvErr(upErr.message);setCvUploading(false);return;}
+    const{data:urlData}=db.storage.from("candidate-cvs").getPublicUrl(path);
+    const url=urlData?.publicUrl;
+    const{error:dbErr}=await db.from("candidates").update({cv_url:url,cv_filename:file.name}).eq("id",cand.id);
+    if(dbErr){setCvErr(dbErr.message);setCvUploading(false);return;}
+    setCvUrl(url);
+    cand.cv_url=url;cand.cv_filename=file.name;
+    setCvUploading(false);
+    if(onRefresh)onRefresh();
+  };
+
+  const removeCV=async()=>{
+    if(!confirm("Remove CV from this candidate?"))return;
+    await db.from("candidates").update({cv_url:null,cv_filename:null}).eq("id",cand.id);
+    setCvUrl(null);cand.cv_url=null;cand.cv_filename=null;
+    if(onRefresh)onRefresh();
+  };
+
   if(!cand)return null;
   const c=cand;
   return <>
@@ -643,6 +677,38 @@ function CandidateDetailPanel({cand, onClose, onEdit}){
       </div>
       {/* Body */}
       <div style={{padding:20,display:"flex",flexDirection:"column",gap:18,flex:1}}>
+        {/* CV */}
+        <div>
+          <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>CV / Resume</div>
+          {cvUrl
+            ?<div style={{background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+                  <span style={{fontSize:18}}>📄</span>
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:500,color:"#3c3489",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.cv_filename||"CV attached"}</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>Click to open</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:6,flexShrink:0}}>
+                  <a href={cvUrl} target="_blank" rel="noreferrer" style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer",textDecoration:"none",display:"inline-flex",alignItems:"center"}}>Open</a>
+                  <button onClick={()=>cvRef.current?.click()} style={{background:"transparent",border:"0.5px solid var(--brm)",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>Replace</button>
+                  <button onClick={removeCV} style={{background:"transparent",border:"0.5px solid #f09595",borderRadius:6,padding:"4px 8px",fontSize:11,cursor:"pointer",color:"#a32d2d"}}>✕</button>
+                </div>
+              </div>
+            :<div onClick={()=>cvRef.current?.click()} style={{border:"1.5px dashed var(--brm)",borderRadius:8,padding:"16px",textAlign:"center",cursor:"pointer",background:"var(--bg2)"}}
+                onMouseOver={e=>e.currentTarget.style.borderColor=ACCENT}
+                onMouseOut={e=>e.currentTarget.style.borderColor="var(--brm)"}>
+                {cvUploading
+                  ?<><span className="spin"></span><span style={{fontSize:12,color:"var(--t2)"}}>Uploading…</span></>
+                  :<><div style={{fontSize:22,marginBottom:4}}>📎</div>
+                    <div style={{fontSize:12,fontWeight:500,color:"var(--t2)"}}>Click to attach CV</div>
+                    <div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>PDF, DOC, DOCX — max 10MB</div></>
+                }
+              </div>
+          }
+          <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={uploadCV}/>
+          {cvErr&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>⚠️ {cvErr}</div>}
+        </div>
         {/* Contact */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Contact</div>
@@ -726,7 +792,7 @@ function CandidatesPage(){
   return <div>
     {modal&&<CandModal onClose={()=>setModal(false)} onSaved={load}/>}
     {editRow&&<CandModal cand={editRow} onClose={()=>{setEditRow(null);}} onSaved={()=>{load();setDetailCand(null);}}/>}
-    {detailCand&&<CandidateDetailPanel cand={detailCand} onClose={()=>setDetailCand(null)} onEdit={c=>{setDetailCand(null);setEditRow(c);}}/>}
+    {detailCand&&<CandidateDetailPanel cand={detailCand} onClose={()=>setDetailCand(null)} onEdit={c=>{setDetailCand(null);setEditRow(c);}} onRefresh={load}/>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Candidates ({filtered.length})</span>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
@@ -750,7 +816,7 @@ function CandidatesPage(){
           </colgroup>
           <thead><tr><th className="th">Candidate</th><th className="th">Role</th><th className="th">Location</th><th className="th">Skills</th><th className="th">Status</th><th className="th"></th></tr></thead>
           <tbody>{filtered.map(c=><tr key={c.id} style={{cursor:"pointer"}} onClick={()=>setDetailCand(c)}>
-            <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.email&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}</div></div></td>
+            <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}{c.cv_url&&<span title="CV attached" style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>{c.email&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}</div></div></td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
             <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,2).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
