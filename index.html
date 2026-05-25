@@ -276,7 +276,7 @@
   .intro .section-label { color: var(--leaf-light); }
   .intro .section-title { color: #ffffff; }
   .intro-text .btn-earth { color: var(--leaf-light); border-bottom-color: var(--leaf-light); }
-  .stat-card { background: rgba(245,245,220,0.12); border-left: 3px solid var(--leaf); }
+  .stat-card { background: rgba(245,245,220,0.12); border-left: 3px solid var(--leaf); padding: 2rem 1.5rem; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
   .stat-num { color: var(--leaf-light); }
   .stat-label { color: rgba(245,245,220,0.75); }
   .founder-photo-wrap {
@@ -296,10 +296,11 @@
     font-weight: 400;
   }
 
-  .intro-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .intro-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; grid-auto-rows: 1fr; }
   .stat-card {
     background: var(--cream-mid); padding: 2rem 1.5rem;
     border-radius: 2px; border-left: 3px solid var(--leaf);
+    min-height: 140px; display: flex; flex-direction: column; justify-content: center;
   }
   .stat-num {
     font-family: 'Cormorant Garamond', serif;
