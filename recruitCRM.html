@@ -1157,9 +1157,159 @@ function CandidatesPage(){
   </div>;
 }
 
+// ── Company Contact Modal ──────────────────────────────────────────────────
+function ContactModal({contact, companyId, companyName, onClose, onSaved}){
+  const blank={name:"",job_title:"",email:"",phone:"",linkedin:"",notes:""};
+  const [f,setF]=useState(contact||blank);
+  const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+  const save=async()=>{
+    if(!f.name.trim()){setErr("Name required");return;}
+    setSaving(true);setErr("");
+    const payload={...f,company_id:companyId};
+    const{error}=contact
+      ?await db.from("contacts").update(payload).eq("id",contact.id)
+      :await db.from("contacts").insert(payload);
+    setSaving(false);
+    if(error){setErr(error.message);return;}
+    onSaved();onClose();
+  };
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal">
+      <h3>{contact?"Edit contact":"Add contact"} {companyName&&<span style={{fontWeight:400,color:"var(--t2)"}}>— {companyName}</span>}</h3>
+      <div className="fr2">
+        <div><label>Full name *</label><input type="text" value={f.name} onChange={s("name")} placeholder="Jane Smith"/></div>
+        <div><label>Job title</label><input type="text" value={f.job_title||""} onChange={s("job_title")} placeholder="Head of Ecology"/></div>
+      </div>
+      <div className="fr2">
+        <div><label>Email</label><div style={{display:"flex",gap:6}}><input type="email" value={f.email||""} onChange={s("email")} placeholder="jane@company.com" style={{flex:1}}/>{f.email&&<CopyButton text={f.email}/>}</div></div>
+        <div><label>Phone</label><input type="tel" value={f.phone||""} onChange={s("phone")} placeholder="+44 7700 000000"/></div>
+      </div>
+      <div className="fr"><label>LinkedIn URL</label>
+        <div style={{display:"flex",gap:6}}>
+          <input type="text" value={f.linkedin||""} onChange={s("linkedin")} placeholder="https://linkedin.com/in/username" style={{flex:1}}/>
+          {f.linkedin&&<a href={f.linkedin} target="_blank" rel="noreferrer" style={{background:"#0a66c2",color:"#fff",borderRadius:7,padding:"7px 12px",fontSize:12,textDecoration:"none",whiteSpace:"nowrap",display:"flex",alignItems:"center"}}>Open ↗</a>}
+        </div>
+      </div>
+      <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")} placeholder="Key contact notes…" style={{minHeight:70}}/></div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save contact"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── Company Detail Panel ───────────────────────────────────────────────────
+function CompanyDetailPanel({company, onClose, onEdit}){
+  const [contacts,setContacts]=useState([]);
+  const [jobs,setJobs]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [contactModal,setContactModal]=useState(false);
+  const [editContact,setEditContact]=useState(null);
+  const c=company;
+
+  const loadContacts=useCallback(async()=>{
+    setLoading(true);
+    const[{data:ct},{data:jb}]=await Promise.all([
+      db.from("contacts").select("*").eq("company_id",c.id).order("name"),
+      db.from("jobs").select("id,title,status").eq("company_id",c.id).order("created_at",{ascending:false}),
+    ]);
+    setContacts(ct||[]);setJobs(jb||[]);setLoading(false);
+  },[c.id]);
+
+  useEffect(()=>{loadContacts();},[loadContacts]);
+
+  const delContact=async id=>{
+    if(!confirm("Remove this contact?"))return;
+    await db.from("contacts").delete().eq("id",id);
+    loadContacts();
+  };
+
+  const termsStr=c.fee_type==="percentage"&&c.fee_percentage?`${c.fee_percentage}% of salary`:c.fee_type==="fixed"&&c.fee_fixed?`Fixed £${parseFloat(c.fee_fixed).toLocaleString()}`:"Not set";
+
+  return <>
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.35)",zIndex:500}}/>
+    <div style={{position:"fixed",top:0,right:0,bottom:0,width:440,maxWidth:"95vw",background:"var(--bg)",zIndex:501,display:"flex",flexDirection:"column",boxShadow:"-8px 0 40px rgba(0,0,0,0.15)",overflowY:"auto"}}>
+      {contactModal&&<ContactModal companyId={c.id} companyName={c.name} onClose={()=>setContactModal(false)} onSaved={loadContacts}/>}
+      {editContact&&<ContactModal contact={editContact} companyId={c.id} companyName={c.name} onClose={()=>setEditContact(null)} onSaved={()=>{setEditContact(null);loadContacts();}}/>}
+      {/* Header */}
+      <div style={{padding:"20px 20px 16px",borderBottom:"0.5px solid var(--br)",position:"sticky",top:0,background:"var(--bg)",zIndex:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+          <button onClick={onClose} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"4px 10px",fontSize:12,cursor:"pointer",color:"var(--t2)"}}>✕ Close</button>
+          <button className="btn-o" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>onEdit(c)}>Edit</button>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <Av name={c.name} size={52}/>
+          <div>
+            <div style={{fontWeight:600,fontSize:16,color:"var(--t1)"}}>{c.name}</div>
+            <div style={{fontSize:13,color:"var(--t2)",marginTop:2}}>{c.industry||"No industry set"}</div>
+            <div style={{marginTop:6}}><Pill label={c.status||"Active"}/></div>
+          </div>
+        </div>
+      </div>
+      {/* Body */}
+      <div style={{padding:20,display:"flex",flexDirection:"column",gap:18,flex:1}}>
+        {/* Details */}
+        <div>
+          <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Details</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
+            {[["🌐 Website",c.website],["📋 Fee terms",termsStr],["📝 Terms notes",c.terms_notes]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1,wordBreak:"break-all"}}>{v}</div></div>:null)}
+          </div>
+        </div>
+        {/* Contacts */}
+        <div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Contacts ({contacts.length})</div>
+            <button onClick={()=>setContactModal(true)} style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>+ Add contact</button>
+          </div>
+          {loading?<Spin/>:contacts.length===0
+            ?<div style={{fontSize:12,color:"var(--t3)",background:"var(--bg2)",borderRadius:8,padding:"14px",textAlign:"center",fontStyle:"italic"}}>No contacts yet — add your key contacts at this company.</div>
+            :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {contacts.map(ct=><div key={ct.id} style={{background:"var(--bg2)",borderRadius:8,padding:"10px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <Av name={ct.name} size={32}/>
+                    <div>
+                      <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{ct.name}</div>
+                      {ct.job_title&&<div style={{fontSize:11,color:"var(--t2)"}}>{ct.job_title}</div>}
+                    </div>
+                  </div>
+                  <div style={{display:"flex",gap:4}}>
+                    <button onClick={()=>setEditContact(ct)} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"var(--t2)"}}>Edit</button>
+                    <button onClick={()=>delContact(ct.id)} style={{background:"none",border:"0.5px solid #f09595",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"#a32d2d"}}>✕</button>
+                  </div>
+                </div>
+                <div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:6}}>
+                  {ct.email&&<div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:11,color:"var(--t2)"}}>📧 {ct.email}</span><CopyButton text={ct.email}/></div>}
+                  {ct.phone&&<span style={{fontSize:11,color:"var(--t2)"}}>📞 {ct.phone}</span>}
+                  {ct.linkedin&&<a href={ct.linkedin} target="_blank" rel="noreferrer" style={{fontSize:11,background:"#0a66c2",color:"#fff",borderRadius:4,padding:"1px 6px",textDecoration:"none"}}>in</a>}
+                </div>
+                {ct.notes&&<div style={{marginTop:6,fontSize:11,color:"var(--t3)",lineHeight:1.5}}>{ct.notes}</div>}
+              </div>)}
+            </div>}
+        </div>
+        {/* Active jobs */}
+        <div>
+          <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Jobs ({jobs.length})</div>
+          {jobs.length===0?<div style={{fontSize:12,color:"var(--t3)"}}>No jobs linked to this company.</div>:
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {jobs.map(j=><div key={j.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"var(--bg2)",borderRadius:8,padding:"8px 12px"}}>
+              <div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{j.title}</div>
+              <Pill label={j.status||"Open"}/>
+            </div>)}
+          </div>}
+        </div>
+      </div>
+    </div>
+  </>;
+}
+
 function CompaniesPage(){
   const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);
   const [modal,setModal]=useState(false);const [editRow,setEditRow]=useState(null);const [err,setErr]=useState("");
+  const [detailCo,setDetailCo]=useState(null);
   const load=useCallback(async()=>{setLoading(true);const{data,error}=await db.from("companies").select("*").order("created_at",{ascending:false});if(error)setErr(error.message);else setRows(data||[]);setLoading(false);},[]);
   const termsStr=c=>c.fee_type==="percentage"&&c.fee_percentage?`${c.fee_percentage}% of salary`:c.fee_type==="fixed"&&c.fee_fixed?`Fixed £${parseFloat(c.fee_fixed).toLocaleString()}`:"Not set";
   useEffect(()=>{load();},[load]);
@@ -1167,6 +1317,7 @@ function CompaniesPage(){
   return <div>
     {modal&&<CoModal onClose={()=>setModal(false)} onSaved={load}/>}
     {editRow&&<CoModal co={editRow} onClose={()=>setEditRow(null)} onSaved={load}/>}
+    {detailCo&&<CompanyDetailPanel company={detailCo} onClose={()=>setDetailCo(null)} onEdit={c=>{setDetailCo(null);setEditRow(c);}}/>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Companies ({rows.length})</span>
       <button className="btn-a" onClick={()=>setModal(true)}>+ Add company</button>
@@ -1176,30 +1327,204 @@ function CompaniesPage(){
       {loading?<Spin/>:rows.length===0?<EmptyState icon="🏢" title="No companies yet" sub="Add client companies to link jobs and track your BD relationships." action="+ Add company" onAction={()=>setModal(true)}/>:
       <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:600}}>
         <colgroup>
-          <col style={{width:"25%"}}/>
-          <col style={{width:"20%"}}/>
-          <col style={{width:"28%"}}/>
-          <col style={{width:"12%"}}/>
-          <col style={{width:"15%"}}/>
+          <col style={{width:"24%"}}/><col style={{width:"18%"}}/><col style={{width:"24%"}}/><col style={{width:"10%"}}/><col style={{width:"12%"}}/><col style={{width:"12%"}}/>
         </colgroup>
-        <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th"></th></tr></thead>
-        <tbody>{rows.map(c=><tr key={c.id}>
-          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:ACCENT,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
+        <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th">Contacts</th><th className="th"></th></tr></thead>
+        <tbody>{rows.map(c=><tr key={c.id} style={{cursor:"pointer"}} onClick={()=>setDetailCo(c)}>
+          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
           <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
-          <td className="td">
-            <div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>
-              {termsStr(c)}
-            </div>
-            {c.terms_notes&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.terms_notes}</div>}
-          </td>
+          <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_notes&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.terms_notes}</div>}</td>
           <td className="td"><Pill label={c.status||"Active"}/></td>
-          <td className="td"><div style={{display:"flex",gap:5}}>
+          <td className="td"><ContactCount companyId={c.id}/></td>
+          <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
             <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
             <button className="btn-d" onClick={()=>del(c.id)}>Del</button>
           </div></td>
         </tr>)}</tbody>
       </table>}
     </Panel>
+  </div>;
+}
+
+function ContactCount({companyId}){
+  const [count,setCount]=useState(null);
+  useEffect(()=>{
+    db.from("contacts").select("id",{count:"exact",head:true}).eq("company_id",companyId).then(({count:c})=>setCount(c||0));
+  },[companyId]);
+  if(count===null)return <span style={{color:"var(--t3)"}}>—</span>;
+  return <span style={{fontSize:12,color:count>0?ACCENT:"var(--t3)",fontWeight:count>0?500:400}}>{count>0?`${count} contact${count!==1?"s":""}`:"None"}</span>;
+}
+
+// ── Hotlists ───────────────────────────────────────────────────────────────
+function HotlistsPage(){
+  const [lists,setLists]=useState([]);const [loading,setLoading]=useState(true);
+  const [modal,setModal]=useState(false);const [activeList,setActiveList]=useState(null);
+  const [candidates,setCandidates]=useState([]);
+  const [addingCand,setAddingCand]=useState(false);
+  const [allCands,setAllCands]=useState([]);
+  const [search,setSearch]=useState("");
+  const [shareMsg,setShareMsg]=useState("");
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,candidates(id,name,role,location,skills,status,cv_url))").order("created_at",{ascending:false});
+    setLists(data||[]);
+    if(activeList){
+      const updated=(data||[]).find(l=>l.id===activeList.id);
+      if(updated)setActiveList(updated);
+    }
+    setLoading(false);
+  },[activeList?.id]);
+
+  useEffect(()=>{load();},[]);
+
+  const openList=async(list)=>{
+    setActiveList(list);
+    setCandidates((list.hotlist_candidates||[]).map(hc=>hc.candidates));
+  };
+
+  const createList=async(name,description)=>{
+    if(!name.trim())return;
+    const{data,error}=await db.from("hotlists").insert({name,description}).select();
+    if(error){alert(error.message);return;}
+    load();
+    if(data?.[0])openList({...data[0],hotlist_candidates:[]});
+    setModal(false);
+  };
+
+  const addCandidate=async(cand)=>{
+    if(!activeList)return;
+    const already=(activeList.hotlist_candidates||[]).some(hc=>hc.candidate_id===cand.id);
+    if(already){alert("Already in this hotlist");return;}
+    await db.from("hotlist_candidates").insert({hotlist_id:activeList.id,candidate_id:cand.id});
+    load();setAddingCand(false);setSearch("");
+  };
+
+  const removeCandidate=async(candId)=>{
+    if(!confirm("Remove from hotlist?"))return;
+    await db.from("hotlist_candidates").delete().eq("hotlist_id",activeList.id).eq("candidate_id",candId);
+    load();
+  };
+
+  const delList=async(id)=>{
+    if(!confirm("Delete this hotlist?"))return;
+    await db.from("hotlists").delete().eq("id",id);
+    if(activeList?.id===id)setActiveList(null);
+    load();
+  };
+
+  const copyShareLink=async()=>{
+    if(!activeList)return;
+    const cands=(activeList.hotlist_candidates||[]).map(hc=>hc.candidates).filter(Boolean);
+    const text=`${activeList.name}\n${activeList.description||""}\n\n${cands.map(c=>`• ${c.name} — ${c.role||"?"}, ${c.location||"?"}`).join("\n")}`;
+    await navigator.clipboard?.writeText(text);
+    setShareMsg("Copied to clipboard!");setTimeout(()=>setShareMsg(""),2500);
+  };
+
+  useEffect(()=>{
+    if(addingCand){
+      db.from("candidates").select("id,name,role,location,status").order("name").then(({data})=>setAllCands(data||[]));
+    }
+  },[addingCand]);
+
+  const filteredCands=allCands.filter(c=>!search||c.name?.toLowerCase().includes(search.toLowerCase())||c.role?.toLowerCase().includes(search.toLowerCase()));
+  const activeCands=(activeList?.hotlist_candidates||[]).map(hc=>hc.candidates).filter(Boolean);
+
+  return <div style={{display:"flex",gap:16,height:"100%"}}>
+    {/* Sidebar list of hotlists */}
+    <div style={{width:240,flexShrink:0}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Hotlists</span>
+        <button className="btn-a" style={{fontSize:12,padding:"5px 10px"}} onClick={()=>setModal(true)}>+ New</button>
+      </div>
+      {loading?<Spin/>:lists.length===0
+        ?<div style={{background:"var(--bg2)",borderRadius:8,padding:"20px",textAlign:"center",fontSize:12,color:"var(--t3)"}}>No hotlists yet. Create one to group candidates for a client or role.</div>
+        :<div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {lists.map(l=>{
+            const cnt=(l.hotlist_candidates||[]).length;
+            return <div key={l.id} onClick={()=>openList(l)} style={{background:activeList?.id===l.id?"#eef1ff":"var(--bg2)",border:`0.5px solid ${activeList?.id===l.id?ACCENT:"var(--br)"}`,borderRadius:8,padding:"10px 12px",cursor:"pointer",transition:"all 0.15s"}}
+              onMouseOver={e=>{if(activeList?.id!==l.id)e.currentTarget.style.background="var(--bg3)"}}
+              onMouseOut={e=>{if(activeList?.id!==l.id)e.currentTarget.style.background="var(--bg2)"}}>
+              <div style={{fontWeight:500,fontSize:13,color:activeList?.id===l.id?ACCENT:"var(--t1)",marginBottom:2}}>{l.name}</div>
+              {l.description&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.description}</div>}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:11,color:"var(--t2)"}}>{cnt} candidate{cnt!==1?"s":""}</span>
+                <button onClick={e=>{e.stopPropagation();delList(l.id);}} style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:11,padding:"0 2px"}}>✕</button>
+              </div>
+            </div>;
+          })}
+        </div>}
+    </div>
+    {/* Main panel */}
+    <div style={{flex:1,minWidth:0}}>
+      {!activeList
+        ?<div style={{background:"var(--bg2)",borderRadius:10,padding:"48px 20px",textAlign:"center",color:"var(--t3)"}}>
+            <div style={{fontSize:32,marginBottom:12}}>🔥</div>
+            <div style={{fontSize:14,fontWeight:500,color:"var(--t1)",marginBottom:6}}>Select a hotlist</div>
+            <div style={{fontSize:13,color:"var(--t2)"}}>Create a hotlist to group candidates for a specific client, role type, or outreach campaign.</div>
+          </div>
+        :<div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14,flexWrap:"wrap",gap:8}}>
+            <div>
+              <div style={{fontSize:15,fontWeight:600,color:"var(--t1)"}}>{activeList.name}</div>
+              {activeList.description&&<div style={{fontSize:12,color:"var(--t2)",marginTop:2}}>{activeList.description}</div>}
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              {shareMsg&&<span style={{fontSize:12,color:"#3b6d11",alignSelf:"center"}}>✓ {shareMsg}</span>}
+              <button className="btn-o" style={{fontSize:12}} onClick={copyShareLink}>📋 Copy list</button>
+              <button className="btn-a" style={{fontSize:12}} onClick={()=>setAddingCand(true)}>+ Add candidate</button>
+            </div>
+          </div>
+          {addingCand&&<div style={{background:"var(--bg2)",borderRadius:10,padding:14,marginBottom:14,border:"0.5px solid var(--brm)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+              <span style={{fontSize:13,fontWeight:500}}>Add candidate to "{activeList.name}"</span>
+              <button onClick={()=>{setAddingCand(false);setSearch("");}} style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:13}}>✕</button>
+            </div>
+            <input type="text" placeholder="Search candidates…" value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:8,width:"100%"}}/>
+            <div style={{maxHeight:200,overflowY:"auto",borderRadius:8,border:"0.5px solid var(--br)"}}>
+              {filteredCands.map(c=><div key={c.id} onClick={()=>addCandidate(c)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",cursor:"pointer",borderBottom:"0.5px solid var(--br)"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+                <Av name={c.name} size={28}/><div><div style={{fontSize:13,fontWeight:500}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div>
+                <Pill label={c.status||"New"} style={{marginLeft:"auto"}}/>
+              </div>)}
+            </div>
+          </div>}
+          {activeCands.length===0
+            ?<div style={{background:"var(--bg2)",borderRadius:10,padding:"40px 20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates in this hotlist yet. Click "+ Add candidate" to build it.</div>
+            :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {activeCands.map(c=><div key={c.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
+                <Av name={c.name} size={40}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}{c.cv_url&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
+                  <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
+                  <Pill label={c.status||"New"}/>
+                  {c.cv_url&&<a href={c.cv_url} target="_blank" rel="noreferrer" style={{fontSize:11,color:ACCENT,textDecoration:"none"}}>View CV ↗</a>}
+                  <button onClick={()=>removeCandidate(c.id)} style={{background:"none",border:"0.5px solid #f09595",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"#a32d2d"}}>Remove</button>
+                </div>
+              </div>)}
+            </div>
+          }
+        </div>}
+    </div>
+    {/* Create hotlist modal */}
+    {modal&&<CreateHotlistModal onClose={()=>setModal(false)} onCreate={createList}/>}
+  </div>;
+}
+
+function CreateHotlistModal({onClose,onCreate}){
+  const [name,setName]=useState("");const [desc,setDesc]=useState("");
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal" style={{maxWidth:420}}>
+      <h3>New Hotlist</h3>
+      <div className="fr"><label>Hotlist name *</label><input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Senior Ecologists for WSP UK" autoFocus/></div>
+      <div className="fr"><label>Description</label><textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Optional — what's this list for?" style={{minHeight:60}}/></div>
+      <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={()=>onCreate(name,desc)} disabled={!name.trim()}>Create hotlist</button>
+      </div>
+    </div>
   </div>;
 }
 
@@ -2986,6 +3311,7 @@ const NAV=[
   {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
   {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
   {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
+  {k:"hotlists",l:"Hotlists",i:"🔥",s:"recruit"},
   {k:"pipeline",l:"BD Pipeline",i:"📈",s:"recruit"},
   {k:"submittals",l:"Submittals",i:"📨",s:"recruit"},
   {k:"placements",l:"Placements",i:"🏆",s:"recruit"},
@@ -3080,6 +3406,7 @@ function AuthedApp(){
     activity:<ActivityLogPage/>,
     reporting:<ReportingPage/>,
     sequences:<EmailSequencesPage/>,
+    hotlists:<HotlistsPage/>,
   };
   let lastS=null;
   return <>
