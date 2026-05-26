@@ -200,7 +200,7 @@
   }
   .salary-table {
     width: 100%; border-collapse: collapse;
-    font-size: 0.88rem; min-width: 480px;
+    font-size: 0.88rem; min-width: 420px;
   }
   .salary-table thead { background: var(--forest-dark); color: var(--cream); }
   .salary-table thead th {
@@ -216,7 +216,7 @@
   .salary-table tbody tr:nth-child(even) { background: var(--cream-pale); }
   .salary-table tbody tr:nth-child(even):hover { background: var(--cream-mid); }
   .salary-table td { padding: 0.85rem 1.2rem; color: var(--text-mid); vertical-align: middle; }
-  .salary-table td:first-child { font-weight: 600; color: var(--forest); }
+  .salary-table td:first-child { font-weight: 600; color: var(--forest); min-width: 140px; word-break: normal; }
   .salary-range { font-weight: 700; color: var(--text-dark); white-space: nowrap; }
   .salary-badge {
     display: inline-block; font-size: 0.68rem; font-weight: 600;
@@ -411,6 +411,14 @@
 
     footer { padding: 2rem 1.5rem; }
     .footer-bottom { flex-direction: column; text-align: center; }
+
+    /* Mobile table: smaller font, tighter padding, allow wrapping on title col */
+    .salary-table { font-size: 0.8rem; min-width: 0; }
+    .salary-table thead th { padding: 0.65rem 0.75rem; font-size: 0.65rem; }
+    .salary-table td { padding: 0.7rem 0.75rem; }
+    .salary-table td:first-child { min-width: 0; white-space: normal; word-break: break-word; font-size: 0.78rem; }
+    .salary-range { font-size: 0.8rem; }
+    .salary-badge { font-size: 0.62rem; padding: 0.15rem 0.45rem; }
   }
 </style>
 </head>
@@ -481,44 +489,44 @@
           <tr>
             <td>Graduate / Assistant Ecologist</td>
             <td>0–2 years</td>
-            <td class="salary-range">£24,000 – £28,000</td>
+            <td class="salary-range">£22,000 – £28,000</td>
             <td><span class="salary-badge badge-growing">Stable</span></td>
           </tr>
           <tr>
             <td>Ecologist / Consultant</td>
             <td>2–4 years</td>
-            <td class="salary-range">£30,000 – £35,000</td>
+            <td class="salary-range">£28,000 – £34,000</td>
             <td><span class="salary-badge badge-growing">Growing</span></td>
           </tr>
           <tr>
             <td>Senior Ecologist</td>
             <td>4–7 years</td>
-            <td class="salary-range">£40,000 – £45,000</td>
+            <td class="salary-range">£37,000 – £43,000</td>
             <td><span class="salary-badge badge-high">High demand</span></td>
           </tr>
           <tr>
             <td>Principal Ecologist</td>
             <td>7–12 years</td>
-            <td class="salary-range">£52,000 – £57,000</td>
+            <td class="salary-range">£48,000 – £54,000</td>
             <td><span class="salary-badge badge-high">High demand</span></td>
           </tr>
           <tr>
             <td>Associate / Technical Director</td>
             <td>10–15 years</td>
-            <td class="salary-range">£65,000 – £70,000</td>
+            <td class="salary-range">£60,000 – £66,000</td>
             <td><span class="salary-badge badge-strong">Competitive</span></td>
           </tr>
           <tr>
             <td>Associate Director / Director</td>
             <td>15+ years</td>
-            <td class="salary-range">£82,000 – £87,000</td>
+            <td class="salary-range">£75,000 – £81,000</td>
             <td><span class="salary-badge badge-strong">Competitive</span></td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <p>The Senior Ecologist band is the most active part of the market right now and the hardest level to hire at. Candidates with CIEEM membership, UKHab survey experience, and Defra Metric competency sit at the top end of the £40k–£45k range or above it, particularly in London and the South East.</p>
+    <p>The Senior Ecologist band is the most active part of the market right now and the hardest level to hire at. Candidates with CIEEM membership, UKHab survey experience, and Defra Metric competency sit at the top end of the £37k–£43k range or above it, particularly in London and the South East.</p>
 
     <hr class="divider">
 
@@ -538,44 +546,44 @@
         <tbody>
           <tr>
             <td>London</td>
-            <td class="salary-range">£43,000 – £48,000</td>
-            <td class="salary-range">£57,000 – £62,000</td>
+            <td class="salary-range">£42,000 – £48,000</td>
+            <td class="salary-range">£55,000 – £61,000</td>
             <td>+15–20%</td>
           </tr>
           <tr>
             <td>South East</td>
-            <td class="salary-range">£41,000 – £46,000</td>
-            <td class="salary-range">£54,000 – £59,000</td>
+            <td class="salary-range">£40,000 – £46,000</td>
+            <td class="salary-range">£52,000 – £58,000</td>
             <td>+10–15%</td>
           </tr>
           <tr>
             <td>South West / Bristol</td>
-            <td class="salary-range">£38,000 – £43,000</td>
-            <td class="salary-range">£50,000 – £55,000</td>
+            <td class="salary-range">£37,000 – £43,000</td>
+            <td class="salary-range">£48,000 – £54,000</td>
             <td>+5%</td>
           </tr>
           <tr>
             <td>Midlands</td>
-            <td class="salary-range">£36,000 – £41,000</td>
-            <td class="salary-range">£48,000 – £53,000</td>
+            <td class="salary-range">£35,000 – £41,000</td>
+            <td class="salary-range">£46,000 – £52,000</td>
             <td>Average</td>
           </tr>
           <tr>
             <td>North West / Yorkshire</td>
-            <td class="salary-range">£36,000 – £41,000</td>
-            <td class="salary-range">£47,000 – £52,000</td>
+            <td class="salary-range">£34,000 – £40,000</td>
+            <td class="salary-range">£45,000 – £51,000</td>
             <td>Average</td>
           </tr>
           <tr>
             <td>Scotland</td>
-            <td class="salary-range">£38,000 – £43,000</td>
-            <td class="salary-range">£50,000 – £55,000</td>
+            <td class="salary-range">£36,000 – £42,000</td>
+            <td class="salary-range">£48,000 – £54,000</td>
             <td>Average–+5%</td>
           </tr>
           <tr>
             <td>Wales</td>
-            <td class="salary-range">£35,000 – £40,000</td>
-            <td class="salary-range">£46,000 – £51,000</td>
+            <td class="salary-range">£33,000 – £39,000</td>
+            <td class="salary-range">£44,000 – £50,000</td>
             <td>–5%</td>
           </tr>
         </tbody>
@@ -657,33 +665,33 @@
         <tbody>
           <tr>
             <td>Global tier-1 consultancy</td>
-            <td class="salary-range">£44,000 – £49,000</td>
+            <td class="salary-range">£42,000 – £48,000</td>
             <td>Strong benefits, private medical, pension</td>
           </tr>
           <tr>
             <td>Mid-size specialist consultancy</td>
-            <td class="salary-range">£39,000 – £44,000</td>
+            <td class="salary-range">£37,000 – £43,000</td>
             <td>Good flexibility, faster progression</td>
           </tr>
           <tr>
             <td>Boutique ecology firm (&lt;50 staff)</td>
-            <td class="salary-range">£36,000 – £41,000</td>
+            <td class="salary-range">£34,000 – £40,000</td>
             <td>Varied — some offer profit share</td>
           </tr>
           <tr>
             <td>Developer / energy company (in-house)</td>
-            <td class="salary-range">£46,000 – £51,000</td>
+            <td class="salary-range">£44,000 – £50,000</td>
             <td>Bonus common, less fieldwork</td>
           </tr>
           <tr>
             <td>Local Authority / Public sector</td>
-            <td class="salary-range">£33,000 – £38,000</td>
+            <td class="salary-range">£30,000 – £36,000</td>
             <td>Defined benefit pension, job security</td>
           </tr>
           <tr>
             <td>Contract / freelance (day rate)</td>
-            <td class="salary-range">£300 – £400 per day</td>
-            <td>Equiv. to £78k–£104k if fully utilised</td>
+            <td class="salary-range">£280 – £450 per day</td>
+            <td>Equiv. to £73k–£117k if fully utilised</td>
           </tr>
         </tbody>
       </table>
