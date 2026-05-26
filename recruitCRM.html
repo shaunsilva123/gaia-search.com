@@ -521,7 +521,7 @@ function DashboardPage({setPage}){
         db.from("jobs").select("*",{count:"exact",head:true}),
         db.from("tasks").select("*",{count:"exact",head:true}).eq("done",false),
         db.from("companies").select("*",{count:"exact",head:true}),
-        db.from("candidates").select("id,name,role,status").order("created_at",{ascending:false}).limit(5),
+        db.from("candidates").select("*").order("created_at",{ascending:false}).limit(5),
         // Critical: fetch job_candidates with stage so we can check interview status
         db.from("jobs")
           .select("id,title,salary_value,potential_fee,actual_fee,status,fee_type_override,fee_value_override,companies(name,fee_type,fee_percentage,fee_fixed),job_candidates(id,stage)")
