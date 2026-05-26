@@ -133,6 +133,26 @@ async function claude(system,user,onChunk){
   }
 }
 
+// ── Copy Button ────────────────────────────────────────────────────────────
+function CopyButton({text}){
+  const [copied,setCopied]=useState(false);
+  const copy=()=>{
+    navigator.clipboard?.writeText(text).then(()=>{
+      setCopied(true);setTimeout(()=>setCopied(false),2000);
+    });
+  };
+  return <button onClick={copy} title={copied?"Copied!":"Copy email"} style={{
+    background:copied?"#eaf3de":"var(--bg2)",
+    border:`0.5px solid ${copied?"#97c459":"var(--brm)"}`,
+    borderRadius:7,padding:"0 10px",cursor:"pointer",
+    color:copied?"#3b6d11":"var(--t2)",fontSize:13,
+    display:"flex",alignItems:"center",gap:4,flexShrink:0,
+    transition:"all 0.2s",whiteSpace:"nowrap"
+  }}>
+    {copied?"✓":"📋"}
+  </button>;
+}
+
 // ── Modals ─────────────────────────────────────────────────────────────────
 function CandModal({cand,onClose,onSaved}){
   const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:""};
@@ -156,7 +176,10 @@ function CandModal({cand,onClose,onSaved}){
         <div><label>Role</label><input type="text" value={f.role||""} onChange={s("role")} placeholder="Data Analyst"/></div>
       </div>
       <div className="fr2">
-        <div><label>Email</label><input type="email" value={f.email||""} onChange={s("email")} placeholder="sophie@email.com"/></div>
+        <div><label>Email</label><div style={{display:"flex",gap:6}}>
+          <input type="email" value={f.email||""} onChange={s("email")} placeholder="sophie@email.com" style={{flex:1}}/>
+          {f.email&&<CopyButton text={f.email}/>}
+        </div></div>
         <div><label>Phone</label><input type="tel" value={f.phone||""} onChange={s("phone")} placeholder="+44 7700 000000"/></div>
       </div>
       <div className="fr2">
@@ -923,7 +946,7 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Contact</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
-            {[["📧 Email",c.email],["📞 Phone",c.phone],["📍 Location",c.location],["⏱ Notice",c.notice]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1,wordBreak:"break-all"}}>{v}</div></div>:null)}
+            {[["📧 Email",c.email,true],["📞 Phone",c.phone],["📍 Location",c.location],["⏱ Notice",c.notice]].map(([l,v,canCopy])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1,wordBreak:"break-all",display:"flex",alignItems:"center",gap:6}}>{v}{canCopy&&<CopyButton text={v}/>}</div></div>:null)}
           </div>
         </div>
         {/* Details */}
