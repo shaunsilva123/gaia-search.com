@@ -665,7 +665,7 @@ function DashboardPage({setPage}){
       <Panel title="Recent candidates" actions={<button className="btn-o" style={{fontSize:11,padding:"3px 8px"}} onClick={()=>setPage("candidates")}>View all</button>}>
         {loading?<Spin/>:recent.length===0
           ?<div style={{padding:"28px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet.</div>
-          :<div>{recent.map(c=><div key={c.id} onClick={()=>{setPage("candidates");setTimeout(()=>window.dispatchEvent(new CustomEvent("openCandidate",{detail:c})),120);}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+          :<div>{recent.map(c=><div key={c.id} onClick={()=>{window._pendingOpenCandidate=c;setPage("candidates");setTimeout(()=>window.dispatchEvent(new CustomEvent("openCandidate",{detail:c})),400);}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
             <Av name={c.name}/><div style={{flex:1}}><div style={{fontWeight:500,color:ACCENT,fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div>
             <Pill label={c.status||"New"}/>
           </div>)}</div>}
@@ -1033,7 +1033,10 @@ function CandidatesPage(){
 
   // Listen for openCandidate event fired from Dashboard
   useEffect(()=>{
-    const h=e=>{if(e.detail)setDetailCand(e.detail);};
+    // Check if there's a pending candidate queued before we mounted
+    const pending=window._pendingOpenCandidate;
+    if(pending){window._pendingOpenCandidate=null;setDetailCand(pending);}
+    const h=e=>{if(e.detail){setDetailCand(e.detail);window._pendingOpenCandidate=null;}};
     window.addEventListener("openCandidate",h);
     return()=>window.removeEventListener("openCandidate",h);
   },[]);
