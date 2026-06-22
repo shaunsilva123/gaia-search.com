@@ -6,7 +6,7 @@
 <title>recruitCRM — AI Powered</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("MadIajEVnrBSCAMNb");</script>
@@ -62,7 +62,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 const {useState,useCallback,useEffect,Fragment} = React;
 
 const SUPABASE_URL = "https://wnzpeyrdtdxcodeezqxb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_nH49MFdJkjkc0GXTk_Z9rw_02yreXHN";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduenBleXJkdGR4Y29kZWV6cXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjkyNzksImV4cCI6MjA5NDAwNTI3OX0.zd1AdzDm7S2qzA2xsXZatE1nJynAT3j2tN-tp2g6xlA";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ACCENT = "#4f6ef7";
