@@ -9,6 +9,12 @@
 <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.26.0/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Reads text out of CVs so they can be searched -->
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script>
+  if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+</script>
 <script>emailjs.init("MadIajEVnrBSCAMNb");</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,6 +166,32 @@ function CoLogo({company,size=30}){
 }
 // CVs live in a PRIVATE bucket. We never link to them directly — a short-lived
 // signed link is minted on demand so a leaked URL cannot expose someone's CV.
+// Pull readable text out of a CV so Postgres can index it.
+// Returns "" rather than throwing — a CV that will not parse should still upload.
+async function extractFileText(fileOrBlob,filename){
+  const name=(filename||fileOrBlob.name||"").toLowerCase();
+  try{
+    const buf=await fileOrBlob.arrayBuffer();
+    if(name.endsWith(".pdf")){
+      if(!window.pdfjsLib) return "";
+      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+      let out=[];
+      for(let i=1;i<=pdf.numPages;i++){
+        const page=await pdf.getPage(i);
+        const tc=await page.getTextContent();
+        out.push(tc.items.map(it=>it.str).join(" "));
+      }
+      return out.join("\n").replace(/\s+/g," ").trim();
+    }
+    if(name.endsWith(".docx")){
+      if(!window.mammoth) return "";
+      const r=await mammoth.extractRawText({arrayBuffer:buf});
+      return (r.value||"").replace(/\s+/g," ").trim();
+    }
+    // .doc and anything else: best effort as plain text
+    return new TextDecoder("utf-8",{fatal:false}).decode(buf).replace(/[^\x20-\x7E\n]+/g," ").replace(/\s+/g," ").trim();
+  }catch(e){ console.warn("CV text extraction failed",e); return ""; }
+}
 function cvStoragePath(c){
   if(!c) return null;
   if(c.cv_path) return c.cv_path;
@@ -1063,7 +1095,8 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
     if(upErr){setCvErr(upErr.message);setCvUploading(false);return;}
     const{data:urlData}=db.storage.from("candidate-cvs").getPublicUrl(path);
     const url=urlData?.publicUrl;
-    const{error:dbErr}=await db.from("candidates").update({cv_url:url,cv_path:path,cv_filename:file.name}).eq("id",cand.id);
+    const cvText=await extractFileText(file,file.name);
+    const{error:dbErr}=await db.from("candidates").update({cv_url:url,cv_path:path,cv_filename:file.name,cv_text:cvText||null}).eq("id",cand.id);
     if(dbErr){setCvErr(dbErr.message);setCvUploading(false);return;}
     setCvUrl(url);
     cand.cv_url=url;cand.cv_path=path;cand.cv_filename=file.name;
@@ -1075,7 +1108,7 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
     if(!confirm("Remove CV from this candidate?"))return;
     const oldPath=cvStoragePath(cand);
     if(oldPath) await db.storage.from("candidate-cvs").remove([oldPath]);
-    await db.from("candidates").update({cv_url:null,cv_path:null,cv_filename:null}).eq("id",cand.id);
+    await db.from("candidates").update({cv_url:null,cv_path:null,cv_filename:null,cv_text:null}).eq("id",cand.id);
     setCvUrl(null);cand.cv_url=null;cand.cv_path=null;cand.cv_filename=null;
     if(onRefresh)onRefresh();
   };
@@ -1252,8 +1285,55 @@ function CandidatesPage(){
   const statuses=["All",...new Set(rows.map(r=>r.status).filter(Boolean))];
   const ALL_STATUSES=["New","Active","Interview","Offer stage","Placed","On hold","Closed"];
 
+  // Deep search asks Postgres to look inside CV text as well as the fields on
+  // screen. Quotes work for phrases, - excludes a word, OR broadens.
+  const [deep,setDeep]=useState(false);
+  const [deepIds,setDeepIds]=useState(null);
+  const [deepBusy,setDeepBusy]=useState(false);
+  const [deepErr,setDeepErr]=useState("");
+
+  useEffect(()=>{
+    if(!deep||!search.trim()){setDeepIds(null);setDeepErr("");return;}
+    let cancelled=false;
+    setDeepBusy(true);setDeepErr("");
+    const t=setTimeout(async()=>{
+      const{data,error}=await db.from("candidates")
+        .select("id")
+        .textSearch("search_vector",search.trim(),{type:"websearch",config:"english"})
+        .limit(1000);
+      if(cancelled)return;
+      if(error){setDeepErr(error.message);setDeepIds(new Set());}
+      else{setDeepIds(new Set((data||[]).map(r=>r.id)));}
+      setDeepBusy(false);
+    },350);
+    return()=>{cancelled=true;clearTimeout(t);};
+  },[deep,search]);
+
+  // Index CVs that were uploaded before text extraction existed
+  const [indexing,setIndexing]=useState(null);
+  const indexCVs=async()=>{
+    const todo=rows.filter(r=>cvStoragePath(r)&&!r.cv_text);
+    if(todo.length===0){alert("Every CV on file is already indexed.");return;}
+    setIndexing({done:0,total:todo.length});
+    for(let i=0;i<todo.length;i++){
+      const c=todo[i];
+      try{
+        const{data,error}=await db.storage.from("candidate-cvs").download(cvStoragePath(c));
+        if(!error&&data){
+          const text=await extractFileText(data,c.cv_filename||cvStoragePath(c));
+          if(text) await db.from("candidates").update({cv_text:text}).eq("id",c.id);
+        }
+      }catch(e){ console.warn("Could not index CV for",c.name,e); }
+      setIndexing({done:i+1,total:todo.length});
+    }
+    setIndexing(null);
+    load();
+  };
+
   const filtered=rows.filter(r=>{
-    const ms=!search||[r.name,r.role,r.location,r.email].some(v=>v?.toLowerCase().includes(search.toLowerCase()));
+    const ms=deep&&deepIds
+      ?deepIds.has(r.id)
+      :(!search||[r.name,r.role,r.location,r.email].some(v=>v?.toLowerCase().includes(search.toLowerCase())));
     const mf=statusF==="All"||r.status===statusF;return ms&&mf;
   });
 
@@ -1290,12 +1370,26 @@ function CandidatesPage(){
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Candidates ({filtered.length})</span>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-        <input type="text" placeholder="Search… (or press N)" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
+        <input type="text" placeholder={deep?"Search names, skills and CV text…":"Search… (or press N)"} value={search} onChange={e=>setSearch(e.target.value)} style={{width:deep?260:200}}/>
+        <button className={deep?"btn-a":"btn-o"} style={{fontSize:12,padding:"6px 12px"}}
+          onClick={()=>setDeep(d=>!d)}
+          title="Also search the text inside uploaded CVs">
+          {deepBusy?<><span className="spin"></span>Searching…</>:"🔍 Search CVs"}
+        </button>
         <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{width:"auto"}}>{statuses.map(s=><option key={s}>{s}</option>)}</select>
         <button className="btn-o" style={{fontSize:12}} onClick={exportCSV} title="Export to CSV">⬇ Export CSV</button>
         <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate <span style={{opacity:0.6,fontSize:10,marginLeft:2}}>N</span></button>
       </div>
     </div>
+    {deep&&<div style={{background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"8px 14px",marginBottom:10,fontSize:12,color:"var(--t2)",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+      <span>Searching inside CV text. <strong>"bat licence"</strong> for an exact phrase, <strong>-junior</strong> to exclude, <strong>bats OR newts</strong> to broaden.</span>
+      <span style={{flex:1}}/>
+      {indexing
+        ?<span style={{color:"var(--g-deep)"}}><span className="spin"></span>Indexing CV {indexing.done} of {indexing.total}…</span>
+        :<button className="btn-o" style={{fontSize:11,padding:"3px 10px"}} onClick={indexCVs}>Index CVs uploaded earlier</button>}
+    </div>}
+    {deepErr&&<Err msg={deepErr}/>}
+
     {selected.size>0&&<div style={{background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"8px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <span style={{fontSize:13,fontWeight:500,color:ACCENT}}>{selected.size} selected</span>
       <select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)} style={{width:"auto",fontSize:12}}>
