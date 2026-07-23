@@ -1258,13 +1258,57 @@ function ContactModal({contact, companyId, companyName, onClose, onSaved}){
 }
 
 // ── Company Detail Panel ───────────────────────────────────────────────────
-function CompanyDetailPanel({company, onClose, onEdit}){
+function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
   const [contacts,setContacts]=useState([]);
   const [jobs,setJobs]=useState([]);
   const [loading,setLoading]=useState(true);
   const [contactModal,setContactModal]=useState(false);
   const [editContact,setEditContact]=useState(null);
   const c=company;
+  // Terms of business document
+  const tobRef=React.useRef(null);
+  const [tobPath,setTobPath]=useState(company?.terms_doc_path||null);
+  const [tobName,setTobName]=useState(company?.terms_doc_filename||null);
+  const [tobUploading,setTobUploading]=useState(false);
+  const [tobErr,setTobErr]=useState("");
+
+  const uploadToB=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    if(file.size>10*1024*1024){setTobErr("File too large (max 10MB)");return;}
+    setTobUploading(true);setTobErr("");
+    const ext=(file.name.split(".").pop()||"pdf").toLowerCase();
+    const path=`terms/${c.id}_${Date.now()}.${ext}`;
+    const{error:upErr}=await db.storage.from("company-docs").upload(path,file,{upsert:true,contentType:file.type});
+    if(upErr){setTobErr(upErr.message);setTobUploading(false);return;}
+    const{error:dbErr}=await db.from("companies")
+      .update({terms_doc_path:path,terms_doc_filename:file.name}).eq("id",c.id);
+    if(dbErr){setTobErr(dbErr.message);setTobUploading(false);return;}
+    setTobPath(path);setTobName(file.name);
+    c.terms_doc_path=path;c.terms_doc_filename=file.name;
+    setTobUploading(false);
+    if(e.target)e.target.value="";
+    if(onRefresh)onRefresh();
+  };
+
+  // The bucket is private, so generate a short-lived signed link on demand.
+  // The tab is opened first, synchronously, so pop-up blockers don't stop it.
+  const viewToB=async()=>{
+    if(!tobPath)return;
+    const tab=window.open("","_blank");
+    const{data,error}=await db.storage.from("company-docs").createSignedUrl(tobPath,3600);
+    if(error||!data?.signedUrl){setTobErr(error?.message||"Could not open document");if(tab)tab.close();return;}
+    if(tab)tab.location.href=data.signedUrl; else window.location.href=data.signedUrl;
+  };
+
+  const removeToB=async()=>{
+    if(!confirm("Remove the terms of business document for this company?"))return;
+    if(tobPath) await db.storage.from("company-docs").remove([tobPath]);
+    await db.from("companies").update({terms_doc_path:null,terms_doc_filename:null}).eq("id",c.id);
+    setTobPath(null);setTobName(null);
+    c.terms_doc_path=null;c.terms_doc_filename=null;
+    if(onRefresh)onRefresh();
+  };
 
   const loadContacts=useCallback(async()=>{
     setLoading(true);
@@ -1336,15 +1380,31 @@ function CompanyDetailPanel({company, onClose, onEdit}){
                 <div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div>
               </div>:null)}
             </div>
-            {c.terms_doc_url&&<div style={{marginTop:10}}>
-              <a href={c.terms_doc_url} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:ACCENT,textDecoration:"none"}}>📄 View signed terms of business →</a>
-            </div>}
+            {/* Signed ToB document */}
+            <div style={{marginTop:10,paddingTop:10,borderTop:"0.5px solid var(--br)"}}>
+              <div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Signed document</div>
+              <input ref={tobRef} type="file" accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={uploadToB}/>
+              {tobPath
+                ?<div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  <span style={{fontSize:12,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:180}}>📄 {tobName||"Terms of business"}</span>
+                  <button onClick={viewToB} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"3px 10px",fontSize:11,cursor:"pointer",color:ACCENT}}>View ↗</button>
+                  <button onClick={()=>tobRef.current&&tobRef.current.click()} disabled={tobUploading} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"3px 10px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>{tobUploading?"Uploading…":"Replace"}</button>
+                  <button onClick={removeToB} style={{background:"none",border:"0.5px solid #f09595",borderRadius:6,padding:"3px 9px",fontSize:11,cursor:"pointer",color:"#a32d2d"}}>✕</button>
+                </div>
+                :<button onClick={()=>tobRef.current&&tobRef.current.click()} disabled={tobUploading} style={{background:"none",border:"1px dashed var(--brm)",borderRadius:7,padding:"9px 12px",fontSize:12,cursor:"pointer",color:"var(--t2)",width:"100%"}}>
+                  {tobUploading?<><span className="spin"></span>Uploading…</>:"⬆ Upload signed ToB (PDF or Word)"}
+                </button>}
+              {c.terms_doc_url&&<div style={{marginTop:7}}>
+                <a href={c.terms_doc_url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:ACCENT,textDecoration:"none"}}>🔗 External link to terms →</a>
+              </div>}
+              {tobErr&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>{tobErr}</div>}
+            </div>
             {c.terms_notes&&<div style={{marginTop:10,paddingTop:10,borderTop:"0.5px solid var(--br)"}}>
               <div style={{fontSize:11,color:"var(--t3)",marginBottom:2}}>Other terms</div>
               <div style={{fontSize:12,color:"var(--t1)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{c.terms_notes}</div>
             </div>}
             {!c.terms_rebate&&!c.terms_payment_days&&!c.terms_notes&&termsStr==="Not set"&&
-              <div style={{fontSize:12,color:"var(--t3)",fontStyle:"italic"}}>No terms recorded yet — click Edit to add them.</div>}
+              <div style={{fontSize:12,color:"var(--t3)",fontStyle:"italic",marginTop:4}}>No terms recorded yet — click Edit to add them.</div>}
           </div>
         </div>
         {/* Contacts */}
@@ -1406,7 +1466,7 @@ function CompaniesPage(){
   return <div>
     {modal&&<CoModal onClose={()=>setModal(false)} onSaved={load}/>}
     {editRow&&<CoModal co={editRow} onClose={()=>setEditRow(null)} onSaved={load}/>}
-    {detailCo&&<CompanyDetailPanel company={detailCo} onClose={()=>setDetailCo(null)} onEdit={c=>{setDetailCo(null);setEditRow(c);}}/>}
+    {detailCo&&<CompanyDetailPanel company={detailCo} onClose={()=>setDetailCo(null)} onEdit={c=>{setDetailCo(null);setEditRow(c);}} onRefresh={load}/>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Companies ({rows.length})</span>
       <button className="btn-a" onClick={()=>setModal(true)}>+ Add company</button>
@@ -1424,7 +1484,7 @@ function CompaniesPage(){
           <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
           <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_signed
             ?<div style={{fontSize:11,color:"#3b6d11"}}>✓ ToB signed{c.terms_signed_date?` ${c.terms_signed_date}`:""}</div>
-            :<div style={{fontSize:11,color:"#854f0b"}}>ToB not signed</div>}</td>
+            :<div style={{fontSize:11,color:"#854f0b"}}>ToB not signed</div>}{c.terms_doc_path&&<div style={{fontSize:10,color:"var(--t3)"}}>📄 Document on file</div>}</td>
           <td className="td"><Pill label={c.status||"Active"}/></td>
           <td className="td"><ContactCount companyId={c.id}/></td>
           <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
