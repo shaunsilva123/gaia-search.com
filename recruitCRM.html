@@ -1271,6 +1271,7 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
   const [tobName,setTobName]=useState(company?.terms_doc_filename||null);
   const [tobUploading,setTobUploading]=useState(false);
   const [tobErr,setTobErr]=useState("");
+  const [tobSigned,setTobSigned]=useState(!!company?.terms_signed);
 
   const uploadToB=async(e)=>{
     const file=e.target.files[0];
@@ -1281,11 +1282,13 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
     const path=`terms/${c.id}_${Date.now()}.${ext}`;
     const{error:upErr}=await db.storage.from("company-docs").upload(path,file,{upsert:true,contentType:file.type});
     if(upErr){setTobErr(upErr.message);setTobUploading(false);return;}
+    // Uploading a signed document implies the terms are signed. The date is
+    // left blank on purpose — the upload date is not the signature date.
     const{error:dbErr}=await db.from("companies")
-      .update({terms_doc_path:path,terms_doc_filename:file.name}).eq("id",c.id);
+      .update({terms_doc_path:path,terms_doc_filename:file.name,terms_signed:true}).eq("id",c.id);
     if(dbErr){setTobErr(dbErr.message);setTobUploading(false);return;}
-    setTobPath(path);setTobName(file.name);
-    c.terms_doc_path=path;c.terms_doc_filename=file.name;
+    setTobPath(path);setTobName(file.name);setTobSigned(true);
+    c.terms_doc_path=path;c.terms_doc_filename=file.name;c.terms_signed=true;
     setTobUploading(false);
     if(e.target)e.target.value="";
     if(onRefresh)onRefresh();
@@ -1363,8 +1366,8 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
             <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Terms of business</div>
             <span style={{fontSize:10,fontWeight:500,borderRadius:10,padding:"2px 9px",
-              background:c.terms_signed?"#eaf3de":"#faeeda",color:c.terms_signed?"#3b6d11":"#854f0b"}}>
-              {c.terms_signed?"✓ Signed":"Not signed"}
+              background:tobSigned?"#eaf3de":"#faeeda",color:tobSigned?"#3b6d11":"#854f0b"}}>
+              {tobSigned?"✓ Signed":"Not signed"}
             </span>
           </div>
           <div style={{background:"var(--bg2)",borderRadius:8,padding:"12px 14px"}}>
@@ -1396,6 +1399,9 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
                 </button>}
               {c.terms_doc_url&&<div style={{marginTop:7}}>
                 <a href={c.terms_doc_url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:ACCENT,textDecoration:"none"}}>🔗 External link to terms →</a>
+              </div>}
+              {tobPath&&!c.terms_signed_date&&<div style={{fontSize:11,color:"var(--t3)",marginTop:6}}>
+                Marked as signed. Add the date it was signed via Edit.
               </div>}
               {tobErr&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>{tobErr}</div>}
             </div>
