@@ -12,15 +12,15 @@
 <script>emailjs.init("MadIajEVnrBSCAMNb");</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
-:root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#4f6ef7;
+body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
+:root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#2e7a2c;
 /* Gaia Search brand — sampled from the logo */
 --g-cream:var(--bg);--g-cream2:rgba(17,17,17,0.08);--g-ink:#111111;--g-deep:#2e7a2c;--g-green:#5fa92b;--g-lime:#a0d045;
 --g-rule:rgba(17,17,17,0.12);--g-mute:rgba(17,17,17,0.5);--g-face:'Archivo',-apple-system,'Segoe UI',sans-serif}
-body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8eaf0;--t2:#8b91a8;--t3:#555d78;--br:rgba(255,255,255,0.08);--brm:rgba(255,255,255,0.15);--acc:#6b8bff;
+body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8eaf0;--t2:#8b91a8;--t3:#555d78;--br:rgba(255,255,255,0.08);--brm:rgba(255,255,255,0.15);--acc:#8cc750;
 --g-cream:var(--bg);--g-cream2:rgba(255,255,255,0.1);--g-ink:#e8eaf0;--g-deep:#8cc750;--g-green:#a0d045;--g-lime:#c3e57a;
 --g-rule:rgba(242,237,212,0.16);--g-mute:rgba(242,237,212,0.6)}
 body.dark .banner{background:#2a2200;border-color:#7a5c00;color:#f0c040}
@@ -31,21 +31,21 @@ select,input,button,textarea{font-family:inherit}
 select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b68' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px!important}
 select,input[type=text],input[type=password],input[type=email],input[type=tel],input[type=date],textarea{width:100%;padding:7px 10px;border:0.5px solid var(--brm);border-radius:7px;font-size:13px;color:var(--t1);background:var(--bg);outline:none}
 textarea{resize:vertical;min-height:70px}
-select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(79,110,247,0.15)}
+select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(95,169,43,0.22)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid #c0c8ff;border-top-color:#4f6ef7;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:-2px;margin-right:5px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(95,169,43,0.3);border-top-color:var(--acc);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:-2px;margin-right:5px}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:10px}
 .banner{width:100%;background:#fff3cd;border-bottom:0.5px solid #ffc107;padding:8px 20px;font-size:12px;color:#856404;display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-sizing:border-box}
 .banner input{width:240px;font-size:12px;padding:5px 9px}
-.banner button{background:#4f6ef7;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+.banner button{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
 .modal{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;border:0.5px solid var(--br)}
 .modal h3{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:16px}
 .fr{margin-bottom:12px}
 .fr label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.btn-a{background:#4f6ef7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-a{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn-a:disabled{opacity:0.6;cursor:default}
 .btn-o{background:transparent;border:0.5px solid var(--brm);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--t1);display:inline-flex;align-items:center;gap:5px}
 .btn-o:hover{background:var(--bg2)}
@@ -60,7 +60,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .g-stat{background:var(--g-cream);border:0.5px solid var(--br);border-radius:12px;padding:14px 16px}
 .g-stat .r{height:2px;width:22px;background:var(--g-green);border-radius:2px;margin-bottom:9px}
 @media (max-width:760px){.g-num{letter-spacing:-1px}}
-.th{text-align:left;font-size:11px;font-weight:500;color:var(--t2);padding:8px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:0.4px}
+.th{text-align:left;font-family:var(--g-face);font-size:10px;font-weight:700;color:var(--g-mute);padding:9px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:1.2px}
 .td{padding:10px 12px;border-bottom:0.5px solid var(--br);color:var(--t1);font-size:13px;vertical-align:middle}
 </style>
 </head>
@@ -82,7 +82,7 @@ const SUPABASE_URL = "https://wnzpeyrdtdxcodeezqxb.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduenBleXJkdGR4Y29kZWV6cXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjkyNzksImV4cCI6MjA5NDAwNTI3OX0.zd1AdzDm7S2qzA2xsXZatE1nJynAT3j2tN-tp2g6xlA";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const ACCENT = "#4f6ef7";
+const ACCENT = "#2e7a2c";
 
 // ─── LOGO PROVIDER ────────────────────────────────────────────────────────
 // Paste ONE publishable key below to get real company logos. Leave both blank
@@ -104,8 +104,8 @@ const BRANDFETCH_CLIENT_ID = ""; // from brandfetch.com → client ID
 const SIDEBAR = "#1a1f2e";
 
 const PILL_MAP = {
-  "New":{bg:"#eef1ff",fg:"#4f6ef7"},"Active":{bg:"#eaf3de",fg:"#3b6d11"},
-  "Offer stage":{bg:"#eef1ff",fg:"#4f6ef7"},"Placed":{bg:"#e1f5ee",fg:"#0f6e56"},
+  "New":{bg:"#eef0f4",fg:"#5b6577"},"Active":{bg:"#eaf3de",fg:"#3b6d11"},
+  "Offer stage":{bg:"#eef0f4",fg:"#5b6577"},"Placed":{bg:"#e1f5ee",fg:"#0f6e56"},
   "Interview":{bg:"#fbeaf0",fg:"#993556"},"Pipeline":{bg:"#faeeda",fg:"#854f0b"},
   "Open":{bg:"#eaf3de",fg:"#3b6d11"},"Filled":{bg:"#e1f5ee",fg:"#0f6e56"},
   "On hold":{bg:"#faeeda",fg:"#854f0b"},"Cold":{bg:"#f1efe8",fg:"#5f5e5a"},
@@ -113,7 +113,7 @@ const PILL_MAP = {
 };
 
 const AV_COLORS = [
-  {bg:"#eef1ff",fg:"#4f6ef7"},{bg:"#eaf3de",fg:"#3b6d11"},{bg:"#fbeaf0",fg:"#993556"},
+  {bg:"#eef0f4",fg:"#5b6577"},{bg:"#eaf3de",fg:"#3b6d11"},{bg:"#fbeaf0",fg:"#993556"},
   {bg:"#e6f1fb",fg:"#185fa5"},{bg:"#faece7",fg:"#993c1d"},{bg:"#e1f5ee",fg:"#0f6e56"},
   {bg:"#faeeda",fg:"#854f0b"},{bg:"#eeedfe",fg:"#534ab7"},
 ];
@@ -470,7 +470,7 @@ function JobModal({job,companies,onClose,onSaved}){
           </select>
           <input type="text" value={f.fee_value_override||""} onChange={s("fee_value_override")} placeholder={f.fee_type_override==="percentage"?"e.g. 20":"e.g. 9000"} style={{flex:1}}/>
         </div>}
-        {potFee&&<div style={{marginTop:10,background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:7,padding:"8px 12px",fontSize:13,color:"#4f6ef7"}}>
+        {potFee&&<div style={{marginTop:10,background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:7,padding:"8px 12px",fontSize:13,color:"#2e7a2c"}}>
           💰 Potential fee: <strong>£{potFee.toLocaleString()}</strong>
           {effFeeType==="percentage"&&<span style={{fontSize:11,color:"#7f77dd",marginLeft:6}}>({effFeeVal}% × £{parseFloat(f.salary_value||0).toLocaleString()})</span>}
         </div>}
@@ -715,7 +715,7 @@ function DashboardPage({setPage}){
   useEffect(()=>{ loadData(); const id=setInterval(loadData,60000); return()=>clearInterval(id); },[loadData]);
 
   const statCards=[
-    {l:"Candidates",v:loading?"…":stats.c,col:"#4f6ef7"},
+    {l:"Candidates",v:loading?"…":stats.c,col:"#5b6577"},
     {l:"Active jobs",v:loading?"…":stats.j,col:"#1d9e75"},
     {l:"Companies",v:loading?"…":stats.co,col:"#ba7517"},
     {l:"Pending tasks",v:loading?"…":stats.t,col:"#993556"},
@@ -1087,7 +1087,7 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>CV / Resume</div>
           {cvUrl
-            ?<div style={{background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+            ?<div style={{background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
                   <span style={{fontSize:18}}>📄</span>
                   <div style={{minWidth:0}}>
@@ -1133,7 +1133,7 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
         {(c.skills||[]).length>0&&<div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Skills</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-            {(c.skills||[]).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:11,borderRadius:10,padding:"3px 10px"}}>{s}</span>)}
+            {(c.skills||[]).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:11,borderRadius:10,padding:"3px 10px"}}>{s}</span>)}
           </div>
         </div>}
         {/* Notes */}
@@ -1274,7 +1274,7 @@ function CandidatesPage(){
         <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate <span style={{opacity:0.6,fontSize:10,marginLeft:2}}>N</span></button>
       </div>
     </div>
-    {selected.size>0&&<div style={{background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"8px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+    {selected.size>0&&<div style={{background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"8px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <span style={{fontSize:13,fontWeight:500,color:ACCENT}}>{selected.size} selected</span>
       <select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)} style={{width:"auto",fontSize:12}}>
         <option value="">Change status…</option>
@@ -1316,7 +1316,7 @@ function CandidatesPage(){
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
             <td className="td"><span style={{fontSize:11,color:lcColor,fontWeight:ds!==null?500:400}}>{ds===null?"Never":ds===0?"Today":ds===1?"Yesterday":`${ds}d ago`}</span></td>
-            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,2).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
+            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
             <td className="td"><Pill label={c.status||"New"}/></td>
             <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
               {c.linkedin&&<a href={c.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" style={{background:"#0a66c2",color:"#fff",borderRadius:6,padding:"3px 7px",fontSize:11,textDecoration:"none",display:"inline-flex",alignItems:"center"}}>in</a>}
@@ -1716,7 +1716,7 @@ function HotlistsPage(){
         :<div style={{display:"flex",flexDirection:"column",gap:6}}>
           {lists.map(l=>{
             const cnt=(l.hotlist_candidates||[]).length;
-            return <div key={l.id} onClick={()=>openList(l)} style={{background:activeList?.id===l.id?"#eef1ff":"var(--bg2)",border:`0.5px solid ${activeList?.id===l.id?ACCENT:"var(--br)"}`,borderRadius:8,padding:"10px 12px",cursor:"pointer",transition:"all 0.15s"}}
+            return <div key={l.id} onClick={()=>openList(l)} style={{background:activeList?.id===l.id?"rgba(95,169,43,0.12)":"var(--bg2)",border:`0.5px solid ${activeList?.id===l.id?ACCENT:"var(--br)"}`,borderRadius:8,padding:"10px 12px",cursor:"pointer",transition:"all 0.15s"}}
               onMouseOver={e=>{if(activeList?.id!==l.id)e.currentTarget.style.background="var(--bg3)"}}
               onMouseOut={e=>{if(activeList?.id!==l.id)e.currentTarget.style.background="var(--bg2)"}}>
               <div style={{fontWeight:500,fontSize:13,color:activeList?.id===l.id?ACCENT:"var(--t1)",marginBottom:2}}>{l.name}</div>
@@ -1770,7 +1770,7 @@ function HotlistsPage(){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}{c.cv_url&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
                   <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
                   <Pill label={c.status||"New"}/>
@@ -1843,10 +1843,10 @@ function JobsPage({onOpenJob}){
       {/* Fee bar */}
       <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
         {potFee
-          ?<div style={{display:"flex",alignItems:"center",gap:6,background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"6px 12px"}}>
+          ?<div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"6px 12px"}}>
             <span style={{fontSize:16}}>💰</span>
             <div>
-              <div style={{fontSize:13,fontWeight:500,color:"#4f6ef7"}}>£{potFee.toLocaleString()} potential fee</div>
+              <div style={{fontSize:13,fontWeight:500,color:"#2e7a2c"}}>£{potFee.toLocaleString()} potential fee</div>
               {termsStr&&<div style={{fontSize:11,color:"#7f77dd"}}>{termsStr}{j.fee_type_override?" (overridden)":co.name?` · ${co.name} terms`:""}</div>}
             </div>
           </div>
@@ -1945,7 +1945,7 @@ function AddCandToJobModal({job, existingIds, onClose, onAdded}){
           ?<div style={{padding:"20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>{search?"No results.":"All candidates already added to this job."}</div>
           :filtered.map(c=>{
             const sel=selected.includes(c.id);
-            return <div key={c.id} onClick={()=>toggle(c.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer",background:sel?"#eef1ff":"transparent"}}>
+            return <div key={c.id} onClick={()=>toggle(c.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer",background:sel?"rgba(95,169,43,0.12)":"transparent"}}>
               <div style={{width:18,height:18,borderRadius:4,border:`1.5px solid ${sel?ACCENT:"var(--brm)"}`,background:sel?ACCENT:"transparent",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                 {sel&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
               </div>
@@ -1975,7 +1975,7 @@ const STAGES=["Applied","Screening","Interview","2nd Interview","Offer","Placed"
 // Rejected is an outcome, not a funnel step — excluded from the progress bar
 const FUNNEL_STAGES=STAGES.filter(s=>s!=="Rejected");
 const STAGE_COLORS={
-  "Applied":    {bg:"#eef1ff",fg:"#4f6ef7",bar:"#4f6ef7"},
+  "Applied":    {bg:"#eef0f4",fg:"#5b6577",bar:"#5b6577"},
   "Screening":  {bg:"#faeeda",fg:"#854f0b",bar:"#ba7517"},
   "Interview":  {bg:"#fbeaf0",fg:"#993556",bar:"#d4537e"},
   "2nd Interview":{bg:"#eeedfe",fg:"#534ab7",bar:"#7f77dd"},
@@ -2383,7 +2383,7 @@ function TasksPage(){
   const PRIORITY_STYLES={
     urgent:{bg:"#fcebeb",fg:"#a32d2d",label:"Urgent"},
     high:{bg:"#faeeda",fg:"#854f0b",label:"High"},
-    normal:{bg:"#eef1ff",fg:"#4f6ef7",label:"Normal"},
+    normal:{bg:"#eef0f4",fg:"#5b6577",label:"Normal"},
     low:{bg:"#f1efe8",fg:"#5f5e5a",label:"Low"},
   };
 
@@ -2577,7 +2577,7 @@ function CVParserPage(){
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI CV parser</span>
       <div style={{display:"flex",gap:6}}>
-        <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+        <span style={{background:"rgba(95,169,43,0.14)",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
         <button className={mode==="existing"?"btn-a":"btn-o"} style={{fontSize:11,padding:"4px 12px"}} onClick={()=>setMode("existing")}>Existing candidate</button>
         <button className={mode==="upload"?"btn-a":"btn-o"} style={{fontSize:11,padding:"4px 12px"}} onClick={()=>setMode("upload")}>Parse new CV</button>
       </div>
@@ -2602,7 +2602,7 @@ function CVParserPage(){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 12px",marginBottom:10}}>
               {[["Email",parsed.email],["Phone",parsed.phone],["Location",parsed.location],["Experience",parsed.experience],["Salary",parsed.salary],["Notice",parsed.notice]].map(([l,v])=><div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}>{v||"—"}</div></div>)}
             </div>
-            {(parsed.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>{(parsed.skills||[]).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
+            {(parsed.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>{(parsed.skills||[]).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
             {parsed.notes&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>Notes</div><div style={{fontSize:12,color:"var(--t2)",lineHeight:1.55,marginBottom:12}}>{parsed.notes}</div></>}
             {saved
               ?<div style={{background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#3b6d11",fontWeight:500}}>✓ Candidate saved to database!</div>
@@ -2635,7 +2635,7 @@ function CVParserPage(){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 12px",marginBottom:10}}>
               {[["Location",sel.location],["Experience",sel.experience],["Salary",sel.salary],["Notice",sel.notice]].map(([l,v])=><div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{v||"—"}</div></div>)}
             </div>
-            {(sel.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(sel.skills||[]).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
+            {(sel.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(sel.skills||[]).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
           </div>
         </Panel>}
       </div>
@@ -2672,7 +2672,7 @@ function MatchingPage(){
   return <div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI job matching</span>
-      <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+      <span style={{background:"rgba(95,169,43,0.14)",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
     </div>
     {dataLoading?<Spin/>:<>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
@@ -2680,7 +2680,7 @@ function MatchingPage(){
           {cands.length===0?<div style={{color:"var(--t3)",fontSize:13}}>No candidates in database.</div>:<>
             <select value={cand?.id||""} onChange={e=>setCand(cands.find(c=>c.id===e.target.value))} style={{marginBottom:10}}>{cands.map(c=><option key={c.id} value={c.id}>{c.name} — {c.role||"?"}</option>)}</select>
             {cand&&<><div style={{display:"flex",alignItems:"center",gap:10}}><Av name={cand.name} size={36}/><div><div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{cand.name}</div><div style={{fontSize:12,color:"var(--t2)"}}>{cand.location||"—"} · {cand.salary||"—"}</div></div></div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:8}}>{(cand.skills||[]).slice(0,4).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div></>}
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:8}}>{(cand.skills||[]).slice(0,4).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div></>}
           </>}
         </div></Panel>
         <Panel title="Job"><div style={{padding:12}}>
@@ -2726,7 +2726,7 @@ function PitchPage(){
   return <div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI pitch writer</span>
-      <span style={{background:"#eef1ff",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
+      <span style={{background:"rgba(95,169,43,0.14)",color:ACCENT,fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 9px"}}>✦ Claude-powered</span>
     </div>
     {dataLoading?<Spin/>:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
       <div style={{display:"flex",flexDirection:"column",gap:12}}>
@@ -2743,7 +2743,7 @@ function PitchPage(){
         {cand&&<div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"13px 15px"}}>
           <div style={{fontSize:11,color:"var(--t2)",marginBottom:8,fontWeight:500}}>Selected candidate</div>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Av name={cand.name} size={36}/><div><div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{cand.name}</div><div style={{fontSize:12,color:"var(--t2)"}}>{cand.location||"—"} · {cand.salary||"—"}</div></div></div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(cand.skills||[]).slice(0,5).map(s=><span key={s} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(cand.skills||[]).slice(0,5).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div>
         </div>}
       </div>
       <Panel title="Generated pitch" badge={pitch&&!loading?<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>:loading?<span style={{fontSize:11,color:ACCENT}}>Writing…</span>:null}>
@@ -2967,7 +2967,7 @@ function CSVImportPage() {
               <td className="td" style={{color:"var(--t2)"}}>{r.role||"—"}</td>
               <td className="td" style={{color:ACCENT,fontSize:12}}>{r.email||"—"}</td>
               <td className="td" style={{color:"var(--t2)"}}>{r.location||"—"}</td>
-              <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(Array.isArray(r.skills)?r.skills:r.skills?r.skills.split(","):[]).slice(0,3).map((s,j)=><span key={j} style={{background:"#eef1ff",color:"#3c3489",fontSize:10,borderRadius:8,padding:"1px 6px"}}>{s.trim()}</span>)}</div></td>
+              <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(Array.isArray(r.skills)?r.skills:r.skills?r.skills.split(","):[]).slice(0,3).map((s,j)=><span key={j} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px"}}>{s.trim()}</span>)}</div></td>
               <td className="td"><Pill label={r.status||"New"}/></td>
             </tr>)}</tbody>
           </table>
@@ -3016,8 +3016,8 @@ function CSVImportPage() {
 // FEATURE 1: BD PIPELINE (Client pipeline board)
 // ============================================================
 const BD_STAGES=["Prospect","Qualified","Proposal Sent","Terms Agreed","Live Client","Cold"];
-const BD_COLORS={"Prospect":"#eef1ff","Qualified":"#faeeda","Proposal Sent":"#e6f1fb","Terms Agreed":"#fbeaf0","Live Client":"#eaf3de","Cold":"#f1efe8"};
-const BD_FG={"Prospect":"#4f6ef7","Qualified":"#854f0b","Proposal Sent":"#185fa5","Terms Agreed":"#993556","Live Client":"#3b6d11","Cold":"#5f5e5a"};
+const BD_COLORS={"Prospect":"#eef0f4","Qualified":"#faeeda","Proposal Sent":"#e6f1fb","Terms Agreed":"#fbeaf0","Live Client":"#eaf3de","Cold":"#f1efe8"};
+const BD_FG={"Prospect":"#5b6577","Qualified":"#854f0b","Proposal Sent":"#185fa5","Terms Agreed":"#993556","Live Client":"#3b6d11","Cold":"#5f5e5a"};
 
 function BDPipelinePage(){
   const [rows,setRows]=useState([]);
@@ -3157,7 +3157,7 @@ function SubmittalsPage(){
   };
 
   const statusColor=st=>({
-    "Submitted":"#eef1ff","Shortlisted":"#faeeda","Interview Booked":"#e6f1fb",
+    "Submitted":"#eef0f4","Shortlisted":"#faeeda","Interview Booked":"#e6f1fb",
     "Offer Made":"#fbeaf0","Placed":"#eaf3de","Rejected":"#fcebeb"
   }[st]||"#f1efe8");
 
@@ -3777,7 +3777,7 @@ function LoginScreen(){
   return(
     <div style={{minHeight:"100vh",width:"100%",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1f2e"}}>
       <div style={{background:"#fff",borderRadius:16,padding:"40px 36px",width:340,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",textAlign:"center"}}>
-        <div style={{fontSize:22,fontWeight:700,color:"#1a1f2e",marginBottom:4,letterSpacing:0.5}}>recruit<span style={{color:"#4f6ef7"}}>CRM</span></div>
+        <div style={{fontSize:22,fontWeight:700,color:"#1a1f2e",marginBottom:4,letterSpacing:0.5}}>recruit<span style={{color:"#8cc750"}}>CRM</span></div>
         <div style={{fontSize:12,color:"#9e9e9b",marginBottom:28}}>Gaia Search · Private Access</div>
         <input
           type="email"
