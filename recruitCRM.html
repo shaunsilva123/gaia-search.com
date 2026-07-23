@@ -158,6 +158,26 @@ function CoLogo({company,size=30}){
     style={{width:size,height:size,borderRadius:"50%",objectFit:"contain",background:"#fff",
       border:"0.5px solid var(--br)",flexShrink:0}}/>;
 }
+// CVs live in a PRIVATE bucket. We never link to them directly — a short-lived
+// signed link is minted on demand so a leaked URL cannot expose someone's CV.
+function cvStoragePath(c){
+  if(!c) return null;
+  if(c.cv_path) return c.cv_path;
+  // Older rows only stored the old public URL — recover the path from it
+  const u=c.cv_url||"";
+  const i=u.indexOf("/candidate-cvs/");
+  return i>=0?u.slice(i+"/candidate-cvs/".length):null;
+}
+function hasCv(c){ return !!cvStoragePath(c); }
+async function openCv(c){
+  const path=cvStoragePath(c);
+  if(!path) return;
+  // Open the tab first, synchronously, or pop-up blockers will stop it
+  const tab=window.open("","_blank");
+  const{data,error}=await db.storage.from("candidate-cvs").createSignedUrl(path,3600);
+  if(error||!data?.signedUrl){ if(tab)tab.close(); alert("Could not open CV: "+(error?.message||"not found")); return; }
+  if(tab)tab.location.href=data.signedUrl; else window.location.href=data.signedUrl;
+}
 function AiTag(){return <span style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,color:ACCENT,marginBottom:6}}>✦ Claude AI</span>;}
 function Err({msg}){return msg?<div className="err">{msg}</div>:null;}
 function Spin(){return <div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}><span className="spin"></span>Loading…</div>;}
@@ -1013,13 +1033,13 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
   const [jobs,setJobs]=useState([]);
   const [loadingActs,setLoadingActs]=useState(true);
   const [cvUploading,setCvUploading]=useState(false);
-  const [cvUrl,setCvUrl]=useState(cand?.cv_url||null);
+  const [cvUrl,setCvUrl]=useState(cvStoragePath(cand));
   const [cvErr,setCvErr]=useState("");
   const cvRef=React.useRef();
 
   useEffect(()=>{
     if(!cand)return;
-    setCvUrl(cand.cv_url||null);
+    setCvUrl(cvStoragePath(cand));
     setLoadingActs(true);
     Promise.all([
       db.from("activity_log").select("*").eq("entity_id",cand.id).order("created_at",{ascending:false}).limit(10),
@@ -1043,18 +1063,20 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
     if(upErr){setCvErr(upErr.message);setCvUploading(false);return;}
     const{data:urlData}=db.storage.from("candidate-cvs").getPublicUrl(path);
     const url=urlData?.publicUrl;
-    const{error:dbErr}=await db.from("candidates").update({cv_url:url,cv_filename:file.name}).eq("id",cand.id);
+    const{error:dbErr}=await db.from("candidates").update({cv_url:url,cv_path:path,cv_filename:file.name}).eq("id",cand.id);
     if(dbErr){setCvErr(dbErr.message);setCvUploading(false);return;}
     setCvUrl(url);
-    cand.cv_url=url;cand.cv_filename=file.name;
+    cand.cv_url=url;cand.cv_path=path;cand.cv_filename=file.name;
     setCvUploading(false);
     if(onRefresh)onRefresh();
   };
 
   const removeCV=async()=>{
     if(!confirm("Remove CV from this candidate?"))return;
-    await db.from("candidates").update({cv_url:null,cv_filename:null}).eq("id",cand.id);
-    setCvUrl(null);cand.cv_url=null;cand.cv_filename=null;
+    const oldPath=cvStoragePath(cand);
+    if(oldPath) await db.storage.from("candidate-cvs").remove([oldPath]);
+    await db.from("candidates").update({cv_url:null,cv_path:null,cv_filename:null}).eq("id",cand.id);
+    setCvUrl(null);cand.cv_url=null;cand.cv_path=null;cand.cv_filename=null;
     if(onRefresh)onRefresh();
   };
 
@@ -1092,11 +1114,11 @@ function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
                   <span style={{fontSize:18}}>📄</span>
                   <div style={{minWidth:0}}>
                     <div style={{fontSize:12,fontWeight:500,color:"#3c3489",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.cv_filename||"CV attached"}</div>
-                    <div style={{fontSize:11,color:"var(--t3)"}}>Click to open</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>Private — opens with a 1-hour link</div>
                   </div>
                 </div>
                 <div style={{display:"flex",gap:6,flexShrink:0}}>
-                  <a href={cvUrl} target="_blank" rel="noreferrer" style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer",textDecoration:"none",display:"inline-flex",alignItems:"center"}}>Open</a>
+                  <button onClick={()=>openCv(cand)} style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>Open</button>
                   <button onClick={()=>cvRef.current?.click()} style={{background:"transparent",border:"0.5px solid var(--brm)",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>Replace</button>
                   <button onClick={removeCV} style={{background:"transparent",border:"0.5px solid #f09595",borderRadius:6,padding:"4px 8px",fontSize:11,cursor:"pointer",color:"#a32d2d"}}>✕</button>
                 </div>
@@ -1310,7 +1332,7 @@ function CandidatesPage(){
             return <tr key={c.id} style={{cursor:"pointer",background:selected.has(c.id)?"#f0f3ff":""}} onClick={()=>setDetailCand(c)}>
             <td className="td" onClick={e=>{e.stopPropagation();toggleSelect(c.id);}}><input type="checkbox" checked={selected.has(c.id)} onChange={()=>toggleSelect(c.id)} style={{cursor:"pointer"}}/></td>
             <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}>
-              <div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}{c.cv_url&&<span title="CV attached" style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
+              <div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}{hasCv(c)&&<span title="CV attached" style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
               {c.email&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}
             </div></div></td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
@@ -1641,7 +1663,7 @@ function HotlistsPage(){
 
   const load=useCallback(async()=>{
     setLoading(true);
-    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,candidates(id,name,role,location,skills,status,cv_url))").order("created_at",{ascending:false});
+    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
     setLists(data||[]);
     if(activeList){
       const updated=(data||[]).find(l=>l.id===activeList.id);
@@ -1768,13 +1790,13 @@ function HotlistsPage(){
               {activeCands.map(c=><div key={c.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
                 <Av name={c.name} size={40}/>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}{c.cv_url&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
+                  <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}{hasCv(c)&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
                   <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
                   <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
                   <Pill label={c.status||"New"}/>
-                  {c.cv_url&&<a href={c.cv_url} target="_blank" rel="noreferrer" style={{fontSize:11,color:ACCENT,textDecoration:"none"}}>View CV ↗</a>}
+                  {hasCv(c)&&<button onClick={()=>openCv(c)} style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>View CV ↗</button>}
                   <button onClick={()=>removeCandidate(c.id)} style={{background:"none",border:"0.5px solid #f09595",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"#a32d2d"}}>Remove</button>
                 </div>
               </div>)}
