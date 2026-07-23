@@ -211,13 +211,22 @@ function CandModal({cand,onClose,onSaved}){
 }
 
 function CoModal({co,onClose,onSaved}){
-  const blank={name:"",industry:"",website:"",notes:"",status:"Active",fee_type:"percentage",fee_percentage:"",fee_fixed:"",terms_notes:""};
+  const blank={name:"",industry:"",website:"",notes:"",status:"Active",fee_type:"percentage",fee_percentage:"",fee_fixed:"",terms_notes:"",terms_signed:false,terms_signed_date:"",terms_rebate:"",terms_payment_days:"",terms_invoice_trigger:"On start date",terms_doc_url:""};
   const [f,setF]=useState(co||blank);const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
   const save=async()=>{
     if(!f.name.trim()){setErr("Company name is required");return;}
     setSaving(true);setErr("");
-    const payload={...f,fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,fee_fixed:f.fee_fixed?parseFloat(f.fee_fixed):null};
+    const payload={...f,
+      fee_percentage:f.fee_percentage?parseFloat(f.fee_percentage):null,
+      fee_fixed:f.fee_fixed?parseFloat(f.fee_fixed):null,
+      terms_signed:f.terms_signed===true||f.terms_signed==="true",
+      terms_signed_date:f.terms_signed_date||null,
+      terms_payment_days:f.terms_payment_days?parseInt(f.terms_payment_days,10):null,
+      terms_rebate:(f.terms_rebate||"").trim()||null,
+      terms_invoice_trigger:(f.terms_invoice_trigger||"").trim()||null,
+      terms_doc_url:(f.terms_doc_url||"").trim()||null,
+    };
     const{error}=co?await db.from("companies").update(payload).eq("id",co.id):await db.from("companies").insert(payload);
     setSaving(false);if(error){setErr(error.message);return;}
     onSaved();onClose();
@@ -259,8 +268,37 @@ function CoModal({co,onClose,onSaved}){
         {termsPreview&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#3b6d11",marginBottom:10}}>
           ✓ Terms: <strong>{termsPreview}</strong>
         </div>}
-        <div className="fr"><label>Terms notes (optional)</label>
-          <input type="text" value={f.terms_notes||""} onChange={s("terms_notes")} placeholder="e.g. Rebate period 12 weeks, invoiced on start date"/>
+        <div className="fr2">
+          <div><label>Rebate / refund period</label>
+            <input type="text" value={f.terms_rebate||""} onChange={s("terms_rebate")} placeholder="e.g. 100% to 4wks, 50% to 8wks"/>
+          </div>
+          <div><label>Payment terms (days)</label>
+            <input type="text" value={f.terms_payment_days||""} onChange={s("terms_payment_days")} placeholder="e.g. 30"/>
+          </div>
+        </div>
+        <div className="fr2">
+          <div><label>Invoice raised</label>
+            <select value={f.terms_invoice_trigger||"On start date"} onChange={s("terms_invoice_trigger")}>
+              {["On start date","On offer acceptance","On candidate signing","End of month of start","Other"].map(x=><option key={x}>{x}</option>)}
+            </select>
+          </div>
+          <div><label>Terms of business signed?</label>
+            <select value={f.terms_signed===true||f.terms_signed==="true"?"true":"false"} onChange={s("terms_signed")}>
+              <option value="false">Not signed yet</option>
+              <option value="true">Signed</option>
+            </select>
+          </div>
+        </div>
+        {(f.terms_signed===true||f.terms_signed==="true")&&<div className="fr2">
+          <div><label>Date signed</label>
+            <input type="date" value={f.terms_signed_date||""} onChange={s("terms_signed_date")}/>
+          </div>
+          <div><label>Link to signed ToB</label>
+            <input type="text" value={f.terms_doc_url||""} onChange={s("terms_doc_url")} placeholder="Drive / Dropbox link"/>
+          </div>
+        </div>}
+        <div className="fr"><label>Other terms / notes</label>
+          <textarea value={f.terms_notes||""} onChange={s("terms_notes")} placeholder="e.g. Fee based on basic salary excluding car allowance. Introductions valid 12 months." style={{minHeight:70}}/>
         </div>
       </div>
       <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")}/></div>
@@ -1273,7 +1311,40 @@ function CompanyDetailPanel({company, onClose, onEdit}){
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Details</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
-            {[["🌐 Website",c.website],["📋 Fee terms",termsStr],["📝 Terms notes",c.terms_notes]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1,wordBreak:"break-all"}}>{v}</div></div>:null)}
+            {[["🌐 Website",c.website]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1,wordBreak:"break-all"}}>{v}</div></div>:null)}
+          </div>
+        </div>
+        {/* Terms of business */}
+        <div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+            <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Terms of business</div>
+            <span style={{fontSize:10,fontWeight:500,borderRadius:10,padding:"2px 9px",
+              background:c.terms_signed?"#eaf3de":"#faeeda",color:c.terms_signed?"#3b6d11":"#854f0b"}}>
+              {c.terms_signed?"✓ Signed":"Not signed"}
+            </span>
+          </div>
+          <div style={{background:"var(--bg2)",borderRadius:8,padding:"12px 14px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"9px 16px"}}>
+              {[
+                ["Fee",termsStr],
+                ["Rebate period",c.terms_rebate],
+                ["Payment terms",c.terms_payment_days?`${c.terms_payment_days} days from invoice`:null],
+                ["Invoice raised",c.terms_invoice_trigger],
+                ["Date signed",c.terms_signed_date],
+              ].map(([l,v])=>v?<div key={l}>
+                <div style={{fontSize:11,color:"var(--t3)"}}>{l}</div>
+                <div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div>
+              </div>:null)}
+            </div>
+            {c.terms_doc_url&&<div style={{marginTop:10}}>
+              <a href={c.terms_doc_url} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:ACCENT,textDecoration:"none"}}>📄 View signed terms of business →</a>
+            </div>}
+            {c.terms_notes&&<div style={{marginTop:10,paddingTop:10,borderTop:"0.5px solid var(--br)"}}>
+              <div style={{fontSize:11,color:"var(--t3)",marginBottom:2}}>Other terms</div>
+              <div style={{fontSize:12,color:"var(--t1)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{c.terms_notes}</div>
+            </div>}
+            {!c.terms_rebate&&!c.terms_payment_days&&!c.terms_notes&&termsStr==="Not set"&&
+              <div style={{fontSize:12,color:"var(--t3)",fontStyle:"italic"}}>No terms recorded yet — click Edit to add them.</div>}
           </div>
         </div>
         {/* Contacts */}
@@ -1351,7 +1422,9 @@ function CompaniesPage(){
         <tbody>{rows.map(c=><tr key={c.id} style={{cursor:"pointer"}} onClick={()=>setDetailCo(c)}>
           <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
           <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
-          <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_notes&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.terms_notes}</div>}</td>
+          <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_signed
+            ?<div style={{fontSize:11,color:"#3b6d11"}}>✓ ToB signed{c.terms_signed_date?` ${c.terms_signed_date}`:""}</div>
+            :<div style={{fontSize:11,color:"#854f0b"}}>ToB not signed</div>}</td>
           <td className="td"><Pill label={c.status||"Active"}/></td>
           <td className="td"><ContactCount companyId={c.id}/></td>
           <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
@@ -1715,7 +1788,9 @@ function AddCandToJobModal({job, existingIds, onClose, onAdded}){
 }
 
 // ── Job Pipeline Page ──────────────────────────────────────────────────────
-const STAGES=["Applied","Screening","Interview","2nd Interview","Offer","Placed"];
+const STAGES=["Applied","Screening","Interview","2nd Interview","Offer","Placed","Rejected"];
+// Rejected is an outcome, not a funnel step — excluded from the progress bar
+const FUNNEL_STAGES=STAGES.filter(s=>s!=="Rejected");
 const STAGE_COLORS={
   "Applied":    {bg:"#eef1ff",fg:"#4f6ef7",bar:"#4f6ef7"},
   "Screening":  {bg:"#faeeda",fg:"#854f0b",bar:"#ba7517"},
@@ -1723,6 +1798,7 @@ const STAGE_COLORS={
   "2nd Interview":{bg:"#eeedfe",fg:"#534ab7",bar:"#7f77dd"},
   "Offer":      {bg:"#e6f1fb",fg:"#185fa5",bar:"#378add"},
   "Placed":     {bg:"#eaf3de",fg:"#3b6d11",bar:"#639922"},
+  "Rejected":   {bg:"#fcebeb",fg:"#a32d2d",bar:"#c94a4a"},
 };
 
 function JobPipelinePage({job, onBack}){
@@ -1756,7 +1832,13 @@ function JobPipelinePage({job, onBack}){
     await db.from("job_candidates").update({stage:newStage}).eq("id",entry.id);
     // Auto-create a submittal when reaching Interview or beyond
     const SUBMITTAL_TRIGGER=["Interview","2nd Interview","Offer","Placed"];
-    if(SUBMITTAL_TRIGGER.includes(newStage)){
+    if(newStage==="Rejected"){
+      // Keep the submittal record in step rather than leaving it showing an
+      // interview that is no longer happening
+      const c=entry.candidates||{};
+      if(c.id) await db.from("submittals").update({status:"Rejected"}).eq("candidate_id",c.id).eq("job_id",job.id);
+    }
+    else if(SUBMITTAL_TRIGGER.includes(newStage)){
       const c=entry.candidates||{};
       const existing=await db.from("submittals").select("id").eq("candidate_id",c.id).eq("job_id",job.id);
       if(!existing.data||existing.data.length===0){
@@ -1951,7 +2033,7 @@ function JobPipelinePage({job, onBack}){
 
     {/* Progress bar */}
     <div style={{display:"flex",height:4,borderRadius:10,overflow:"hidden",marginBottom:16,gap:1}}>
-      {STAGES.map(s=>{
+      {FUNNEL_STAGES.map(s=>{
         const cnt=byStage[s].length,total=entries.length||1;
         return <div key={s} style={{flex:cnt||0.05,background:STAGE_COLORS[s].bar,transition:"flex 0.4s",minWidth:2}}/>;
       })}
