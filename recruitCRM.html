@@ -534,7 +534,7 @@ function DashboardPage({setPage}){
           .or("potential_fee.not.is.null,actual_fee.not.is.null")
           .order("potential_fee",{ascending:false,nullsFirst:false})
           .limit(6),
-        db.from("placements").select("id,fee_amount,payment_received"),
+        db.from("placements").select("id,job_id,job_title,company_name,fee_amount,payment_received"),
       ]);
 
       setStats({c:c.count||0,j:j.count||0,t:t.count||0,co:co.count||0});
@@ -547,24 +547,42 @@ function DashboardPage({setPage}){
 
       // A job qualifies for potential revenue only if at least one candidate
       // in its pipeline has reached Interview, 2nd Interview, Offer, or Placed
-      const interviewQualified=open.filter(job=>{
-        const entries=job.job_candidates||[];
-        return entries.some(e=>INTERVIEW_STAGES.includes(e.stage));
-      });
-
       const placedFromPipeline=open.filter(job=>{
         const entries=job.job_candidates||[];
         return entries.some(e=>e.stage==="Placed");
       });
+      const placedIds=new Set(placedFromPipeline.map(j=>j.id));
+
+      // A job qualifies for POTENTIAL revenue only if a candidate has reached
+      // Interview / 2nd Interview / Offer AND nobody is Placed yet. Once someone
+      // is placed the fee is won, so it belongs in actual — counting it in both
+      // would double it.
+      const interviewQualified=open.filter(job=>{
+        if(placedIds.has(job.id)) return false;
+        const entries=job.job_candidates||[];
+        return entries.some(e=>INTERVIEW_STAGES.includes(e.stage));
+      });
 
       const potential=interviewQualified.reduce((sum,job)=>sum+calcFee(job),0);
 
-      // Actual revenue: use placements table first, fall back to pipeline
-      const placementActual=placements.reduce((sum,p)=>sum+(parseFloat(p.fee_amount)||0),0);
-      const pipelineActual=filled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0)
-        + placedFromPipeline.reduce((sum,job)=>sum+calcFee(job),0);
-      const actual=placementActual>0?placementActual:pipelineActual;
-      const placed=placements.length>0?placements.length:filled.length+placedFromPipeline.length;
+      // Actual revenue = every recorded placement, PLUS any job won in the
+      // pipeline that has no placement record yet (so the number is never
+      // silently wrong while paperwork is outstanding). Jobs already covered by
+      // a placement row are skipped so nothing is counted twice.
+      // Match placements to jobs by id, and also by title+company so that
+      // placements typed in by hand (no job_id) still de-duplicate correctly.
+      const norm=v=>(v||"").toString().trim().toLowerCase();
+      const placementJobIds=new Set(placements.map(p=>p.job_id).filter(Boolean));
+      const placementKeys=new Set(placements.map(p=>norm(p.job_title)+"|"+norm(p.company_name)).filter(k=>k!=="|"));
+      const alreadyRecorded=job=>placementJobIds.has(job.id)
+        ||placementKeys.has(norm(job.title)+"|"+norm(job.companies?.name));
+      const unrecordedPlaced=placedFromPipeline.filter(j=>!alreadyRecorded(j));
+      const unrecordedFilled=filled.filter(j=>!alreadyRecorded(j));
+
+      const actual=placements.reduce((sum,p)=>sum+(parseFloat(p.fee_amount)||0),0)
+        + unrecordedPlaced.reduce((sum,job)=>sum+calcFee(job),0)
+        + unrecordedFilled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0);
+      const placed=placements.length+unrecordedPlaced.length+unrecordedFilled.length;
 
       setRevenue({potential,actual,placed,interviewJobs:interviewQualified});
       setLastRefresh(new Date());
@@ -1715,6 +1733,11 @@ function JobPipelinePage({job, onBack}){
   const [noteText,setNoteText]=useState("");
   const [movingId,setMovingId]=useState(null);
   const [err,setErr]=useState("");
+  // Placement capture — opens automatically when a candidate is moved to Placed
+  const [placeForm,setPlaceForm]=useState(null);
+  const [placeSaving,setPlaceSaving]=useState(false);
+  const [placeErr,setPlaceErr]=useState("");
+  const [placeDone,setPlaceDone]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -1745,7 +1768,82 @@ function JobPipelinePage({job, onBack}){
         });
       }
     }
+    // Moving someone to Placed means the fee is won — capture the placement now
+    // so the Placements page and the dashboard stay in step with the pipeline.
+    if(newStage==="Placed"){
+      const c=entry.candidates||{};
+      const existing=await db.from("placements").select("id").eq("job_id",job.id).eq("candidate_id",c.id);
+      if(!existing.data||existing.data.length===0){
+        const t=jobFeeTerms();
+        setPlaceErr("");
+        setPlaceForm({
+          candidate_id:c.id||"",
+          candidate_name:c.name||"",
+          job_title:job.title||"",
+          company_name:job.companies?.name||"",
+          start_date:"",
+          salary:t.salary,
+          fee_percentage:t.pct,
+          fee_amount:t.fee,
+          invoice_number:"",
+          notes:"",
+        });
+      }
+    }
     setMovingId(null);load();
+  };
+
+  // Work out the fee from the job override, or the client's standard terms
+  const jobFeeTerms=()=>{
+    const co=job.companies||{};
+    const feeType=job.fee_type_override||co.fee_type||"none";
+    const feeVal=job.fee_type_override
+      ?parseFloat(job.fee_value_override||0)
+      :(feeType==="percentage"?parseFloat(co.fee_percentage||0):parseFloat(co.fee_fixed||0));
+    const salNum=parseFloat((job.salary_value||"").toString().replace(/[^0-9.]/g,""));
+    const salary=salNum?String(salNum):"";
+    if(feeType==="fixed"&&feeVal) return{salary,pct:"",fee:String(Math.round(feeVal))};
+    if(feeType==="percentage"&&feeVal) return{salary,pct:String(feeVal),fee:salNum?String(Math.round(salNum*(feeVal/100))):""};
+    return{salary,pct:"",fee:""};
+  };
+
+  // Keep the fee in step when salary or percentage is edited
+  const setPlaceField=(k,v)=>setPlaceForm(prev=>{
+    const next={...prev,[k]:v};
+    if(k==="salary"||k==="fee_percentage"){
+      const sal=parseFloat(String(next.salary).replace(/[^0-9.]/g,""));
+      const pct=parseFloat(next.fee_percentage);
+      if(sal&&pct) next.fee_amount=String(Math.round(sal*(pct/100)));
+    }
+    return next;
+  });
+
+  const savePlacement=async()=>{
+    if(!placeForm)return;
+    if(!placeForm.candidate_name.trim())return setPlaceErr("Candidate name required");
+    setPlaceSaving(true);setPlaceErr("");
+    const{error}=await db.from("placements").insert({
+      candidate_id:placeForm.candidate_id||null,
+      job_id:job.id||null,
+      candidate_name:placeForm.candidate_name.trim(),
+      job_title:placeForm.job_title.trim(),
+      company_name:placeForm.company_name.trim(),
+      start_date:placeForm.start_date||null,
+      salary:placeForm.salary?parseFloat(String(placeForm.salary).replace(/[^0-9.]/g,"")):null,
+      fee_amount:placeForm.fee_amount?parseFloat(String(placeForm.fee_amount).replace(/[^0-9.]/g,"")):null,
+      fee_percentage:placeForm.fee_percentage?parseFloat(placeForm.fee_percentage):null,
+      invoice_number:placeForm.invoice_number.trim()||null,
+      payment_received:false,
+      notes:placeForm.notes.trim()||null,
+    });
+    if(error){setPlaceErr(error.message);}
+    else{
+      const nm=placeForm.candidate_name;
+      setPlaceForm(null);
+      setPlaceDone(`Placement recorded for ${nm} — it will show on the dashboard and Placements page.`);
+      setTimeout(()=>setPlaceDone(""),6000);
+    }
+    setPlaceSaving(false);
   };
 
   const removeFromJob=async(id)=>{
@@ -1764,8 +1862,70 @@ function JobPipelinePage({job, onBack}){
 
   const byStage=STAGES.reduce((acc,s)=>{acc[s]=entries.filter(e=>e.stage===s);return acc;},{});
 
+  const pf=placeForm;
+
   return <div>
     {addModal&&<AddCandToJobModal job={job} existingIds={existingIds} onClose={()=>setAddModal(false)} onAdded={load}/>}
+
+    {/* Placement capture — opens when a candidate is moved to Placed */}
+    {pf&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setPlaceForm(null);}}>
+      <div className="modal" style={{maxWidth:480}}>
+        <h3>🏆 Record placement</h3>
+        <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
+          {pf.candidate_name} has been moved to Placed. Confirm the details below and this
+          will be added to your Placements and counted as actual revenue.
+        </div>
+        <Err msg={placeErr}/>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          <div style={{gridColumn:"1 / -1"}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Candidate</label>
+            <input type="text" value={pf.candidate_name} onChange={e=>setPlaceField("candidate_name",e.target.value)}/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Role</label>
+            <input type="text" value={pf.job_title} onChange={e=>setPlaceField("job_title",e.target.value)}/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Company</label>
+            <input type="text" value={pf.company_name} onChange={e=>setPlaceField("company_name",e.target.value)}/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Start date</label>
+            <input type="date" value={pf.start_date} onChange={e=>setPlaceField("start_date",e.target.value)}/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Salary (£)</label>
+            <input type="text" value={pf.salary} onChange={e=>setPlaceField("salary",e.target.value)} placeholder="43500"/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Fee %</label>
+            <input type="text" value={pf.fee_percentage} onChange={e=>setPlaceField("fee_percentage",e.target.value)} placeholder="15"/>
+          </div>
+          <div>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Fee amount (£)</label>
+            <input type="text" value={pf.fee_amount} onChange={e=>setPlaceField("fee_amount",e.target.value)} placeholder="6525"/>
+          </div>
+          <div style={{gridColumn:"1 / -1"}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Invoice number (optional)</label>
+            <input type="text" value={pf.invoice_number} onChange={e=>setPlaceField("invoice_number",e.target.value)}/>
+          </div>
+          <div style={{gridColumn:"1 / -1"}}>
+            <label style={{fontSize:11,color:"var(--t2)"}}>Notes (optional)</label>
+            <textarea value={pf.notes} onChange={e=>setPlaceField("notes",e.target.value)} style={{minHeight:60}}/>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={()=>setPlaceForm(null)} disabled={placeSaving}>Skip for now</button>
+          <button className="btn-a" onClick={savePlacement} disabled={placeSaving}>
+            {placeSaving?<><span className="spin"></span>Saving…</>:"Save placement"}
+          </button>
+        </div>
+      </div>
+    </div>}
+
+    {placeDone&&<div style={{background:"#eaf3de",border:"0.5px solid #639922",color:"#3b6d11",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10}}>
+      ✓ {placeDone}
+    </div>}
 
     {/* Note modal */}
     {noteEntry&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget){setNoteEntry(null);setNoteText("");}}}>
