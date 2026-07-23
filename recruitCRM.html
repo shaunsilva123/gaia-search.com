@@ -18,10 +18,10 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
 :root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#4f6ef7;
 /* Gaia Search brand — sampled from the logo */
---g-cream:#fdf5cf;--g-cream2:#f4e7ac;--g-ink:#111111;--g-deep:#2e7a2c;--g-green:#5fa92b;--g-lime:#a0d045;
---g-rule:rgba(17,17,17,0.12);--g-mute:rgba(17,17,17,0.55);--g-face:'Archivo',-apple-system,'Segoe UI',sans-serif}
+--g-cream:var(--bg);--g-cream2:rgba(17,17,17,0.08);--g-ink:#111111;--g-deep:#2e7a2c;--g-green:#5fa92b;--g-lime:#a0d045;
+--g-rule:rgba(17,17,17,0.12);--g-mute:rgba(17,17,17,0.5);--g-face:'Archivo',-apple-system,'Segoe UI',sans-serif}
 body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8eaf0;--t2:#8b91a8;--t3:#555d78;--br:rgba(255,255,255,0.08);--brm:rgba(255,255,255,0.15);--acc:#6b8bff;
---g-cream:#171a10;--g-cream2:#232817;--g-ink:#f2edd4;--g-deep:#8cc750;--g-green:#a0d045;--g-lime:#c3e57a;
+--g-cream:var(--bg);--g-cream2:rgba(255,255,255,0.1);--g-ink:#e8eaf0;--g-deep:#8cc750;--g-green:#a0d045;--g-lime:#c3e57a;
 --g-rule:rgba(242,237,212,0.16);--g-mute:rgba(242,237,212,0.6)}
 body.dark .banner{background:#2a2200;border-color:#7a5c00;color:#f0c040}
 body.dark .dark-sidebar{background:#0d1117!important}
@@ -51,13 +51,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .btn-o:hover{background:var(--bg2)}
 .btn-d{background:transparent;border:0.5px solid #f09595;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:#a32d2d}
 .err{background:#fff0f0;border:0.5px solid #f09595;border-radius:7px;padding:8px 12px;font-size:12px;color:#a32d2d;margin-top:8px}
-.g-canvas{background:var(--g-cream);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.g-canvas{background:var(--g-cream);border:0.5px solid var(--br);border-radius:14px;padding:20px 22px;margin-bottom:14px}
 .g-eyebrow{font-family:var(--g-face);font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g-mute)}
 .g-num{font-family:var(--g-face);font-weight:800;letter-spacing:-1.5px;line-height:1;font-variant-numeric:tabular-nums}
 .g-row{display:flex;align-items:center;gap:12px;background:transparent;border-radius:9px;padding:8px 12px 8px 0;border-left:3px solid var(--g-green);padding-left:11px;transition:background 0.15s}
 .g-row:hover{background:rgba(95,169,43,0.09)}
 .g-pill{font-family:var(--g-face);font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;border-radius:20px;padding:3px 9px;background:rgba(95,169,43,0.16);color:var(--g-deep);flex-shrink:0}
-.g-stat{background:var(--g-cream);border-radius:12px;padding:14px 16px}
+.g-stat{background:var(--g-cream);border:0.5px solid var(--br);border-radius:12px;padding:14px 16px}
 .g-stat .r{height:2px;width:22px;background:var(--g-green);border-radius:2px;margin-bottom:9px}
 @media (max-width:760px){.g-num{letter-spacing:-1px}}
 .th{text-align:left;font-size:11px;font-weight:500;color:var(--t2);padding:8px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:0.4px}
