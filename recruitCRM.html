@@ -66,6 +66,16 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ACCENT = "#4f6ef7";
+
+// ─── LOGO PROVIDER ────────────────────────────────────────────────────────
+// Paste ONE publishable key below to get real company logos. Leave both blank
+// and the app falls back to site favicons, then to coloured initials — so it
+// works either way and a bad key just degrades quietly.
+// These are PUBLISHABLE keys, designed to sit in client-side code. Do not put
+// a secret key (sk_...) here — this file is served to the public web.
+const LOGO_DEV_TOKEN     = "";   // from logo.dev  → publishable key
+const BRANDFETCH_CLIENT_ID = ""; // from brandfetch.com → client ID
+// ──────────────────────────────────────────────────────────────────────────
 const SIDEBAR = "#1a1f2e";
 
 const PILL_MAP = {
@@ -89,6 +99,40 @@ function getKey(){return window._apiKey||localStorage.getItem("rcrm_key")||"";}
 
 function Pill({label}){const s=PILL_MAP[label]||{bg:"#f1efe8",fg:"#5f5e5a"};return <span style={{display:"inline-flex",alignItems:"center",padding:"2px 9px",borderRadius:10,fontSize:11,fontWeight:500,background:s.bg,color:s.fg}}>{label}</span>;}
 function Av({name,size=30}){const{bg,fg}=getColor(name);return <div style={{width:size,height:size,borderRadius:"50%",background:bg,color:fg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size<36?11:14,fontWeight:500,flexShrink:0}}>{ini(name)}</div>;}
+// Company logo: manual override first, then the site favicon, falling back to
+// initials. Clearbit's logo API shut down in Dec 2025 and the replacements need
+// an API key, which would have to be exposed in this client-side file.
+function coDomain(website){
+  if(!website)return null;
+  try{
+    let w=website.trim();
+    if(!/^https?:\/\//i.test(w)) w="https://"+w;
+    const h=new URL(w).hostname.replace(/^www\./i,"");
+    return h.includes(".")?h:null;
+  }catch(e){return null;}
+}
+function CoLogo({company,size=30}){
+  const domain=coDomain(company?.website);
+  const px=Math.max(64,size*3); // ask for a retina-friendly size
+  const sources=[];
+  if(company?.logo_url) sources.push(company.logo_url);
+  if(domain){
+    if(LOGO_DEV_TOKEN)       sources.push(`https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${px}&format=png`);
+    if(BRANDFETCH_CLIENT_ID) sources.push(`https://cdn.brandfetch.io/${domain}/w/${px}/h/${px}?c=${BRANDFETCH_CLIENT_ID}`);
+    sources.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
+    sources.push(`https://icons.duckduckgo.com/ip3/${domain}.ico`);
+  }
+  const [i,setI]=useState(0);
+  // Reset when the row changes, otherwise a failed logo hides the next one
+  useEffect(()=>{setI(0);},[company?.id,company?.website,company?.logo_url]);
+  if(i>=sources.length) return <Av name={company?.name||"?"} size={size}/>;
+  return <img
+    src={sources[i]}
+    alt=""
+    onError={()=>setI(n=>n+1)}
+    style={{width:size,height:size,borderRadius:"50%",objectFit:"contain",background:"#fff",
+      border:"0.5px solid var(--br)",flexShrink:0}}/>;
+}
 function AiTag(){return <span style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:500,color:ACCENT,marginBottom:6}}>✦ Claude AI</span>;}
 function Err({msg}){return msg?<div className="err">{msg}</div>:null;}
 function Spin(){return <div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}><span className="spin"></span>Loading…</div>;}
@@ -211,7 +255,7 @@ function CandModal({cand,onClose,onSaved}){
 }
 
 function CoModal({co,onClose,onSaved}){
-  const blank={name:"",industry:"",website:"",notes:"",status:"Active",fee_type:"percentage",fee_percentage:"",fee_fixed:"",terms_notes:"",terms_signed:false,terms_signed_date:"",terms_rebate:"",terms_payment_days:"",terms_invoice_trigger:"On start date",terms_doc_url:""};
+  const blank={name:"",industry:"",website:"",logo_url:"",notes:"",status:"Active",fee_type:"percentage",fee_percentage:"",fee_fixed:"",terms_notes:"",terms_signed:false,terms_signed_date:"",terms_rebate:"",terms_payment_days:"",terms_invoice_trigger:"On start date",terms_doc_url:""};
   const [f,setF]=useState(co||blank);const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
   const save=async()=>{
@@ -226,6 +270,7 @@ function CoModal({co,onClose,onSaved}){
       terms_rebate:(f.terms_rebate||"").trim()||null,
       terms_invoice_trigger:(f.terms_invoice_trigger||"").trim()||null,
       terms_doc_url:(f.terms_doc_url||"").trim()||null,
+      logo_url:(f.logo_url||"").trim()||null,
     };
     const{error}=co?await db.from("companies").update(payload).eq("id",co.id):await db.from("companies").insert(payload);
     setSaving(false);if(error){setErr(error.message);return;}
@@ -243,7 +288,10 @@ function CoModal({co,onClose,onSaved}){
         <div><label>Company name *</label><input type="text" value={f.name} onChange={s("name")} placeholder="Barclays"/></div>
         <div><label>Industry</label><input type="text" value={f.industry||""} onChange={s("industry")} placeholder="Financial services"/></div>
       </div>
-      <div className="fr"><label>Website</label><input type="text" value={f.website||""} onChange={s("website")} placeholder="barclays.com"/></div>
+      <div className="fr2">
+        <div><label>Website</label><input type="text" value={f.website||""} onChange={s("website")} placeholder="barclays.com"/></div>
+        <div><label>Logo URL (optional)</label><input type="text" value={f.logo_url||""} onChange={s("logo_url")} placeholder="Leave blank to use the website"/></div>
+      </div>
       <div className="fr"><label>Status</label>
         <select value={f.status} onChange={s("status")}>{["Active","On hold","Cold","Client"].map(x=><option key={x}>{x}</option>)}</select>
       </div>
@@ -1344,7 +1392,7 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
           <button className="btn-o" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>onEdit(c)}>Edit</button>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <Av name={c.name} size={52}/>
+          <CoLogo company={c} size={52}/>
           <div>
             <div style={{fontWeight:600,fontSize:16,color:"var(--t1)"}}>{c.name}</div>
             <div style={{fontSize:13,color:"var(--t2)",marginTop:2}}>{c.industry||"No industry set"}</div>
@@ -1486,7 +1534,7 @@ function CompaniesPage(){
         </colgroup>
         <thead><tr><th className="th">Company</th><th className="th">Industry</th><th className="th">Agreed terms</th><th className="th">Status</th><th className="th">Contacts</th><th className="th"></th></tr></thead>
         <tbody>{rows.map(c=><tr key={c.id} style={{cursor:"pointer"}} onClick={()=>setDetailCo(c)}>
-          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
+          <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><CoLogo company={c}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
           <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
           <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_signed
             ?<div style={{fontSize:11,color:"#3b6d11"}}>✓ ToB signed{c.terms_signed_date?` ${c.terms_signed_date}`:""}</div>
