@@ -10,11 +10,19 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.26.0/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("MadIajEVnrBSCAMNb");</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
-:root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#4f6ef7}
-body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8eaf0;--t2:#8b91a8;--t3:#555d78;--br:rgba(255,255,255,0.08);--brm:rgba(255,255,255,0.15);--acc:#6b8bff}
+:root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#4f6ef7;
+/* Gaia Search brand — sampled from the logo */
+--g-cream:#fdf5cf;--g-cream2:#f4e7ac;--g-ink:#111111;--g-deep:#2e7a2c;--g-green:#5fa92b;--g-lime:#a0d045;
+--g-rule:rgba(17,17,17,0.12);--g-mute:rgba(17,17,17,0.55);--g-face:'Archivo',-apple-system,'Segoe UI',sans-serif}
+body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8eaf0;--t2:#8b91a8;--t3:#555d78;--br:rgba(255,255,255,0.08);--brm:rgba(255,255,255,0.15);--acc:#6b8bff;
+--g-cream:#171a10;--g-cream2:#232817;--g-ink:#f2edd4;--g-deep:#8cc750;--g-green:#a0d045;--g-lime:#c3e57a;
+--g-rule:rgba(242,237,212,0.16);--g-mute:rgba(242,237,212,0.6)}
 body.dark .banner{background:#2a2200;border-color:#7a5c00;color:#f0c040}
 body.dark .dark-sidebar{background:#0d1117!important}
 body.dark .dark-sidebar *{border-color:rgba(255,255,255,0.06)!important}
@@ -43,6 +51,15 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .btn-o:hover{background:var(--bg2)}
 .btn-d{background:transparent;border:0.5px solid #f09595;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:#a32d2d}
 .err{background:#fff0f0;border:0.5px solid #f09595;border-radius:7px;padding:8px 12px;font-size:12px;color:#a32d2d;margin-top:8px}
+.g-canvas{background:var(--g-cream);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.g-eyebrow{font-family:var(--g-face);font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g-mute)}
+.g-num{font-family:var(--g-face);font-weight:800;letter-spacing:-1.5px;line-height:1;font-variant-numeric:tabular-nums}
+.g-row{display:flex;align-items:center;gap:12px;background:transparent;border-radius:9px;padding:8px 12px 8px 0;border-left:3px solid var(--g-green);padding-left:11px;transition:background 0.15s}
+.g-row:hover{background:rgba(95,169,43,0.09)}
+.g-pill{font-family:var(--g-face);font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;border-radius:20px;padding:3px 9px;background:rgba(95,169,43,0.16);color:var(--g-deep);flex-shrink:0}
+.g-stat{background:var(--g-cream);border-radius:12px;padding:14px 16px}
+.g-stat .r{height:2px;width:22px;background:var(--g-green);border-radius:2px;margin-bottom:9px}
+@media (max-width:760px){.g-num{letter-spacing:-1px}}
 .th{text-align:left;font-size:11px;font-weight:500;color:var(--t2);padding:8px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:0.4px}
 .td{padding:10px 12px;border-bottom:0.5px solid var(--br);color:var(--t1);font-size:13px;vertical-align:middle}
 </style>
@@ -689,45 +706,62 @@ function DashboardPage({setPage}){
   const fmtTime=d=>d?d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"—";
 
   return <div>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-      <div>
-        <div style={{fontSize:14,fontWeight:500,color:"var(--t1)",marginBottom:3}}>Dashboard</div>
-        <div style={{fontSize:12,color:"var(--t3)"}}>
-          AI-powered · Supabase connected
-          {lastRefresh&&<span> · Last updated {fmtTime(lastRefresh)}</span>}
+    <div style={{display:"flex",alignItems:"baseline",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+      <span style={{fontFamily:"var(--g-face)",fontSize:17,fontWeight:800,letterSpacing:"-0.4px",color:"var(--t1)"}}>Today</span>
+      <span style={{height:5,width:5,borderRadius:"50%",background:"var(--g-green)"}}/>
+      <span style={{fontSize:12,color:"var(--t3)"}}>
+        {new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}
+      </span>
+    </div>
+
+    {/* ── Revenue seam: banked against in play ── */}
+    <div className="g-canvas">
+      <div className="g-eyebrow" style={{marginBottom:14}}>Fee position</div>
+
+      <div style={{display:"flex",gap:40,flexWrap:"wrap",alignItems:"flex-end",marginBottom:18}}>
+        <div>
+          <div className="g-num" style={{fontSize:46,color:"var(--g-ink)"}}>
+            {loading?"—":`£${revenue.actual.toLocaleString()}`}
+          </div>
+          <div className="g-eyebrow" style={{marginTop:8,color:"var(--g-ink)"}}>Banked</div>
+          <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
+            {revenue.placed||0} placement{revenue.placed!==1?"s":""} confirmed
+          </div>
+        </div>
+        <div>
+          <div className="g-num" style={{fontSize:34,color:"var(--g-deep)"}}>
+            {loading?"—":`£${revenue.potential.toLocaleString()}`}
+          </div>
+          <div className="g-eyebrow" style={{marginTop:8,color:"var(--g-deep)"}}>In play</div>
+          <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
+            {loading?"…":`${revenue.interviewJobs?.length||0} job${revenue.interviewJobs?.length!==1?"s":""} at interview or beyond`}
+          </div>
         </div>
       </div>
-      <button
-        className="btn-o"
-        style={{fontSize:12,padding:"5px 12px",display:"flex",alignItems:"center",gap:5}}
-        onClick={loadData}
-        disabled={loading}>
-        {loading?<><span className="spin"></span>Refreshing…</>:<>↻ Refresh</>}
-      </button>
+
+      {/* Won share of everything currently on the table */}
+      {(()=>{
+        const total=revenue.actual+revenue.potential;
+        const pct=total>0?Math.round((revenue.actual/total)*100):0;
+        return <div>
+          <div style={{height:9,borderRadius:6,background:"var(--g-cream2)",overflow:"hidden",display:"flex"}}>
+            <div style={{width:`${pct}%`,background:"linear-gradient(90deg,var(--g-deep),var(--g-lime))",transition:"width 0.6s ease"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:7,fontSize:11,color:"var(--g-mute)"}}>
+            <span>{loading?"":`${pct}% of £${total.toLocaleString()} on the table is already won`}</span>
+            <button onClick={loadData} disabled={loading}
+              style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:"var(--g-deep)",fontFamily:"var(--g-face)",fontWeight:600,padding:0}}>
+              {loading?"Refreshing…":`Updated ${fmtTime(lastRefresh)} · refresh`}
+            </button>
+          </div>
+        </div>;
+      })()}
     </div>
 
-    {/* Revenue tickers */}
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:6}}>
-      <RevenueTicker
-        label="Potential sales revenue"
-        value={revenue.potential}
-        sub={loading?"…":`${revenue.interviewJobs?.length||0} job${revenue.interviewJobs?.length!==1?"s":""} with candidates at interview+`}
-        color="#4f6ef7"
-        loading={loading}/>
-      <RevenueTicker
-        label="Actual revenue earned"
-        value={revenue.actual}
-        sub={`${revenue.placed||0} placement${revenue.placed!==1?"s":""} confirmed`}
-        color="#1d9e75"
-        loading={loading}/>
-    </div>
-
-    {/* Interview-qualified jobs breakdown */}
-    {!loading&&revenue.interviewJobs?.length>0&&<div style={{background:"#eef1ff",border:"0.5px solid #c0c8ff",borderRadius:8,padding:"10px 14px",marginBottom:14}}>
-      <div style={{fontSize:11,fontWeight:500,color:"#4f6ef7",marginBottom:6,textTransform:"uppercase",letterSpacing:"0.5px"}}>
-        💰 Jobs contributing to potential revenue (interview stage or beyond)
-      </div>
-      <div style={{display:"flex",flexDirection:"column",gap:5}}>
+    {/* ── What is in play ── */}
+    {!loading&&revenue.interviewJobs?.length>0&&<div className="g-canvas">
+      <div className="g-eyebrow" style={{marginBottom:12}}>In play · {revenue.interviewJobs.length} job{revenue.interviewJobs.length!==1?"s":""}</div>
+      <div style={{display:"flex",flexDirection:"column",gap:3}}>
         {revenue.interviewJobs.map(job=>{
           const fee=calcFee(job);
           const co=job.companies||{};
@@ -737,30 +771,30 @@ function DashboardPage({setPage}){
             .map(jc=>jc.stage)
             .filter(s=>INTERVIEW_STAGES.includes(s))
             .sort((a,b)=>INTERVIEW_STAGES.indexOf(b)-INTERVIEW_STAGES.indexOf(a))[0];
-          return <div key={job.id} style={{display:"flex",alignItems:"center",gap:10,background:"#fff",borderRadius:6,padding:"7px 10px",border:"0.5px solid #c0c8ff"}}>
+          return <div key={job.id} className="g-row">
             <div style={{flex:1,minWidth:0}}>
-              <span style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{job.title}</span>
-              <span style={{fontSize:11,color:"var(--t2)",marginLeft:6}}>{co.name||"—"}</span>
+              <div style={{fontWeight:600,fontSize:13,color:"var(--g-ink)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{job.title}</div>
+              <div style={{fontSize:11,color:"var(--g-mute)",marginTop:1}}>
+                {co.name||"—"} · {feeType==="percentage"?`${feeVal}% of £${parseFloat(job.salary_value||0).toLocaleString()}`:`fixed £${feeVal.toLocaleString()}`}
+              </div>
             </div>
-            <span style={{fontSize:11,color:"#7f77dd",flexShrink:0}}>
-              {feeType==="percentage"?`${feeVal}% × £${parseFloat(job.salary_value||0).toLocaleString()}`:`Fixed £${feeVal.toLocaleString()}`}
-            </span>
-            <span style={{fontSize:11,background:"#fbeaf0",color:"#993556",borderRadius:8,padding:"2px 7px",flexShrink:0}}>{highestStage}</span>
-            <span style={{fontSize:13,fontWeight:500,color:"#4f6ef7",flexShrink:0}}>£{fee.toLocaleString()}</span>
+            <span className="g-pill">{highestStage}</span>
+            <span className="g-num" style={{fontSize:16,color:"var(--g-ink)",flexShrink:0,letterSpacing:"-0.5px"}}>£{fee.toLocaleString()}</span>
           </div>;
         })}
       </div>
     </div>}
 
-    {!loading&&revenue.interviewJobs?.length===0&&<div style={{background:"var(--bg2)",border:"0.5px solid var(--br)",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:12,color:"var(--t3)"}}>
-      ℹ️ Potential revenue will appear here once candidates reach Interview stage on an active job.
+    {!loading&&revenue.interviewJobs?.length===0&&<div className="g-canvas" style={{fontSize:12,color:"var(--g-mute)"}}>
+      Nothing in play yet. Move a candidate to Interview on an open job and the fee will appear here.
     </div>}
 
     {/* Stat cards */}
     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
-      {statCards.map(c=><div key={c.l} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,padding:"12px 14px"}}>
-        <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>{c.l}</div>
-        <div style={{fontSize:22,fontWeight:500,color:loading?"var(--t3)":c.col}}>{c.v}</div>
+      {statCards.map(c=><div key={c.l} className="g-stat">
+        <div className="r"/>
+        <div className="g-num" style={{fontSize:26,color:loading?"var(--g-mute)":"var(--g-ink)"}}>{c.v}</div>
+        <div className="g-eyebrow" style={{marginTop:7}}>{c.l}</div>
       </div>)}
     </div>
 
@@ -770,7 +804,7 @@ function DashboardPage({setPage}){
         {loading?<Spin/>:recent.length===0
           ?<div style={{padding:"28px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates yet.</div>
           :<div>{recent.map(c=><div key={c.id} onClick={()=>{window._pendingOpenCandidate=c;setPage("candidates");setTimeout(()=>window.dispatchEvent(new CustomEvent("openCandidate",{detail:c})),400);}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
-            <Av name={c.name}/><div style={{flex:1}}><div style={{fontWeight:500,color:ACCENT,fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div>
+            <Av name={c.name}/><div style={{flex:1}}><div style={{fontWeight:600,color:"var(--g-deep)",fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}</div></div>
             <Pill label={c.status||"New"}/>
           </div>)}</div>}
       </Panel>
@@ -788,8 +822,8 @@ function DashboardPage({setPage}){
                 <div style={{fontSize:11,color:"var(--t2)"}}>{j.companies?.name||"—"}</div>
               </div>
               <div style={{textAlign:"right",flexShrink:0}}>
-                <div style={{fontSize:13,fontWeight:500,color:isActual?"#1d9e75":"#4f6ef7"}}>£{(fee||0).toLocaleString()}</div>
-                <div style={{fontSize:10,color:"var(--t3)"}}>{isActual?"actual":"potential"}</div>
+                <div className="g-num" style={{fontSize:15,letterSpacing:"-0.4px",color:isActual?"var(--g-ink)":"var(--g-deep)"}}>£{(fee||0).toLocaleString()}</div>
+                <div className="g-eyebrow" style={{marginTop:3}}>{isActual?"banked":"in play"}</div>
               </div>
               <Pill label={j.status||"Open"}/>
             </div>;
