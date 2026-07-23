@@ -1060,7 +1060,20 @@ function SendToClientSection({cand}){
 }
 
 // ── Candidate Detail Panel ─────────────────────────────────────────────────
-function CandidateDetailPanel({cand, onClose, onEdit, onRefresh}){
+function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
+  // The list only carries the columns it displays, so fetch the whole record
+  // here — that way any field added to the table later still shows up.
+  const [full,setFull]=useState(candProp);
+  const cand=full||candProp;
+  useEffect(()=>{
+    setFull(candProp);
+    if(!candProp?.id)return;
+    let cancelled=false;
+    db.from("candidates").select("*").eq("id",candProp.id).single()
+      .then(({data})=>{ if(!cancelled&&data) setFull(data); });
+    return()=>{cancelled=true;};
+  },[candProp?.id]);
+
   const [activities,setActivities]=useState([]);
   const [jobs,setJobs]=useState([]);
   const [loadingActs,setLoadingActs]=useState(true);
@@ -1246,7 +1259,12 @@ function CandidatesPage(){
   const load=useCallback(async()=>{
     setLoading(true);
     const[{data,error},{data:acts}]=await Promise.all([
-      db.from("candidates").select("*").order("created_at",{ascending:false}),
+      // Deliberately NOT select("*") — that would pull every CV's full text
+      // into the browser on every page load. CV text is only needed for the
+      // server-side search, and the detail panel fetches the full row itself.
+      db.from("candidates")
+        .select("id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,linkedin,cv_url,cv_path,cv_filename,created_at")
+        .order("created_at",{ascending:false}),
       db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}),
     ]);
     if(error)setErr(error.message);else setRows(data||[]);
@@ -1312,7 +1330,12 @@ function CandidatesPage(){
   // Index CVs that were uploaded before text extraction existed
   const [indexing,setIndexing]=useState(null);
   const indexCVs=async()=>{
-    const todo=rows.filter(r=>cvStoragePath(r)&&!r.cv_text);
+    // rows no longer carries cv_text, so ask the database which CVs lack it
+    const{data:pending}=await db.from("candidates")
+      .select("id,cv_path,cv_url,cv_filename")
+      .not("cv_path","is",null)
+      .is("cv_text",null);
+    const todo=pending||[];
     if(todo.length===0){alert("Every CV on file is already indexed.");return;}
     setIndexing({done:0,total:todo.length});
     for(let i=0;i<todo.length;i++){
