@@ -90,6 +90,14 @@ const ACCENT = "#4f6ef7";
 // works either way and a bad key just degrades quietly.
 // These are PUBLISHABLE keys, designed to sit in client-side code. Do not put
 // a secret key (sk_...) here — this file is served to the public web.
+// Annual fee target shown on the dashboard. Click the figure on the dashboard
+// to change it — the new value is remembered in this browser.
+const DEFAULT_TARGET = 100000;
+function getTarget(){
+  const v=parseFloat(localStorage.getItem("gaiaTarget"));
+  return v>0?v:DEFAULT_TARGET;
+}
+
 const LOGO_DEV_TOKEN     = "";   // from logo.dev  → publishable key
 const BRANDFETCH_CLIENT_ID = ""; // from brandfetch.com → client ID
 // ──────────────────────────────────────────────────────────────────────────
@@ -593,6 +601,16 @@ function DashboardPage({setPage}){
   const [topJobs,setTopJobs]=useState([]);
   const [loading,setLoading]=useState(true);
   const [lastRefresh,setLastRefresh]=useState(null);
+  const [target,setTarget]=useState(getTarget());
+
+  const editTarget=()=>{
+    const v=prompt("Annual fee target (£)",String(target));
+    if(v===null)return;
+    const n=parseFloat(String(v).replace(/[^0-9.]/g,""));
+    if(!n||n<=0)return;
+    localStorage.setItem("gaiaTarget",String(n));
+    setTarget(n);
+  };
 
   // Interview-qualifying stages
   const INTERVIEW_STAGES=["Interview","2nd Interview","Offer","Placed"];
@@ -714,41 +732,58 @@ function DashboardPage({setPage}){
       </span>
     </div>
 
-    {/* ── Revenue seam: banked against in play ── */}
+    {/* ── Revenue seam: progress against the year's target ── */}
     <div className="g-canvas">
-      <div className="g-eyebrow" style={{marginBottom:14}}>Fee position</div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:12,flexWrap:"wrap",marginBottom:14}}>
+        <div className="g-eyebrow">Fee position</div>
+        <button onClick={editTarget} title="Click to change your target"
+          style={{background:"none",border:"none",padding:0,cursor:"pointer",fontFamily:"var(--g-face)",fontSize:11,fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",color:"var(--g-mute)"}}>
+          Target £{target.toLocaleString()}
+        </button>
+      </div>
 
-      <div style={{display:"flex",gap:40,flexWrap:"wrap",alignItems:"flex-end",marginBottom:18}}>
+      <div style={{display:"flex",gap:44,flexWrap:"wrap",alignItems:"flex-start",marginBottom:18}}>
         <div>
-          <div className="g-num" style={{fontSize:46,color:"var(--g-ink)"}}>
+          <div className="g-num" style={{fontSize:38,color:"var(--g-ink)"}}>
             {loading?"—":`£${revenue.actual.toLocaleString()}`}
           </div>
-          <div className="g-eyebrow" style={{marginTop:8,color:"var(--g-ink)"}}>Banked</div>
+          <div className="g-eyebrow" style={{marginTop:9,color:"var(--g-ink)"}}>Banked</div>
           <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
             {revenue.placed||0} placement{revenue.placed!==1?"s":""} confirmed
           </div>
         </div>
         <div>
-          <div className="g-num" style={{fontSize:34,color:"var(--g-deep)"}}>
+          <div className="g-num" style={{fontSize:38,color:"var(--g-deep)"}}>
             {loading?"—":`£${revenue.potential.toLocaleString()}`}
           </div>
-          <div className="g-eyebrow" style={{marginTop:8,color:"var(--g-deep)"}}>In play</div>
+          <div className="g-eyebrow" style={{marginTop:9,color:"var(--g-deep)"}}>In play</div>
           <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
             {loading?"…":`${revenue.interviewJobs?.length||0} job${revenue.interviewJobs?.length!==1?"s":""} at interview or beyond`}
           </div>
         </div>
+        <div>
+          <div className="g-num" style={{fontSize:38,color:"var(--g-mute)"}}>
+            {loading?"—":`£${Math.max(0,target-revenue.actual-revenue.potential).toLocaleString()}`}
+          </div>
+          <div className="g-eyebrow" style={{marginTop:9}}>Still to find</div>
+          <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
+            to reach £{target.toLocaleString()}
+          </div>
+        </div>
       </div>
 
-      {/* Won share of everything currently on the table */}
+      {/* Progress toward target: solid = banked, pale = in play */}
       {(()=>{
-        const total=revenue.actual+revenue.potential;
-        const pct=total>0?Math.round((revenue.actual/total)*100):0;
+        const bankedPct=Math.min(100,(revenue.actual/target)*100);
+        const playPct=Math.min(100-bankedPct,(revenue.potential/target)*100);
+        const pctOfTarget=Math.round((revenue.actual/target)*100);
         return <div>
-          <div style={{height:9,borderRadius:6,background:"var(--g-cream2)",overflow:"hidden",display:"flex"}}>
-            <div style={{width:`${pct}%`,background:"linear-gradient(90deg,var(--g-deep),var(--g-lime))",transition:"width 0.6s ease"}}/>
+          <div style={{height:11,borderRadius:6,background:"var(--g-cream2)",overflow:"hidden",display:"flex"}}>
+            <div style={{width:`${bankedPct}%`,background:"linear-gradient(90deg,var(--g-deep),var(--g-lime))",transition:"width 0.6s ease"}}/>
+            <div style={{width:`${playPct}%`,background:"var(--g-lime)",opacity:0.38,transition:"width 0.6s ease"}}/>
           </div>
-          <div style={{display:"flex",justifyContent:"space-between",marginTop:7,fontSize:11,color:"var(--g-mute)"}}>
-            <span>{loading?"":`${pct}% of £${total.toLocaleString()} on the table is already won`}</span>
+          <div style={{display:"flex",justifyContent:"space-between",gap:12,marginTop:8,fontSize:11,color:"var(--g-mute)",flexWrap:"wrap"}}>
+            <span>{loading?"":`${pctOfTarget}% of target banked · £${(revenue.actual+revenue.potential).toLocaleString()} including everything in play`}</span>
             <button onClick={loadData} disabled={loading}
               style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:"var(--g-deep)",fontFamily:"var(--g-face)",fontWeight:600,padding:0}}>
               {loading?"Refreshing…":`Updated ${fmtTime(lastRefresh)} · refresh`}
