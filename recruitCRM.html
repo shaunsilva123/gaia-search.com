@@ -1819,6 +1819,25 @@ function HotlistsPage(){
     load();
   };
 
+  const [moveFor,setMoveFor]=useState(null); // hc being moved/copied to another list
+
+  const moveToList=async(hc,destListId,keepHere)=>{
+    // Skip if the candidate is already on the destination list
+    const dest=lists.find(l=>l.id===destListId);
+    const already=(dest?.hotlist_candidates||[]).some(x=>x.candidate_id===hc.candidate_id);
+    if(!already){
+      await db.from("hotlist_candidates").insert({hotlist_id:destListId,candidate_id:hc.candidate_id});
+    }
+    if(!keepHere){
+      await db.from("hotlist_candidates").delete().eq("id",hc.id);
+    }
+    setMoveFor(null);
+    setShareMsg(already?(keepHere?"Already on that list":"Removed — was already on that list")
+                      :(keepHere?`Copied to "${dest?.name}"`:`Moved to "${dest?.name}"`));
+    setTimeout(()=>setShareMsg(""),2500);
+    load();
+  };
+
   const [laterFor,setLaterFor]=useState(null); // hc awaiting a date/time
   const [laterDate,setLaterDate]=useState("");
   const [laterTime,setLaterTime]=useState("");
@@ -1884,6 +1903,36 @@ function HotlistsPage(){
 
   return <div style={{display:"flex",gap:16,height:"100%"}}>
     {/* Contact-later scheduler */}
+    {moveFor&&(()=>{
+      const others=lists.filter(l=>l.id!==activeList?.id);
+      return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setMoveFor(null);}}>
+        <div className="modal" style={{maxWidth:400}}>
+          <h3>Move {moveFor.candidates?.name}</h3>
+          <div style={{fontSize:12,color:"var(--t2)",marginBottom:12}}>
+            Choose a hotlist. <strong>Move</strong> removes them from "{activeList?.name}"; <strong>Copy</strong> keeps them on both.
+          </div>
+          {others.length===0
+            ?<div style={{fontSize:13,color:"var(--t3)",padding:"10px 0"}}>You only have one hotlist. Create another first.</div>
+            :<div style={{display:"flex",flexDirection:"column",gap:6,maxHeight:260,overflowY:"auto"}}>
+              {others.map(l=>{
+                const on=(l.hotlist_candidates||[]).some(x=>x.candidate_id===moveFor.candidate_id);
+                return <div key={l.id} style={{display:"flex",alignItems:"center",gap:8,border:"0.5px solid var(--br)",borderRadius:8,padding:"9px 11px"}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{l.name}</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>{(l.hotlist_candidates||[]).length} candidate{(l.hotlist_candidates||[]).length!==1?"s":""}{on?" · already on this list":""}</div>
+                  </div>
+                  <button className="btn-o" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>moveToList(moveFor,l.id,true)}>Copy</button>
+                  <button className="btn-a" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>moveToList(moveFor,l.id,false)}>Move</button>
+                </div>;
+              })}
+            </div>}
+          <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+            <button className="btn-o" onClick={()=>setMoveFor(null)}>Cancel</button>
+          </div>
+        </div>
+      </div>;
+    })()}
+
     {laterFor&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setLaterFor(null);}}>
       <div className="modal" style={{maxWidth:380}}>
         <h3>⏰ Contact later</h3>
@@ -2000,6 +2049,8 @@ function HotlistsPage(){
                   <Pill label={c.status||"New"}/>
                   <button onClick={()=>{setLaterFor(hc);setLaterDate(todayStr());setLaterTime("");}}
                     style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>⏰ Contact later</button>
+                  <button onClick={()=>setMoveFor(hc)}
+                    style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>⇄ Move / copy</button>
                   {hasCv(c)&&<button onClick={()=>openCv(c)} style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>View CV ↗</button>}
                   <button onClick={()=>removeCandidate(c.id)} style={{background:"none",border:"0.5px solid #f09595",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"#a32d2d"}}>Remove</button>
                 </div>
