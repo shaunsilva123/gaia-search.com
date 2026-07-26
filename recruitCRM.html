@@ -1819,24 +1819,29 @@ function HotlistsPage(){
     load();
   };
 
-  const [moveFor,setMoveFor]=useState(null); // hc being moved/copied to another list
+  const [moveFor,setMoveFor]=useState(null); // single hc being moved
+  const [picked,setPicked]=useState(new Set()); // hc ids selected for bulk
+  const [bulkMove,setBulkMove]=useState(false); // bulk move modal open
 
-  const moveToList=async(hc,destListId,keepHere)=>{
-    // Skip if the candidate is already on the destination list
+  const togglePick=(id)=>setPicked(prev=>{
+    const n=new Set(prev); n.has(id)?n.delete(id):n.add(id); return n;
+  });
+
+  // Move or copy one or many hotlist rows to another list in a single pass
+  const doMove=async(hcs,destListId,keepHere)=>{
     const dest=lists.find(l=>l.id===destListId);
-    const already=(dest?.hotlist_candidates||[]).some(x=>x.candidate_id===hc.candidate_id);
-    if(!already){
-      await db.from("hotlist_candidates").insert({hotlist_id:destListId,candidate_id:hc.candidate_id});
-    }
-    if(!keepHere){
-      await db.from("hotlist_candidates").delete().eq("id",hc.id);
-    }
-    setMoveFor(null);
-    setShareMsg(already?(keepHere?"Already on that list":"Removed — was already on that list")
-                      :(keepHere?`Copied to "${dest?.name}"`:`Moved to "${dest?.name}"`));
+    const destIds=new Set((dest?.hotlist_candidates||[]).map(x=>x.candidate_id));
+    const toInsert=hcs.filter(hc=>!destIds.has(hc.candidate_id))
+                      .map(hc=>({hotlist_id:destListId,candidate_id:hc.candidate_id}));
+    if(toInsert.length) await db.from("hotlist_candidates").insert(toInsert);
+    if(!keepHere) await db.from("hotlist_candidates").delete().in("id",hcs.map(hc=>hc.id));
+    setMoveFor(null);setBulkMove(false);setPicked(new Set());
+    const n=hcs.length;
+    setShareMsg(`${keepHere?"Copied":"Moved"} ${n} candidate${n!==1?"s":""} to "${dest?.name}"`);
     setTimeout(()=>setShareMsg(""),2500);
     load();
   };
+  const moveToList=(hc,destListId,keepHere)=>doMove([hc],destListId,keepHere);
 
   const [laterFor,setLaterFor]=useState(null); // hc awaiting a date/time
   const [laterDate,setLaterDate]=useState("");
@@ -1903,6 +1908,37 @@ function HotlistsPage(){
 
   return <div style={{display:"flex",gap:16,height:"100%"}}>
     {/* Contact-later scheduler */}
+    {bulkMove&&(()=>{
+      const others=lists.filter(l=>l.id!==activeList?.id);
+      const chosen=activeHcs.filter(hc=>picked.has(hc.id));
+      return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setBulkMove(false);}}>
+        <div className="modal" style={{maxWidth:400}}>
+          <h3>Move {chosen.length} candidate{chosen.length!==1?"s":""}</h3>
+          <div style={{fontSize:12,color:"var(--t2)",marginBottom:12}}>
+            <strong>Move</strong> removes them from "{activeList?.name}"; <strong>Copy</strong> keeps them on both. Anyone already on the destination list is skipped.
+          </div>
+          {others.length===0
+            ?<div style={{fontSize:13,color:"var(--t3)",padding:"10px 0"}}>You only have one hotlist. Create another first.</div>
+            :<div style={{display:"flex",flexDirection:"column",gap:6,maxHeight:260,overflowY:"auto"}}>
+              {others.map(l=>{
+                const already=(l.hotlist_candidates||[]).filter(x=>chosen.some(hc=>hc.candidate_id===x.candidate_id)).length;
+                return <div key={l.id} style={{display:"flex",alignItems:"center",gap:8,border:"0.5px solid var(--br)",borderRadius:8,padding:"9px 11px"}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{l.name}</div>
+                    <div style={{fontSize:11,color:"var(--t3)"}}>{(l.hotlist_candidates||[]).length} candidate{(l.hotlist_candidates||[]).length!==1?"s":""}{already?` · ${already} already on it`:""}</div>
+                  </div>
+                  <button className="btn-o" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>doMove(chosen,l.id,true)}>Copy</button>
+                  <button className="btn-a" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>doMove(chosen,l.id,false)}>Move</button>
+                </div>;
+              })}
+            </div>}
+          <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+            <button className="btn-o" onClick={()=>setBulkMove(false)}>Cancel</button>
+          </div>
+        </div>
+      </div>;
+    })()}
+
     {moveFor&&(()=>{
       const others=lists.filter(l=>l.id!==activeList?.id);
       return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setMoveFor(null);}}>
@@ -2010,10 +2046,23 @@ function HotlistsPage(){
           {activeHcs.length===0
             ?<div style={{background:"var(--bg2)",borderRadius:10,padding:"40px 20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates in this hotlist yet. Click "+ Add candidate" to build it.</div>
             :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-              <div style={{fontSize:12,color:"var(--t2)",marginBottom:2,display:"flex",gap:14,flexWrap:"wrap"}}>
-                <span><strong style={{color:"var(--t1)"}}>{activeHcs.length}</strong> candidate{activeHcs.length!==1?"s":""}</span>
-                <span>{contactedCount} contacted</span>
-                {urgentCount>0&&<span style={{color:"#c0392b",fontWeight:600}}>{urgentCount} urgent</span>}
+              <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:2,minHeight:30}}>
+                <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--t2)",cursor:"pointer"}}>
+                  <input type="checkbox"
+                    checked={picked.size>0&&picked.size===activeHcs.length}
+                    ref={el=>{if(el)el.indeterminate=picked.size>0&&picked.size<activeHcs.length;}}
+                    onChange={e=>setPicked(e.target.checked?new Set(activeHcs.map(hc=>hc.id)):new Set())}
+                    style={{width:16,height:16,accentColor:ACCENT,cursor:"pointer"}}/>
+                  Select all
+                </label>
+                <span style={{fontSize:12,color:"var(--t2)"}}><strong style={{color:"var(--t1)"}}>{activeHcs.length}</strong> candidate{activeHcs.length!==1?"s":""}</span>
+                <span style={{fontSize:12,color:"var(--t2)"}}>{contactedCount} contacted</span>
+                {urgentCount>0&&<span style={{fontSize:12,color:"#c0392b",fontWeight:600}}>{urgentCount} urgent</span>}
+                {picked.size>0&&<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:12,fontWeight:600,color:ACCENT}}>{picked.size} selected</span>
+                  <button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>setBulkMove(true)}>⇄ Move / copy</button>
+                  <button className="btn-o" style={{fontSize:12,padding:"5px 10px"}} onClick={()=>setPicked(new Set())}>Clear</button>
+                </div>}
               </div>
               {activeHcs.map(hc=>{
                 const c=hc.candidates;
@@ -2024,10 +2073,13 @@ function HotlistsPage(){
                 return <div key={hc.id} style={{
                   background:bg,border:bd,
                   borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,transition:"background 0.15s,border-color 0.15s"}}>
+                <input type="checkbox" title="Select for bulk move" checked={picked.has(hc.id)} onChange={()=>togglePick(hc.id)}
+                  style={{width:16,height:16,accentColor:"var(--acc)",cursor:"pointer",flexShrink:0}}/>
                 <label title={done?`Contacted${hc.contacted_at?" "+new Date(hc.contacted_at).toLocaleDateString("en-GB"):""} — click to undo`:"Mark as contacted on LinkedIn"}
-                  style={{display:"flex",alignItems:"center",cursor:"pointer",flexShrink:0}}>
+                  style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",flexShrink:0,paddingLeft:10,borderLeft:"0.5px solid var(--br)"}}>
                   <input type="checkbox" checked={!!done} onChange={()=>toggleContacted(hc)}
                     style={{width:18,height:18,accentColor:"#5fa92b",cursor:"pointer"}}/>
+                  <span style={{fontSize:10,color:"var(--t3)"}}>in</span>
                 </label>
                 <Av name={c.name} size={40}/>
                 <div style={{flex:1,minWidth:0}}>
