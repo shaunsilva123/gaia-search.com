@@ -1263,7 +1263,7 @@ function CandidatesPage(){
       // into the browser on every page load. CV text is only needed for the
       // server-side search, and the detail panel fetches the full row itself.
       db.from("candidates")
-        .select("id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,linkedin,cv_url,cv_path,cv_filename,created_at")
+        .select("id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at")
         .order("created_at",{ascending:false}),
       db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}),
     ]);
