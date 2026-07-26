@@ -1780,7 +1780,7 @@ function HotlistsPage(){
 
   const load=useCallback(async()=>{
     setLoading(true);
-    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
+    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,urgent,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
     setLists(data||[]);
     if(activeList){
       const updated=(data||[]).find(l=>l.id===activeList.id);
@@ -1819,6 +1819,32 @@ function HotlistsPage(){
     load();
   };
 
+  const [laterFor,setLaterFor]=useState(null); // hc awaiting a date/time
+  const [laterDate,setLaterDate]=useState("");
+  const [laterTime,setLaterTime]=useState("");
+
+  const toggleUrgent=async(hc)=>{
+    const now=!hc.urgent;
+    setActiveList(prev=>prev&&({...prev,hotlist_candidates:(prev.hotlist_candidates||[]).map(x=>
+      x.id===hc.id?{...x,urgent:now}:x)}));
+    await db.from("hotlist_candidates").update({urgent:now}).eq("id",hc.id);
+    load();
+  };
+
+  const saveLater=async()=>{
+    if(!laterFor||!laterDate)return;
+    const c=laterFor.candidates;
+    await db.from("tasks").insert({
+      title:`Contact ${c.name}${c.role?" ("+c.role+")":""} — from hotlist "${activeList.name}"`,
+      due_date:laterDate,
+      due_time:laterTime||null,
+      priority:"normal",
+      done:false,
+    });
+    setLaterFor(null);setLaterDate("");setLaterTime("");
+    setShareMsg("Follow-up added to Tasks");setTimeout(()=>setShareMsg(""),2500);
+  };
+
   const toggleContacted=async(hc)=>{
     const now=!hc.contacted_linkedin;
     // Update the screen straight away, then persist
@@ -1854,8 +1880,27 @@ function HotlistsPage(){
   const filteredCands=allCands.filter(c=>!search||c.name?.toLowerCase().includes(search.toLowerCase())||c.role?.toLowerCase().includes(search.toLowerCase()));
   const activeHcs=(activeList?.hotlist_candidates||[]).filter(hc=>hc.candidates);
   const contactedCount=activeHcs.filter(hc=>hc.contacted_linkedin).length;
+  const urgentCount=activeHcs.filter(hc=>hc.urgent).length;
 
   return <div style={{display:"flex",gap:16,height:"100%"}}>
+    {/* Contact-later scheduler */}
+    {laterFor&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setLaterFor(null);}}>
+      <div className="modal" style={{maxWidth:380}}>
+        <h3>⏰ Contact later</h3>
+        <div style={{fontSize:12,color:"var(--t2)",marginBottom:12}}>
+          Adds a reminder to your Tasks to contact <strong>{laterFor.candidates?.name}</strong>.
+        </div>
+        <div className="fr2">
+          <div><label>Date</label><input type="date" value={laterDate} onChange={e=>setLaterDate(e.target.value)}/></div>
+          <div><label>Time (optional)</label><input type="time" value={laterTime} onChange={e=>setLaterTime(e.target.value)}/></div>
+        </div>
+        <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={()=>setLaterFor(null)}>Cancel</button>
+          <button className="btn-a" onClick={saveLater} disabled={!laterDate}>Add to Tasks</button>
+        </div>
+      </div>
+    </div>}
+
     {/* Sidebar list of hotlists */}
     <div style={{width:240,flexShrink:0}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
@@ -1916,13 +1961,19 @@ function HotlistsPage(){
           {activeHcs.length===0
             ?<div style={{background:"var(--bg2)",borderRadius:10,padding:"40px 20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates in this hotlist yet. Click "+ Add candidate" to build it.</div>
             :<div style={{display:"flex",flexDirection:"column",gap:8}}>
-              <div style={{fontSize:12,color:"var(--t2)",marginBottom:2}}>{contactedCount} of {activeHcs.length} contacted on LinkedIn</div>
+              <div style={{fontSize:12,color:"var(--t2)",marginBottom:2,display:"flex",gap:14,flexWrap:"wrap"}}>
+                <span><strong style={{color:"var(--t1)"}}>{activeHcs.length}</strong> candidate{activeHcs.length!==1?"s":""}</span>
+                <span>{contactedCount} contacted</span>
+                {urgentCount>0&&<span style={{color:"#c0392b",fontWeight:600}}>{urgentCount} urgent</span>}
+              </div>
               {activeHcs.map(hc=>{
                 const c=hc.candidates;
                 const done=hc.contacted_linkedin;
+                const urgent=hc.urgent;
+                const bg=urgent?"rgba(192,57,43,0.10)":done?"rgba(95,169,43,0.12)":"var(--bg)";
+                const bd=urgent?"0.5px solid rgba(192,57,43,0.5)":done?"0.5px solid rgba(95,169,43,0.45)":"0.5px solid var(--br)";
                 return <div key={hc.id} style={{
-                  background:done?"rgba(95,169,43,0.12)":"var(--bg)",
-                  border:done?"0.5px solid rgba(95,169,43,0.45)":"0.5px solid var(--br)",
+                  background:bg,border:bd,
                   borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,transition:"background 0.15s,border-color 0.15s"}}>
                 <label title={done?`Contacted${hc.contacted_at?" "+new Date(hc.contacted_at).toLocaleDateString("en-GB"):""} — click to undo`:"Mark as contacted on LinkedIn"}
                   style={{display:"flex",alignItems:"center",cursor:"pointer",flexShrink:0}}>
@@ -1933,13 +1984,22 @@ function HotlistsPage(){
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}
                     {hasCv(c)&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}
+                    {urgent&&<span style={{marginLeft:6,fontSize:10,background:"#c0392b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>! Urgent</span>}
                     {done&&<span style={{marginLeft:6,fontSize:10,background:"#5fa92b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>in Contacted</span>}
                   </div>
                   <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
                   <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
                 </div>
+                <button onClick={()=>toggleUrgent(hc)}
+                  title={urgent?"Urgent — click to clear":"Mark urgent to call"}
+                  style={{flexShrink:0,width:30,height:30,borderRadius:"50%",cursor:"pointer",
+                    border:urgent?"none":"1px solid var(--brm)",
+                    background:urgent?"#c0392b":"transparent",
+                    color:urgent?"#fff":"var(--t3)",fontWeight:800,fontSize:15,lineHeight:1,fontFamily:"var(--g-face)"}}>!</button>
                 <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
                   <Pill label={c.status||"New"}/>
+                  <button onClick={()=>{setLaterFor(hc);setLaterDate(todayStr());setLaterTime("");}}
+                    style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>⏰ Contact later</button>
                   {hasCv(c)&&<button onClick={()=>openCv(c)} style={{background:"none",border:"none",padding:0,fontSize:11,color:ACCENT,cursor:"pointer",fontFamily:"inherit"}}>View CV ↗</button>}
                   <button onClick={()=>removeCandidate(c.id)} style={{background:"none",border:"0.5px solid #f09595",borderRadius:5,padding:"2px 7px",fontSize:10,cursor:"pointer",color:"#a32d2d"}}>Remove</button>
                 </div>
