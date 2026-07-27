@@ -1780,7 +1780,7 @@ function HotlistsPage(){
 
   const load=useCallback(async()=>{
     setLoading(true);
-    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,urgent,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
+    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,urgent,not_interested,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
     setLists(data||[]);
     if(activeList){
       const updated=(data||[]).find(l=>l.id===activeList.id);
@@ -1852,6 +1852,14 @@ function HotlistsPage(){
     setActiveList(prev=>prev&&({...prev,hotlist_candidates:(prev.hotlist_candidates||[]).map(x=>
       x.id===hc.id?{...x,urgent:now}:x)}));
     await db.from("hotlist_candidates").update({urgent:now}).eq("id",hc.id);
+    load();
+  };
+
+  const toggleNotInterested=async(hc)=>{
+    const now=!hc.not_interested;
+    setActiveList(prev=>prev&&({...prev,hotlist_candidates:(prev.hotlist_candidates||[]).map(x=>
+      x.id===hc.id?{...x,not_interested:now}:x)}));
+    await db.from("hotlist_candidates").update({not_interested:now}).eq("id",hc.id);
     load();
   };
 
@@ -2068,8 +2076,9 @@ function HotlistsPage(){
                 const c=hc.candidates;
                 const done=hc.contacted_linkedin;
                 const urgent=hc.urgent;
-                const bg=urgent?"rgba(192,57,43,0.10)":done?"rgba(95,169,43,0.12)":"var(--bg)";
-                const bd=urgent?"0.5px solid rgba(192,57,43,0.5)":done?"0.5px solid rgba(95,169,43,0.45)":"0.5px solid var(--br)";
+                const dead=hc.not_interested;
+                const bg=dead?"rgba(120,20,20,0.16)":urgent?"rgba(192,57,43,0.10)":done?"rgba(95,169,43,0.12)":"var(--bg)";
+                const bd=dead?"0.5px solid rgba(120,20,20,0.55)":urgent?"0.5px solid rgba(192,57,43,0.5)":done?"0.5px solid rgba(95,169,43,0.45)":"0.5px solid var(--br)";
                 return <div key={hc.id} style={{
                   background:bg,border:bd,
                   borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,transition:"background 0.15s,border-color 0.15s"}}>
@@ -2082,11 +2091,12 @@ function HotlistsPage(){
                   <span style={{fontSize:10,color:"var(--t3)"}}>in</span>
                 </label>
                 <Av name={c.name} size={40}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{c.name}
+                <div style={{flex:1,minWidth:0,opacity:dead?0.6:1}}>
+                  <div style={{fontWeight:500,fontSize:13,color:"var(--t1)",textDecoration:dead?"line-through":"none"}}>{c.name}
                     {hasCv(c)&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}
                     {urgent&&<span style={{marginLeft:6,fontSize:10,background:"#c0392b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>! Urgent</span>}
                     {done&&<span style={{marginLeft:6,fontSize:10,background:"#5fa92b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>in Contacted</span>}
+                    {dead&&<span style={{marginLeft:6,fontSize:10,background:"#7a1414",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>Not interested</span>}
                   </div>
                   <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
                   <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
@@ -2097,6 +2107,12 @@ function HotlistsPage(){
                     border:urgent?"none":"1px solid var(--brm)",
                     background:urgent?"#c0392b":"transparent",
                     color:urgent?"#fff":"var(--t3)",fontWeight:800,fontSize:15,lineHeight:1,fontFamily:"var(--g-face)"}}>!</button>
+                <button onClick={()=>toggleNotInterested(hc)}
+                  title={dead?"Not interested — click to clear":"Mark: not interested at this time"}
+                  style={{flexShrink:0,width:30,height:30,borderRadius:"50%",cursor:"pointer",
+                    border:dead?"none":"1px solid var(--brm)",
+                    background:dead?"#7a1414":"transparent",
+                    color:dead?"#fff":"var(--t3)",fontWeight:800,fontSize:15,lineHeight:1}}>✕</button>
                 <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
                   <Pill label={c.status||"New"}/>
                   <button onClick={()=>{setLaterFor(hc);setLaterDate(todayStr());setLaterTime("");}}
