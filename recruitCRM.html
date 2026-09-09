@@ -3730,6 +3730,14 @@ function PlacementsPage(){
 
   const togglePaid=async(id,val)=>{await db.from("placements").update({payment_received:val,payment_date:val?new Date().toISOString().split("T")[0]:null}).eq("id",id);load();};
 
+  const del=async(id,name)=>{
+    if(!window.confirm(`Delete the placement for ${name}?\n\nThis removes it from your Placements list and from the fee totals (and the dashboard's banked revenue). This can't be undone.`))return;
+    const{data,error}=await db.from("placements").delete().eq("id",id).select();
+    if(error){alert("Couldn't delete the placement: "+error.message);return;}
+    if(!data||data.length===0){alert("The placement couldn't be removed — the database's delete permission isn't enabled for the placements table. Add a DELETE policy in Supabase (SQL editor) and try again:\n\ncreate policy \"authenticated can delete placements\"\n  on public.placements for delete to authenticated using (true);");return;}
+    load();
+  };
+
   const totalFees=rows.reduce((sum,r)=>sum+(parseFloat(r.fee_amount)||0),0);
   const paidFees=rows.filter(r=>r.payment_received).reduce((sum,r)=>sum+(parseFloat(r.fee_amount)||0),0);
 
@@ -3774,9 +3782,12 @@ function PlacementsPage(){
         <td className="td" style={{color:"#185fa5",fontWeight:500}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
         <td className="td" style={{fontSize:11,color:"var(--t3)"}}>{r.invoice_number||"—"}</td>
         <td className="td">
-          <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
-            {r.payment_received?"✓ Paid":"Unpaid"}
-          </button>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
+              {r.payment_received?"✓ Paid":"Unpaid"}
+            </button>
+            <button onClick={()=>del(r.id,r.candidate_name)} title="Delete placement" style={{background:"transparent",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:13,lineHeight:1,padding:"2px 4px"}}>🗑</button>
+          </div>
         </td>
       </tr>)}</tbody>
     </table>}
