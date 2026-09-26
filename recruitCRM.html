@@ -990,6 +990,19 @@ function GlobalSearch({setPage}){
 
   const total=(results?.candidates?.length||0)+(results?.jobs?.length||0)+(results?.companies?.length||0);
 
+  // Open the candidate's record, not just the Candidates page
+  const openCand=async(c)=>{
+    setQ("");setOpen(false);
+    // Search results only carry a few fields, so fetch the full record first
+    const{data}=await db.from("candidates")
+      .select("id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at")
+      .eq("id",c.id).single();
+    const full=data||c;
+    window._pendingOpenCandidate=full;
+    setPage("candidates");
+    setTimeout(()=>window.dispatchEvent(new CustomEvent("openCandidate",{detail:full})),400);
+  };
+
   return <div ref={ref} style={{position:"relative"}}>
     <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--bg2)",border:"0.5px solid var(--brm)",borderRadius:8,padding:"5px 10px",width:220}}>
       <span style={{color:"var(--t3)",fontSize:13}}>🔍</span>
@@ -1003,7 +1016,7 @@ function GlobalSearch({setPage}){
       {!loading&&results&&total>0&&<>
         {results.candidates.length>0&&<>
           <div style={{padding:"8px 14px 4px",fontSize:10,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Candidates</div>
-          {results.candidates.map(c=><div key={c.id} onClick={()=>{setPage("candidates");setQ("");setOpen(false);}} style={{padding:"8px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:8,borderBottom:"0.5px solid var(--br)"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+          {results.candidates.map(c=><div key={c.id} onClick={()=>openCand(c)} style={{padding:"8px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:8,borderBottom:"0.5px solid var(--br)"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
             <Av name={c.name} size={26}/><div><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div></div>
           </div>)}
         </>}
@@ -2004,6 +2017,257 @@ function ContactCount({companyId}){
   },[companyId]);
   if(count===null)return <span style={{color:"var(--t3)"}}>—</span>;
   return <span style={{fontSize:12,color:count>0?ACCENT:"var(--t3)",fontWeight:count>0?500:400}}>{count>0?`${count} contact${count!==1?"s":""}`:"None"}</span>;
+}
+
+// ─── JOB DESCRIPTION LIBRARY ──────────────────────────────────────────────
+// JD files live in the PRIVATE "job-descriptions" bucket; text is stored in
+// jd_text so the library can be searched.
+function jdTitleFromFile(fname){
+  return fname.replace(/\.[^.]+$/,"").replace(/(\s*\(\d+\))+\s*$/,"")
+    .replace(/[_]+/g," ").replace(/\s+/g," ").replace(/\s*\bJD\b\s*$/i,"").trim()||fname;
+}
+async function openJdFile(path){
+  if(!path)return;
+  const tab=window.open("","_blank");
+  const{data,error}=await db.storage.from("job-descriptions").createSignedUrl(path,3600);
+  if(error||!data?.signedUrl){if(tab)tab.close();alert("Could not open file: "+(error?.message||"not found"));return;}
+  if(tab)tab.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+}
+
+function JdModal({jd,companies,jobs,onClose,onSaved}){
+  const [f,setF]=useState({title:"",company_id:"",job_id:"",notes:"",jd_text:"",file_path:null,file_name:null});
+  const [loading,setLoading]=useState(!!jd);
+  const [saving,setSaving]=useState(false);
+  const [busy,setBusy]=useState("");
+  const [err,setErr]=useState("");
+  const [msg,setMsg]=useState("");
+  const fileRef=React.useRef();
+
+  useEffect(()=>{
+    if(!jd)return;
+    db.from("job_descriptions").select("*").eq("id",jd.id).single().then(({data,error})=>{
+      if(error)setErr(error.message);
+      else setF({title:data.title||"",company_id:data.company_id||"",job_id:data.job_id||"",notes:data.notes||"",
+        jd_text:data.jd_text||"",file_path:data.file_path,file_name:data.file_name});
+      setLoading(false);
+    });
+  },[jd]);
+
+  const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
+  const jobList=f.company_id?jobs.filter(j=>String(j.company_id)===String(f.company_id)):jobs;
+
+  const pickFile=async(e)=>{
+    const file=e.target.files[0];e.target.value="";
+    if(!file)return;
+    if(file.size>10*1024*1024){setErr("File too large (max 10MB)");return;}
+    setBusy("Uploading…");setErr("");
+    const ext=(file.name.split(".").pop()||"pdf").toLowerCase();
+    const path=`jds/${Date.now()}.${ext}`;
+    const{error}=await db.storage.from("job-descriptions").upload(path,file,{upsert:true,contentType:file.type||undefined});
+    if(error){setErr(error.message);setBusy("");return;}
+    const text=await extractFileText(file,file.name);
+    const old=f.file_path;
+    setF(p=>({...p,file_path:path,file_name:file.name,
+      title:p.title||jdTitleFromFile(file.name),
+      jd_text:p.jd_text&&!confirm("Replace the text below with the text from this file?")?p.jd_text:(text||p.jd_text)}));
+    if(old&&jd) await db.storage.from("job-descriptions").remove([old]);
+    setBusy("");
+  };
+
+  const save=async()=>{
+    if(!f.title.trim()){setErr("Give the JD a title");return;}
+    setSaving(true);setErr("");
+    const payload={title:f.title.trim(),company_id:f.company_id||null,job_id:f.job_id||null,notes:f.notes||null,
+      jd_text:f.jd_text||null,file_path:f.file_path||null,file_name:f.file_name||null};
+    const{error}=jd?await db.from("job_descriptions").update(payload).eq("id",jd.id):await db.from("job_descriptions").insert(payload);
+    setSaving(false);
+    if(error){setErr(error.message);return;}
+    onSaved();onClose();
+  };
+
+  const copyText=async()=>{
+    try{await navigator.clipboard.writeText(f.jd_text||"");setMsg("Text copied");setTimeout(()=>setMsg(""),2000);}
+    catch(e){setErr("Couldn't copy — select the text and press Ctrl + C instead");}
+  };
+  const pushToJob=async()=>{
+    const job=jobs.find(j=>String(j.id)===String(f.job_id));
+    if(!job)return;
+    if(!confirm(`Replace the description on "${job.title}" with this JD's text?`))return;
+    const{error}=await db.from("jobs").update({description:f.jd_text||""}).eq("id",job.id);
+    if(error)setErr(error.message);else{setMsg("Copied to "+job.title);setTimeout(()=>setMsg(""),2500);}
+  };
+
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget&&!busy&&!saving)onClose();}}>
+    <div className="modal" style={{maxWidth:720}}>
+      <h3>{jd?"Job description":"New job description"}</h3>
+      {loading?<Spin/>:<div className="fr">
+        <div style={{marginBottom:10}}><label>Title *</label>
+          <input type="text" value={f.title} onChange={s("title")} placeholder="Senior Ecologist – Bristol"/></div>
+        <div className="fr2">
+          <div><label>Company</label>
+            <select value={f.company_id} onChange={e=>setF(p=>({...p,company_id:e.target.value,job_id:""}))}>
+              <option value="">None</option>
+              {companies.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+            </select></div>
+          <div><label>Linked job</label>
+            <select value={f.job_id} onChange={s("job_id")}>
+              <option value="">None</option>
+              {jobList.map(j=><option key={j.id} value={j.id}>{j.title}{j.companies?.name?` (${j.companies.name})`:""}</option>)}
+            </select></div>
+        </div>
+        <div style={{marginBottom:10}}><label>File</label>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            {f.file_path
+              ?<><span style={{fontSize:12,color:"var(--t1)"}}>📄 {f.file_name}</span>
+                <button className="btn-o" onClick={()=>openJdFile(f.file_path)}>Open</button>
+                <button className="btn-o" onClick={()=>fileRef.current.click()} disabled={!!busy}>Replace</button></>
+              :<button className="btn-o" onClick={()=>fileRef.current.click()} disabled={!!busy}>⬆ Upload PDF or Word file</button>}
+            {busy&&<span style={{fontSize:12,color:"var(--t3)"}}><span className="spin"></span>{busy}</span>}
+          </div>
+          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={pickFile}/>
+        </div>
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <label style={{marginBottom:0}}>Description text</label>
+            <div style={{display:"flex",gap:6}}>
+              <button className="btn-o" style={{fontSize:11,padding:"3px 10px"}} onClick={copyText} disabled={!f.jd_text}>Copy text</button>
+              {f.job_id&&<button className="btn-o" style={{fontSize:11,padding:"3px 10px"}} onClick={pushToJob} disabled={!f.jd_text}>Copy to linked job</button>}
+            </div>
+          </div>
+          <textarea value={f.jd_text} onChange={s("jd_text")} placeholder="Paste the job description here, or upload a file above to fill this in"
+            style={{minHeight:260,lineHeight:1.5}}/>
+        </div>
+        <div style={{marginBottom:10}}><label>Notes</label>
+          <input type="text" value={f.notes} onChange={s("notes")} placeholder="Salary band, hiring manager, anything else"/></div>
+        {msg&&<div style={{fontSize:12,color:"#1d9e75",marginBottom:6}}>{msg}</div>}
+        <Err msg={err}/>
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:12}}>
+          <button className="btn-o" onClick={onClose} disabled={!!busy||saving}>Cancel</button>
+          <button className="btn-a" onClick={save} disabled={!!busy||saving}>{saving?"Saving…":"Save"}</button>
+        </div>
+      </div>}
+    </div>
+  </div>;
+}
+
+function JDLibraryPage(){
+  const [rows,setRows]=useState([]);
+  const [companies,setCompanies]=useState([]);
+  const [jobs,setJobs]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [err,setErr]=useState("");
+  const [search,setSearch]=useState("");
+  const [textHits,setTextHits]=useState(null);
+  const [modal,setModal]=useState(null); // null | "new" | jd row
+  const [upload,setUpload]=useState(null);
+  const bulkRef=React.useRef();
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data,error},{data:co},{data:jb}]=await Promise.all([
+      db.from("job_descriptions").select("id,created_at,title,company_id,job_id,notes,file_path,file_name,companies(name),jobs(title)").order("created_at",{ascending:false}),
+      db.from("companies").select("id,name").order("name"),
+      db.from("jobs").select("id,title,company_id,companies(name)").order("title"),
+    ]);
+    if(error)setErr(error.message.includes("job_descriptions")?"The job descriptions table isn't set up yet — run the setup SQL in Supabase first.":error.message);
+    else setRows(data||[]);
+    setCompanies(co||[]);setJobs(jb||[]);
+    setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  // Search inside JD text on the server as well as the titles on screen
+  useEffect(()=>{
+    const q=search.trim().replace(/[%,()*]/g," ").trim();
+    if(q.length<2){setTextHits(null);return;}
+    const t=setTimeout(async()=>{
+      const{data}=await db.from("job_descriptions").select("id").ilike("jd_text",`%${q}%`).limit(500);
+      setTextHits(new Set((data||[]).map(r=>r.id)));
+    },300);
+    return()=>clearTimeout(t);
+  },[search]);
+
+  const bulkUpload=async(e)=>{
+    const all=[...(e.target.files||[])];e.target.value="";
+    const seen={};all.forEach(f=>{const k=cvBaseName(f.name);if(!seen[k]||f.lastModified>seen[k].lastModified)seen[k]=f;});
+    const files=Object.values(seen);
+    if(!files.length)return;
+    setUpload({done:0,total:files.length,failed:[]});
+    const failed=[];
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      try{
+        if(file.size>10*1024*1024)throw new Error("over 10MB");
+        const ext=(file.name.split(".").pop()||"pdf").toLowerCase();
+        const path=`jds/${Date.now()}_${i}.${ext}`;
+        const{error:upErr}=await db.storage.from("job-descriptions").upload(path,file,{upsert:true,contentType:file.type||undefined});
+        if(upErr)throw upErr;
+        const text=await extractFileText(file,file.name);
+        const{error:dbErr}=await db.from("job_descriptions").insert({title:jdTitleFromFile(file.name),file_path:path,file_name:file.name,jd_text:text||null});
+        if(dbErr)throw dbErr;
+      }catch(er){failed.push(file.name+": "+(er.message||er));}
+      setUpload({done:i+1,total:files.length,failed});
+      await new Promise(r=>setTimeout(r,0));
+    }
+    setUpload(failed.length?{done:files.length,total:files.length,failed}:null);
+    load();
+  };
+
+  const del=async(r)=>{
+    if(!confirm(`Delete "${r.title}"?`))return;
+    if(r.file_path)await db.storage.from("job-descriptions").remove([r.file_path]);
+    await db.from("job_descriptions").delete().eq("id",r.id);
+    load();
+  };
+
+  const q=search.trim().toLowerCase();
+  const filtered=rows.filter(r=>!q||
+    [r.title,r.companies?.name,r.jobs?.title,r.notes,r.file_name].some(v=>v?.toLowerCase().includes(q))||
+    (textHits&&textHits.has(r.id)));
+
+  return <div>
+    {modal&&<JdModal jd={modal==="new"?null:modal} companies={companies} jobs={jobs} onClose={()=>setModal(null)} onSaved={load}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Job descriptions ({filtered.length})</span>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <input type="text" placeholder="Search titles and JD text…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:240}}/>
+        <button className="btn-o" style={{fontSize:12}} onClick={()=>bulkRef.current.click()} disabled={!!upload&&upload.done<upload.total}>⬆ Upload JDs</button>
+        <input ref={bulkRef} type="file" multiple accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={bulkUpload}/>
+        <button className="btn-a" onClick={()=>setModal("new")}>+ New JD</button>
+      </div>
+    </div>
+    {upload&&upload.done<upload.total&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}><span className="spin"></span>Uploading {upload.done+1} of {upload.total}…</div>}
+    {upload&&upload.failed.length>0&&upload.done===upload.total&&<div className="err" style={{marginBottom:10}}>
+      {upload.failed.map((m,i)=><div key={i}>{m}</div>)}
+      <button className="btn-o" style={{fontSize:11,marginTop:6}} onClick={()=>setUpload(null)}>Dismiss</button>
+    </div>}
+    <Err msg={err}/>
+    {loading?<Spin/>:
+    rows.length===0&&!err?<div style={{textAlign:"center",padding:"50px 20px",color:"var(--t2)",fontSize:13,background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:12}}>
+      <div style={{fontSize:28,marginBottom:8}}>📑</div>
+      No job descriptions yet. Upload JD files, or add one by pasting its text.
+    </div>:
+    <div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:12,overflow:"hidden"}}>
+      <div style={{overflowX:"auto"}}>
+      <table style={{width:"100%",borderCollapse:"collapse"}}>
+        <thead><tr>
+          <th className="th">Title</th><th className="th">Company</th><th className="th">Linked job</th><th className="th">File</th><th className="th">Added</th><th className="th"></th>
+        </tr></thead>
+        <tbody>{filtered.map(r=><tr key={r.id} style={{cursor:"pointer"}} onClick={()=>setModal(r)}
+          onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+          <td className="td" style={{fontWeight:500,color:ACCENT}}>{r.title}
+            {r.notes&&<div style={{fontSize:11,color:"var(--t3)",fontWeight:400,marginTop:2}}>{r.notes}</div>}</td>
+          <td className="td">{r.companies?.name||"—"}</td>
+          <td className="td">{r.jobs?.title||"—"}</td>
+          <td className="td">{r.file_path
+            ?<button className="btn-o" style={{fontSize:11,padding:"3px 10px"}} onClick={e=>{e.stopPropagation();openJdFile(r.file_path);}}>📄 Open</button>
+            :<span style={{fontSize:12,color:"var(--t3)"}}>Text only</span>}</td>
+          <td className="td" style={{fontSize:12,color:"var(--t2)",whiteSpace:"nowrap"}}>{new Date(r.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</td>
+          <td className="td" style={{textAlign:"right"}}><button className="btn-d" style={{fontSize:11}} onClick={e=>{e.stopPropagation();del(r);}}>Del</button></td>
+        </tr>)}</tbody>
+      </table></div>
+    </div>}
+  </div>;
 }
 
 // ── Hotlists ───────────────────────────────────────────────────────────────
@@ -4329,6 +4593,7 @@ const NAV=[
   {k:"dashboard",l:"Dashboard",i:"🏠",s:"main"},
   {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
   {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
+  {k:"jds",l:"Job descriptions",i:"📑",s:"recruit"},
   {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
   {k:"hotlists",l:"Hotlists",i:"🔥",s:"recruit"},
   {k:"pipeline",l:"BD Pipeline",i:"📈",s:"recruit"},
@@ -4443,6 +4708,7 @@ function AuthedApp(){
     reporting:<ReportingPage/>,
     sequences:<EmailSequencesPage/>,
     hotlists:<HotlistsPage/>,
+    jds:<JDLibraryPage/>,
   };
   let lastS=null;
   return <>
