@@ -1246,6 +1246,230 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
     </div>
   </>;
 }
+// ─── BULK CV MATCH ────────────────────────────────────────────────────────
+// Pick a folder's worth of CVs at once. Each file's text is read in the
+// browser, matched to a candidate by name, shown for review, then uploaded
+// exactly like the single "Replace" button in the candidate panel.
+function cvBaseName(fname){
+  // "Mary Haine CV 2026 (1) (1).pdf" -> "mary haine cv 2026.pdf" so repeat downloads collapse
+  const dot=fname.lastIndexOf(".");
+  const stem=dot>0?fname.slice(0,dot):fname;
+  const ext=dot>0?fname.slice(dot):"";
+  return (stem.replace(/(\s*\(\d+\))+\s*$/,"")+ext).toLowerCase();
+}
+function cvNorm(s){
+  return " "+(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/['’]/g,"").replace(/[^a-z]+/g," ").trim()+" ";
+}
+function cvNameParts(name){
+  // Ignore credentials (ACIEEM, MCIEEM, CEnv…) and anything after | , or (
+  const clean=(name||"").split(/[|,(]/)[0].trim();
+  let toks=clean.split(/\s+/).filter(Boolean);
+  const allCaps=t=>t.length>1&&t===t.toUpperCase()&&/[A-Z]/.test(t);
+  if(!toks.every(allCaps)) toks=toks.filter(t=>!allCaps(t));
+  const words=toks.map(t=>cvNorm(t).trim()).filter(Boolean);
+  if(words.length<2) return null;
+  return {first:words[0],last:words[words.length-1]};
+}
+function cvScore(p,fileN,headN,textN){
+  const full=" "+p.first+" "+p.last+" ";
+  let s=0;
+  // Filename evidence
+  if(fileN.includes(full)) s=Math.max(s,3);
+  else if(fileN.includes(" "+p.first[0]+p.last+" ")) s=Math.max(s,2);            // JFreemantle CV.pdf
+  else if(fileN.includes(" "+p.last+" ")&&(fileN.includes(" "+p.first+" ")||fileN.includes(" "+p.first[0]+" "))) s=Math.max(s,2);
+  // CV text evidence: the name near the top is strong, further down could be a referee
+  if(headN.includes(full)) s=Math.max(s,3);
+  else if(headN.includes(" "+p.first+" ")&&headN.includes(" "+p.last+" ")) s=Math.max(s,2); // middle name
+  else if(textN.includes(full)) s=Math.max(s,1);
+  return s;
+}
+const CV_CONF={3:"Strong",2:"Likely",1:"Weak",0:"No match"};
+
+function BulkCvMatch({candidates,onClose,onDone}){
+  const [stage,setStage]=useState("pick"); // pick | reading | review | attaching | done
+  const [progress,setProgress]=useState({done:0,total:0});
+  const [items,setItems]=useState([]);
+  const [showNoMatch,setShowNoMatch]=useState(false);
+  const [results,setResults]=useState(null);
+  const [skipped,setSkipped]=useState(0);
+  const fileRef=React.useRef();
+
+  const byId={};candidates.forEach(c=>{byId[c.id]=c;});
+  const sorted=[...candidates].filter(c=>c.name).sort((a,b)=>a.name.localeCompare(b.name));
+  const indexed=candidates.map(c=>({c,p:cvNameParts(c.name)})).filter(x=>x.p);
+
+  const readFiles=async(e)=>{
+    const all=[...(e.target.files||[])].filter(f=>/\.(pdf|docx?|DOCX?|PDF)$/i.test(f.name));
+    // Collapse "file.pdf", "file (1).pdf", "file (1) (1).pdf" into one (newest kept)
+    const seen={};
+    all.forEach(f=>{const k=cvBaseName(f.name);if(!seen[k]||f.lastModified>seen[k].lastModified)seen[k]=f;});
+    const files=Object.values(seen);
+    setSkipped(all.length-files.length);
+    if(!files.length){alert("No PDF or Word files were selected.");return;}
+    setStage("reading");setProgress({done:0,total:files.length});
+    const out=[];
+    for(let i=0;i<files.length;i++){
+      const f=files[i];
+      let text="";
+      if(f.size<=10*1024*1024) text=await extractFileText(f,f.name);
+      const fileN=cvNorm(f.name.replace(/\.[^.]+$/,"").replace(/[_\-.]+/g," ").replace(/([a-z])([A-Z])/g,"$1 $2")+" "+f.name.replace(/\.[^.]+$/,""));
+      const textN=cvNorm(text);
+      const headN=textN.slice(0,600);
+      let best=0,matches=[];
+      indexed.forEach(({c,p})=>{
+        const s=cvScore(p,fileN,headN,textN);
+        if(s>best){best=s;matches=[c];}
+        else if(s===best&&s>0&&!matches.some(m=>m.id===c.id))matches.push(c);
+      });
+      const tie=matches.length>1;
+      const cand=best>0?matches[0]:null;
+      let note="";
+      if(f.size>10*1024*1024) note="Over 10MB, can't upload";
+      else if(!text) note="Couldn't read text (scanned?), matched on filename only";
+      if(tie) note="Also matches "+matches.slice(1).map(m=>m.name).join(", ");
+      out.push({key:i,file:f,text,candId:cand?cand.id:"",score:best,manual:false,note,
+        tooBig:f.size>10*1024*1024,
+        include:!!cand&&best>=2&&!tie&&f.size<=10*1024*1024});
+      setProgress({done:i+1,total:files.length});
+    }
+    // Only one file per candidate: keep the newest, untick the rest
+    const groups={};
+    out.filter(r=>r.include).forEach(r=>{(groups[r.candId]=groups[r.candId]||[]).push(r);});
+    Object.values(groups).forEach(g=>{
+      if(g.length<2)return;
+      g.sort((a,b)=>b.file.lastModified-a.file.lastModified);
+      g.slice(1).forEach(r=>{r.include=false;r.note="A newer file is also matched to this person";});
+    });
+    // Don't silently overwrite a CV that's already on file
+    out.forEach(r=>{
+      if(r.include&&r.candId&&hasCv(byId[r.candId])){r.include=false;r.note=r.note||"Already has a CV — tick to replace it";}
+    });
+    out.sort((a,b)=>(b.score-a.score)||a.file.name.localeCompare(b.file.name));
+    setItems(out);setStage("review");
+  };
+
+  const update=(key,patch)=>setItems(list=>list.map(r=>r.key===key?{...r,...patch}:r));
+
+  const attach=async()=>{
+    const todo=items.filter(r=>r.include&&r.candId&&!r.tooBig);
+    setStage("attaching");setProgress({done:0,total:todo.length});
+    const ok=[],failed=[];
+    for(let i=0;i<todo.length;i++){
+      const r=todo[i];const c=byId[r.candId];
+      try{
+        const ext=(r.file.name.split(".").pop()||"pdf").toLowerCase();
+        const path=`cvs/${c.id}_${Date.now()}.${ext}`;
+        const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,r.file,{upsert:true,contentType:r.file.type||undefined});
+        if(upErr)throw upErr;
+        const{data:urlData}=db.storage.from("candidate-cvs").getPublicUrl(path);
+        const oldPath=cvStoragePath(c);
+        const{error:dbErr}=await db.from("candidates")
+          .update({cv_url:urlData?.publicUrl,cv_path:path,cv_filename:r.file.name,cv_text:r.text||null})
+          .eq("id",c.id);
+        if(dbErr)throw dbErr;
+        if(oldPath&&oldPath!==path) await db.storage.from("candidate-cvs").remove([oldPath]);
+        ok.push({file:r.file.name,name:c.name});
+      }catch(err){ failed.push({file:r.file.name,name:c?.name,msg:err.message||String(err)}); }
+      setProgress({done:i+1,total:todo.length});
+    }
+    setResults({ok,failed});setStage("done");
+    if(onDone)onDone();
+  };
+
+  const matched=items.filter(r=>r.candId);
+  const noMatch=items.filter(r=>!r.candId);
+  const shown=showNoMatch?items:matched;
+  const ticked=items.filter(r=>r.include&&r.candId&&!r.tooBig).length;
+  const confColour=s=>s>=3?"#1d9e75":s===2?"#8a6d00":"#a32d2d";
+
+  return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget&&stage!=="reading"&&stage!=="attaching")onClose();}}>
+    <div className="modal" style={{maxWidth:stage==="review"?900:500}}>
+      <h3>Bulk CV match</h3>
+
+      {stage==="pick"&&<>
+        <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.55,marginBottom:14}}>
+          Select all the CVs in a folder at once (Ctrl + A in the file picker). Each one is read and matched to a candidate by name.
+          You'll review every match before anything is saved.
+        </p>
+        <input ref={fileRef} type="file" multiple accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={readFiles}/>
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={onClose}>Cancel</button>
+          <button className="btn-a" onClick={()=>fileRef.current&&fileRef.current.click()}>Choose files</button>
+        </div>
+      </>}
+
+      {stage==="reading"&&<div style={{padding:"24px 0",textAlign:"center",fontSize:13,color:"var(--t2)"}}>
+        <span className="spin"></span>Reading file {progress.done} of {progress.total}…
+      </div>}
+
+      {stage==="review"&&<>
+        <p style={{fontSize:12,color:"var(--t2)",marginBottom:10,lineHeight:1.5}}>
+          {matched.length} of {items.length} files matched a candidate{skipped>0?` (${skipped} repeat download${skipped>1?"s":""} ignored)`:""}.
+          Check each row, change the person if needed, and untick anything that shouldn't be attached.
+        </p>
+        <div style={{overflowX:"auto",border:"0.5px solid var(--br)",borderRadius:8,maxHeight:"55vh",overflowY:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr>
+              <th className="th" style={{width:36}}></th>
+              <th className="th">File</th>
+              <th className="th">Candidate</th>
+              <th className="th">Match</th>
+            </tr></thead>
+            <tbody>
+              {shown.map(r=>{
+                const c=byId[r.candId];
+                return <tr key={r.key} style={{opacity:r.include?1:0.7}}>
+                  <td className="td"><input type="checkbox" checked={r.include} disabled={!r.candId||r.tooBig}
+                    onChange={e=>update(r.key,{include:e.target.checked})}/></td>
+                  <td className="td" style={{maxWidth:260,wordBreak:"break-word",fontSize:12}}>
+                    {r.file.name}
+                    {r.note&&<div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{r.note}</div>}
+                    {c&&hasCv(c)&&r.include&&<div style={{fontSize:11,color:"#a32d2d",marginTop:2}}>Will replace {c.cv_filename||"their current CV"}</div>}
+                  </td>
+                  <td className="td">
+                    <select value={r.candId} style={{fontSize:12,width:"100%",minWidth:180}}
+                      onChange={e=>update(r.key,{candId:e.target.value,manual:true,include:!!e.target.value&&!r.tooBig})}>
+                      <option value="">Skip this file</option>
+                      {sorted.map(s=><option key={s.id} value={s.id}>{s.name}{hasCv(s)?" (has CV)":""}</option>)}
+                    </select>
+                  </td>
+                  <td className="td" style={{fontSize:12,whiteSpace:"nowrap",color:r.manual?"var(--t2)":confColour(r.score)}}>
+                    {r.manual?"Set by you":CV_CONF[r.score]}
+                  </td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+        </div>
+        {noMatch.length>0&&<button className="btn-o" style={{fontSize:11,marginTop:8}} onClick={()=>setShowNoMatch(v=>!v)}>
+          {showNoMatch?"Hide":"Show"} {noMatch.length} file{noMatch.length>1?"s":""} with no match
+        </button>}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:14}}>
+          <button className="btn-o" onClick={onClose}>Cancel</button>
+          <button className="btn-a" disabled={!ticked} onClick={attach}>Attach {ticked} CV{ticked===1?"":"s"}</button>
+        </div>
+      </>}
+
+      {stage==="attaching"&&<div style={{padding:"24px 0",textAlign:"center",fontSize:13,color:"var(--t2)"}}>
+        <span className="spin"></span>Attaching CV {progress.done} of {progress.total}…
+      </div>}
+
+      {stage==="done"&&results&&<>
+        <p style={{fontSize:13,color:"var(--t1)",marginBottom:10}}>
+          Attached {results.ok.length} CV{results.ok.length===1?"":"s"}.
+          {results.failed.length>0&&` ${results.failed.length} failed.`}
+        </p>
+        {results.failed.length>0&&<div className="err">
+          {results.failed.map((f,i)=><div key={i}>{f.file} → {f.name}: {f.msg}</div>)}
+        </div>}
+        <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+          <button className="btn-a" onClick={onClose}>Done</button>
+        </div>
+      </>}
+    </div>
+  </div>;
+}
 function CandidatesPage(){
   const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);
   const [search,setSearch]=useState("");const [statusF,setStatusF]=useState("All");
@@ -1255,6 +1479,7 @@ function CandidatesPage(){
   const [selected,setSelected]=useState(new Set());
   const [bulkStatus,setBulkStatus]=useState("");
   const [lastContacted,setLastContacted]=useState({});
+  const [bulkCv,setBulkCv]=useState(false);
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -1388,6 +1613,7 @@ function CandidatesPage(){
 
   return <div>
     {modal&&<CandModal onClose={()=>setModal(false)} onSaved={load}/>}
+    {bulkCv&&<BulkCvMatch candidates={rows} onClose={()=>setBulkCv(false)} onDone={load}/>}
     {editRow&&<CandModal cand={editRow} onClose={()=>{setEditRow(null);}} onSaved={()=>{load();setDetailCand(null);}}/>}
     {detailCand&&<CandidateDetailPanel cand={detailCand} onClose={()=>setDetailCand(null)} onEdit={c=>{setDetailCand(null);setEditRow(c);}} onRefresh={load}/>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
@@ -1401,6 +1627,7 @@ function CandidatesPage(){
         </button>
         <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{width:"auto"}}>{statuses.map(s=><option key={s}>{s}</option>)}</select>
         <button className="btn-o" style={{fontSize:12}} onClick={exportCSV} title="Export to CSV">⬇ Export CSV</button>
+        <button className="btn-o" style={{fontSize:12}} onClick={()=>setBulkCv(true)} title="Match a batch of CV files to candidates">📎 Bulk CV match</button>
         <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate <span style={{opacity:0.6,fontSize:10,marginLeft:2}}>N</span></button>
       </div>
     </div>
