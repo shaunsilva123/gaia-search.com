@@ -168,7 +168,7 @@ function CoLogo({company,size=30}){
 // signed link is minted on demand so a leaked URL cannot expose someone's CV.
 // Pull readable text out of a CV so Postgres can index it.
 // Returns "" rather than throwing — a CV that will not parse should still upload.
-async function extractFileText(fileOrBlob,filename){
+async function extractFileText(fileOrBlob,filename,maxPages){
   const name=(filename||fileOrBlob.name||"").toLowerCase();
   try{
     const buf=await fileOrBlob.arrayBuffer();
@@ -176,10 +176,17 @@ async function extractFileText(fileOrBlob,filename){
       if(!window.pdfjsLib) return "";
       const pdf=await pdfjsLib.getDocument({data:buf}).promise;
       let out=[];
-      for(let i=1;i<=pdf.numPages;i++){
-        const page=await pdf.getPage(i);
-        const tc=await page.getTextContent();
-        out.push(tc.items.map(it=>it.str).join(" "));
+      try{
+        const n=maxPages?Math.min(maxPages,pdf.numPages):pdf.numPages;
+        for(let i=1;i<=n;i++){
+          const page=await pdf.getPage(i);
+          const tc=await page.getTextContent();
+          out.push(tc.items.map(it=>it.str).join(" "));
+          page.cleanup();
+        }
+      }finally{
+        // Free the parsed PDF — without this, memory builds up across many files
+        try{ await pdf.destroy(); }catch(e){}
       }
       return out.join("\n").replace(/\s+/g," ").trim();
     }
@@ -1307,12 +1314,15 @@ function BulkCvMatch({candidates,onClose,onDone}){
     const files=Object.values(seen);
     setSkipped(all.length-files.length);
     if(!files.length){alert("No PDF or Word files were selected.");return;}
+    if(files.length>150&&!confirm(files.length+" files selected. Large batches can be slow on a Chromebook — carry on? (Choosing fewer files at a time is safer.)")){e.target.value="";return;}
     setStage("reading");setProgress({done:0,total:files.length});
     const out=[];
     for(let i=0;i<files.length;i++){
       const f=files[i];
       let text="";
-      if(f.size<=10*1024*1024) text=await extractFileText(f,f.name);
+      // Only the first 2 pages are needed to find a name — full text is read at attach time
+      if(f.size<=10*1024*1024) text=(await extractFileText(f,f.name,2)).slice(0,4000);
+      await new Promise(res=>setTimeout(res,0)); // let the browser tidy up between files
       const fileN=cvNorm(f.name.replace(/\.[^.]+$/,"").replace(/[_\-.]+/g," ").replace(/([a-z])([A-Z])/g,"$1 $2")+" "+f.name.replace(/\.[^.]+$/,""));
       const textN=cvNorm(text);
       const headN=textN.slice(0,600);
@@ -1328,7 +1338,7 @@ function BulkCvMatch({candidates,onClose,onDone}){
       if(f.size>10*1024*1024) note="Over 10MB, can't upload";
       else if(!text) note="Couldn't read text (scanned?), matched on filename only";
       if(tie) note="Also matches "+matches.slice(1).map(m=>m.name).join(", ");
-      out.push({key:i,file:f,text,candId:cand?cand.id:"",score:best,manual:false,note,
+      out.push({key:i,file:f,hasText:!!text,candId:cand?cand.id:"",score:best,manual:false,note,
         tooBig:f.size>10*1024*1024,
         include:!!cand&&best>=2&&!tie&&f.size<=10*1024*1024});
       setProgress({done:i+1,total:files.length});
@@ -1363,9 +1373,10 @@ function BulkCvMatch({candidates,onClose,onDone}){
         const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,r.file,{upsert:true,contentType:r.file.type||undefined});
         if(upErr)throw upErr;
         const{data:urlData}=db.storage.from("candidate-cvs").getPublicUrl(path);
+        const fullText=await extractFileText(r.file,r.file.name);
         const oldPath=cvStoragePath(c);
         const{error:dbErr}=await db.from("candidates")
-          .update({cv_url:urlData?.publicUrl,cv_path:path,cv_filename:r.file.name,cv_text:r.text||null})
+          .update({cv_url:urlData?.publicUrl,cv_path:path,cv_filename:r.file.name,cv_text:fullText||null})
           .eq("id",c.id);
         if(dbErr)throw dbErr;
         if(oldPath&&oldPath!==path) await db.storage.from("candidate-cvs").remove([oldPath]);
