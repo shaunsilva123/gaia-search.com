@@ -1313,6 +1313,8 @@ function BulkCvMatch({candidates,onClose,onDone}){
   const [showNoMatch,setShowNoMatch]=useState(false);
   const [results,setResults]=useState(null);
   const [skipped,setSkipped]=useState(0);
+  const [finding,setFinding]=useState(null); // {done,total} while AI reads unmatched files
+  const [findErr,setFindErr]=useState("");
   const fileRef=React.useRef();
 
   const byId={};candidates.forEach(c=>{byId[c.id]=c;});
@@ -1351,7 +1353,7 @@ function BulkCvMatch({candidates,onClose,onDone}){
       if(f.size>10*1024*1024) note="Over 10MB, can't upload";
       else if(!text) note="Couldn't read text (scanned?), matched on filename only";
       if(tie) note="Also matches "+matches.slice(1).map(m=>m.name).join(", ");
-      out.push({key:i,file:f,hasText:!!text,candId:cand?cand.id:"",score:best,manual:false,note,
+      out.push({key:i,file:f,hasText:!!text,snippet:text,newCand:null,candId:cand?cand.id:"",score:best,manual:false,note,
         tooBig:f.size>10*1024*1024,
         include:!!cand&&best>=2&&!tie&&f.size<=10*1024*1024});
       setProgress({done:i+1,total:files.length});
@@ -1374,13 +1376,69 @@ function BulkCvMatch({candidates,onClose,onDone}){
 
   const update=(key,patch)=>setItems(list=>list.map(r=>r.key===key?{...r,...patch}:r));
 
+  // Read unmatched files with AI: is it a CV, and whose? Creates "new candidate" rows.
+  const findNew=async()=>{
+    const todo=items.filter(r=>!r.candId&&!r.newCand&&r.snippet&&!r.tooBig&&!r.checked);
+    if(!todo.length)return;
+    setFindErr("");setFinding({done:0,total:todo.length});
+    const existing=indexed.map(x=>({c:x.c,k:x.p.first+" "+x.p.last}));
+    const found={}; // name key -> newest item key, so one person isn't created twice
+    const patches={};
+    for(let i=0;i<todo.length;i++){
+      const r=todo[i];
+      try{
+        let raw="";
+        await claude(
+          "You are a CV parser. Decide whether the document is a person's CV/resume, then extract details. Respond ONLY with a JSON object (no markdown) with keys: is_cv (true only for a CV/resume; false for job descriptions, letters, invoices, reports or anything else), name, role, email, phone, location, experience, salary, notice, skills (array of strings), notes (2-sentence summary). Use null for unknown fields.",
+          "DOCUMENT FILENAME: "+r.file.name+"\n\nDOCUMENT TEXT:\n"+r.snippet.slice(0,4000),
+          chunk=>{raw+=chunk;}
+        );
+        const m=raw.match(/\{[\s\S]*\}/);
+        const obj=m?JSON.parse(m[0]):null;
+        if(obj&&obj.is_cv&&obj.name&&cvNameParts(obj.name)){
+          const p=cvNameParts(obj.name);const k=p.first+" "+p.last;
+          const already=existing.find(x=>x.k===k);
+          if(already){
+            patches[r.key]={candId:already.c.id,score:2,checked:true,include:!hasCv(already.c),
+              note:hasCv(already.c)?"Already has a CV — tick to replace it":"Matched by reading the CV"};
+          }else{
+            const prev=found[k];
+            if(prev===undefined||r.file.lastModified>(items.find(x=>x.key===prev)?.file.lastModified||0)){
+              if(prev!==undefined)patches[prev]={newCand:null,candId:"",include:false,checked:true,note:"A newer CV for this person is in the list"};
+              found[k]=r.key;
+              patches[r.key]={newCand:obj,candId:"__new__",include:true,checked:true,note:""};
+            }else{
+              patches[r.key]={checked:true,note:"A newer CV for this person is in the list"};
+            }
+          }
+        }else{
+          patches[r.key]={checked:true,note:obj&&obj.is_cv===false?"Not a CV":"Couldn't find a name"};
+        }
+      }catch(e){
+        setFindErr(e.message);
+        if(/API key|api key|401|credit/i.test(e.message))break;
+      }
+      setFinding({done:i+1,total:todo.length});
+    }
+    setItems(list=>list.map(r=>patches[r.key]?{...r,...patches[r.key]}:r));
+    setFinding(null);setShowNoMatch(true);
+  };
+
   const attach=async()=>{
     const todo=items.filter(r=>r.include&&r.candId&&!r.tooBig);
     setStage("attaching");setProgress({done:0,total:todo.length});
     const ok=[],failed=[];
     for(let i=0;i<todo.length;i++){
-      const r=todo[i];const c=byId[r.candId];
+      const r=todo[i];let c=byId[r.candId];
       try{
+        if(r.candId==="__new__"){
+          const{is_cv,...parsed}=r.newCand;
+          const payload={...parsed,skills:Array.isArray(parsed.skills)?parsed.skills:[],status:"New",initials:ini(parsed.name),
+            notes:[parsed.notes,"Added from CV file: "+r.file.name].filter(Boolean).join("\n")};
+          const{data:created,error:insErr}=await db.from("candidates").insert(payload).select("id,name,cv_path,cv_url").single();
+          if(insErr)throw insErr;
+          c=created;created.isNew=true;
+        }
         const ext=(r.file.name.split(".").pop()||"pdf").toLowerCase();
         const path=`cvs/${c.id}_${Date.now()}.${ext}`;
         const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,r.file,{upsert:true,contentType:r.file.type||undefined});
@@ -1393,7 +1451,7 @@ function BulkCvMatch({candidates,onClose,onDone}){
           .eq("id",c.id);
         if(dbErr)throw dbErr;
         if(oldPath&&oldPath!==path) await db.storage.from("candidate-cvs").remove([oldPath]);
-        ok.push({file:r.file.name,name:c.name});
+        ok.push({file:r.file.name,name:c.name,isNew:!!c.isNew});
       }catch(err){ failed.push({file:r.file.name,name:c?.name,msg:err.message||String(err)}); }
       setProgress({done:i+1,total:todo.length});
     }
@@ -1403,6 +1461,8 @@ function BulkCvMatch({candidates,onClose,onDone}){
 
   const matched=items.filter(r=>r.candId);
   const noMatch=items.filter(r=>!r.candId);
+  const unchecked=noMatch.filter(r=>r.snippet&&!r.tooBig&&!r.checked).length;
+  const newCount=items.filter(r=>r.candId==="__new__"&&r.include).length;
   const shown=showNoMatch?items:matched;
   const ticked=items.filter(r=>r.include&&r.candId&&!r.tooBig).length;
   const confColour=s=>s>=3?"#1d9e75":s===2?"#8a6d00":"#a32d2d";
@@ -1449,29 +1509,41 @@ function BulkCvMatch({candidates,onClose,onDone}){
                   <td className="td" style={{maxWidth:260,wordBreak:"break-word",fontSize:12}}>
                     {r.file.name}
                     {r.note&&<div style={{fontSize:11,color:"var(--t3)",marginTop:2}}>{r.note}</div>}
+                    {r.candId==="__new__"&&r.newCand&&<div style={{fontSize:11,color:"var(--t2)",marginTop:2}}>
+                      {[r.newCand.role,r.newCand.location,r.newCand.email].filter(Boolean).join(" · ")||"No other details found"}</div>}
                     {c&&hasCv(c)&&r.include&&<div style={{fontSize:11,color:"#a32d2d",marginTop:2}}>Will replace {c.cv_filename||"their current CV"}</div>}
                   </td>
                   <td className="td">
                     <select value={r.candId} style={{fontSize:12,width:"100%",minWidth:180}}
-                      onChange={e=>update(r.key,{candId:e.target.value,manual:true,include:!!e.target.value&&!r.tooBig})}>
+                      onChange={e=>update(r.key,{candId:e.target.value,manual:e.target.value!=="__new__",include:!!e.target.value&&!r.tooBig})}>
                       <option value="">Skip this file</option>
+                      {r.newCand&&<option value="__new__">➕ New candidate: {r.newCand.name}</option>}
                       {sorted.map(s=><option key={s.id} value={s.id}>{s.name}{hasCv(s)?" (has CV)":""}</option>)}
                     </select>
                   </td>
                   <td className="td" style={{fontSize:12,whiteSpace:"nowrap",color:r.manual?"var(--t2)":confColour(r.score)}}>
-                    {r.manual?"Set by you":CV_CONF[r.score]}
+                    {r.candId==="__new__"?<span style={{color:"#1d6fa5"}}>New candidate</span>:r.manual?"Set by you":CV_CONF[r.score]}
                   </td>
                 </tr>;
               })}
             </tbody>
           </table>
         </div>
-        {noMatch.length>0&&<button className="btn-o" style={{fontSize:11,marginTop:8}} onClick={()=>setShowNoMatch(v=>!v)}>
-          {showNoMatch?"Hide":"Show"} {noMatch.length} file{noMatch.length>1?"s":""} with no match
-        </button>}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginTop:8}}>
+          {noMatch.length>0&&<button className="btn-o" style={{fontSize:11}} onClick={()=>setShowNoMatch(v=>!v)}>
+            {showNoMatch?"Hide":"Show"} {noMatch.length} file{noMatch.length>1?"s":""} with no match
+          </button>}
+          {unchecked>0&&!finding&&<button className="btn-o" style={{fontSize:11}} onClick={findNew}
+            title="Uses your Anthropic API key to read each unmatched file">
+            ✦ Find new candidates in {unchecked} unmatched file{unchecked>1?"s":""}
+          </button>}
+          {finding&&<span style={{fontSize:12,color:"var(--t2)"}}><span className="spin"></span>Reading file {finding.done+1} of {finding.total}…</span>}
+        </div>
+        {findErr&&<Err msg={"AI read stopped: "+findErr}/>}
         <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:14}}>
           <button className="btn-o" onClick={onClose}>Cancel</button>
-          <button className="btn-a" disabled={!ticked} onClick={attach}>Attach {ticked} CV{ticked===1?"":"s"}</button>
+          <button className="btn-a" disabled={!ticked||!!finding} onClick={attach}>
+            {newCount>0?`Create ${newCount} + attach ${ticked} CV${ticked===1?"":"s"}`:`Attach ${ticked} CV${ticked===1?"":"s"}`}</button>
         </div>
       </>}
 
@@ -1481,7 +1553,8 @@ function BulkCvMatch({candidates,onClose,onDone}){
 
       {stage==="done"&&results&&<>
         <p style={{fontSize:13,color:"var(--t1)",marginBottom:10}}>
-          Attached {results.ok.length} CV{results.ok.length===1?"":"s"}.
+          Attached {results.ok.length} CV{results.ok.length===1?"":"s"}
+          {results.ok.some(o=>o.isNew)&&`, including ${results.ok.filter(o=>o.isNew).length} new candidate${results.ok.filter(o=>o.isNew).length===1?"":"s"}`}.
           {results.failed.length>0&&` ${results.failed.length} failed.`}
         </p>
         {results.failed.length>0&&<div className="err">
