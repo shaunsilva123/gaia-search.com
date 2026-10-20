@@ -427,9 +427,9 @@ const UPGRADE_HINT=" — run crm-upgrade.sql in Supabase first.";
 // Fields the candidate form is allowed to write (keeps system columns out of saves)
 const CAND_FIELDS=["name","role","email","phone","location","experience","salary","notice","skills","status","notes","linkedin","source","licences","cieem_level","driving_licence","salary_expect"];
 
-function CandModal({cand,onClose,onSaved}){
+function CandModal({cand,onClose,onSaved,initial}){
   const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:"",source:"",licences:[],cieem_level:"",driving_licence:"",salary_expect:""};
-  const [f,setF]=useState(cand?{...blank,...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||"",licences:cand.licences||[],salary_expect:cand.salary_expect||""}:blank);
+  const [f,setF]=useState(cand?{...blank,...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||"",licences:cand.licences||[],salary_expect:cand.salary_expect||""}:{...blank,...(initial||{})});
   const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const [genDesc,setGenDesc]=useState(false);
   const [dupes,setDupes]=useState(null); // possible duplicates found before saving a new candidate
@@ -473,10 +473,12 @@ function CandModal({cand,onClose,onSaved}){
     payload.initials=ini(f.name);
     payload.salary_expect=salaryNum(f.salary_expect);
     ["source","cieem_level","driving_licence"].forEach(k=>{if(!payload[k])payload[k]=null;});
-    const{error}=cand?await db.from("candidates").update(payload).eq("id",cand.id):await db.from("candidates").insert(payload);
+    const{data:savedRow,error}=cand
+      ?await db.from("candidates").update(payload).eq("id",cand.id).select("id,name").single()
+      :await db.from("candidates").insert(payload).select("id,name").single();
     setSaving(false);
     if(error){setErr(error.message+(/source|licences|cieem|driving|salary_expect/i.test(error.message)?UPGRADE_HINT:""));return;}
-    onSaved();onClose();
+    await onSaved(savedRow);onClose();
   };
   return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
     <div className="modal">
@@ -2262,9 +2264,17 @@ function BulkCvMatch({candidates,onClose,onDone}){
   const attach=async()=>{
     const todo=items.filter(r=>r.include&&r.candId&&!r.tooBig);
     setStage("attaching");setProgress({done:0,total:todo.length});
-    const ok=[],failed=[];
+    const ok=[],failed=[];let inboxed=0,inboxSkipped=0;
     for(let i=0;i<todo.length;i++){
       const r=todo[i];let c=byId[r.candId];
+      // Unmatched CV the user chose to keep for later
+      if(r.candId==="__inbox__"){
+        const res=await storeInInbox(r.file);
+        if(res.ok)inboxed++;else if(res.skipped)inboxSkipped++;
+        else failed.push({file:r.file.name,name:"CV inbox",msg:res.error+(/cv_inbox/.test(res.error)?INBOX_HINT:"")});
+        setProgress({done:i+1,total:todo.length});
+        continue;
+      }
       try{
         if(r.candId==="__new__"){
           const{is_cv,...parsed}=r.newCand;
@@ -2290,7 +2300,7 @@ function BulkCvMatch({candidates,onClose,onDone}){
       }catch(err){ failed.push({file:r.file.name,name:c?.name,msg:err.message||String(err)}); }
       setProgress({done:i+1,total:todo.length});
     }
-    setResults({ok,failed});setStage("done");
+    setResults({ok,failed,inboxed,inboxSkipped});setStage("done");
     if(onDone)onDone();
   };
 
@@ -2350,14 +2360,15 @@ function BulkCvMatch({candidates,onClose,onDone}){
                   </td>
                   <td className="td">
                     <select value={r.candId} style={{fontSize:12,width:"100%",minWidth:180}}
-                      onChange={e=>update(r.key,{candId:e.target.value,manual:e.target.value!=="__new__",include:!!e.target.value&&!r.tooBig})}>
+                      onChange={e=>update(r.key,{candId:e.target.value,manual:e.target.value!=="__new__"&&e.target.value!=="__inbox__",include:!!e.target.value&&!r.tooBig})}>
                       <option value="">Skip this file</option>
+                      <option value="__inbox__">📥 Keep in CV inbox for later</option>
                       {r.newCand&&<option value="__new__">➕ New candidate: {r.newCand.name}</option>}
                       {sorted.map(s=><option key={s.id} value={s.id}>{s.name}{hasCv(s)?" (has CV)":""}</option>)}
                     </select>
                   </td>
                   <td className="td" style={{fontSize:12,whiteSpace:"nowrap",color:r.manual?"var(--t2)":confColour(r.score)}}>
-                    {r.candId==="__new__"?<span style={{color:"#1d6fa5"}}>New candidate</span>:r.manual?"Set by you":CV_CONF[r.score]}
+                    {r.candId==="__inbox__"?<span style={{color:"#993556"}}>📥 CV inbox</span>:r.candId==="__new__"?<span style={{color:"#1d6fa5"}}>New candidate</span>:r.manual?"Set by you":CV_CONF[r.score]}
                   </td>
                 </tr>;
               })}
@@ -2373,12 +2384,17 @@ function BulkCvMatch({candidates,onClose,onDone}){
             ✦ Find new candidates in {unchecked} unmatched file{unchecked>1?"s":""}
           </button>}
           {finding&&<span style={{fontSize:12,color:"var(--t2)"}}><span className="spin"></span>Reading file {finding.done+1} of {finding.total}…</span>}
+          {(()=>{const left=items.filter(r=>!r.candId&&!r.tooBig);return left.length>0&&!finding&&<button className="btn-o" style={{fontSize:11}}
+            onClick={()=>{setItems(list=>list.map(r=>!r.candId&&!r.tooBig?{...r,candId:"__inbox__",include:true}:r));setShowNoMatch(true);}}
+            title="Save them in the CV inbox until you create the candidates">📥 Store {left.length} unmatched in CV inbox</button>;})()}
         </div>
         {findErr&&<Err msg={"AI read stopped: "+findErr}/>}
         <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:14}}>
           <button className="btn-o" onClick={onClose}>Cancel</button>
           <button className="btn-a" disabled={!ticked||!!finding} onClick={attach}>
-            {newCount>0?`Create ${newCount} + attach ${ticked} CV${ticked===1?"":"s"}`:`Attach ${ticked} CV${ticked===1?"":"s"}`}</button>
+            {(()=>{const inb=items.filter(r=>r.include&&r.candId==="__inbox__").length;const att=ticked-inb;
+              const parts=[newCount>0?`create ${newCount}`:"",att-0>0?`attach ${att} CV${att===1?"":"s"}`:"",inb>0?`store ${inb} in inbox`:""].filter(Boolean).join(" + ");
+              return parts.charAt(0).toUpperCase()+parts.slice(1)||"Attach";})()}</button>
         </div>
       </>}
 
@@ -2392,6 +2408,10 @@ function BulkCvMatch({candidates,onClose,onDone}){
           {results.ok.some(o=>o.isNew)&&`, including ${results.ok.filter(o=>o.isNew).length} new candidate${results.ok.filter(o=>o.isNew).length===1?"":"s"}`}.
           {results.failed.length>0&&` ${results.failed.length} failed.`}
         </p>
+        {results.inboxed>0&&<p style={{fontSize:13,color:"var(--t1)",marginBottom:10}}>
+          📥 Stored {results.inboxed} CV{results.inboxed===1?"":"s"} in the CV inbox{results.inboxSkipped?` (${results.inboxSkipped} were already there)`:""}.{" "}
+          <span style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}} onClick={()=>{onClose();window.dispatchEvent(new CustomEvent("nav",{detail:"cvinbox"}));}}>Open CV inbox →</span>
+        </p>}
         {results.failed.length>0&&<div className="err">
           {results.failed.map((f,i)=><div key={i}>{f.file} → {f.name}: {f.msg}</div>)}
         </div>}
@@ -3281,6 +3301,224 @@ function JDLibraryPage(){
         </tr>)}</tbody>
       </table></div>
     </div>}
+  </div>;
+}
+
+// ─── CV INBOX ──────────────────────────────────────────────────────────────
+// CVs that don't belong to a candidate yet. Files sit in the private
+// candidate-cvs bucket under inbox/, with a row in cv_inbox, until you
+// create the candidate (or attach the CV to an existing one).
+const INBOX_HINT=" — run cv-inbox-setup.sql in Supabase first.";
+
+// "Jane_Smith_CV_2026 (1).pdf" → "Jane Smith"
+function guessNameFromFile(fname,text){
+  const stem=(fname||"").replace(/\.[^.]+$/,"").replace(/(\s*\(\d+\))+$/,"")
+    .replace(/([a-z])([A-Z])/g,"$1 $2").replace(/[_\-.+]+/g," ");
+  const junk=/^(cv|resume|résumé|curriculum|vitae|updated?|final|new|latest|copy|draft|v\d+|\d+|ecologist|ecology|senior|principal|consultant|my|of|the|and|for|to)$/i;
+  const words=stem.split(/\s+/).filter(w=>w&&!junk.test(w)&&/^[a-zA-Z'’]+$/.test(w));
+  const tc=w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  if(words.length>=2&&words.length<=4)return words.map(tc).join(" ");
+  // Fall back to the first two or three capitalised words of the CV text
+  // (same line only, and skip all-caps credentials like MCIEEM)
+  const m=(text||"").slice(0,200).match(/^\s*([A-Z][a-z][a-zA-Z'’-]*(?:[ \t]+[A-Z][a-z][a-zA-Z'’-]*){1,2})/);
+  return m?m[1]:"";
+}
+
+// Put one file into the inbox. Returns {ok,skipped,error}
+async function storeInInbox(file,knownText){
+  const{data:dupe}=await db.from("cv_inbox").select("id").eq("file_name",file.name).limit(1);
+  if(dupe&&dupe.length)return{skipped:true};
+  const ext=(file.name.split(".").pop()||"pdf").toLowerCase();
+  const path=`inbox/${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,file,{upsert:true,contentType:file.type||undefined});
+  if(upErr)return{error:upErr.message};
+  const text=knownText||await extractFileText(file,file.name);
+  const{error}=await db.from("cv_inbox").insert({file_path:path,file_name:file.name,cv_text:text||null,guess_name:guessNameFromFile(file.name,text)||null});
+  if(error){await db.storage.from("candidate-cvs").remove([path]);return{error:error.message};}
+  return{ok:true};
+}
+
+// Move an inbox CV onto a candidate's record (replacing any CV they already have)
+async function attachInboxCv(item,candId){
+  const{data:c}=await db.from("candidates").select("id,cv_path,cv_url").eq("id",candId).single();
+  const oldPath=cvStoragePath(c);
+  const{error}=await db.from("candidates").update({cv_path:item.file_path,cv_url:null,cv_filename:item.file_name,cv_text:item.cv_text||null}).eq("id",candId);
+  if(error)throw error;
+  if(oldPath&&oldPath!==item.file_path)await db.storage.from("candidate-cvs").remove([oldPath]);
+  await db.from("cv_inbox").delete().eq("id",item.id);
+}
+
+function CvInboxPage(){
+  const [items,setItems]=useState([]);
+  const [cands,setCands]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [err,setErr]=useState("");
+  const [msg,setMsg]=useState("");
+  const [q,setQ]=useState("");
+  const [upload,setUpload]=useState(null);
+  const [creating,setCreating]=useState(null);   // {item, initial}
+  const [parsing,setParsing]=useState(null);     // item id being read by AI
+  const [attachFor,setAttachFor]=useState(null); // item
+  const [attachPick,setAttachPick]=useState("");
+  const [preview,setPreview]=useState(null);     // item
+  const fileRef=React.useRef();
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const[{data,error},{data:c}]=await Promise.all([
+      db.from("cv_inbox").select("id,created_at,file_path,file_name,guess_name,cv_text").order("created_at",{ascending:false}),
+      db.from("candidates").select("id,name,role,location,cv_path,cv_url").order("name"),
+    ]);
+    if(error)setErr(/cv_inbox/.test(error.message)?"The CV inbox isn't set up yet"+INBOX_HINT:error.message);
+    else{setErr("");setItems(data||[]);}
+    setCands(c||[]);setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const flash=m=>{setMsg(m);setTimeout(()=>setMsg(""),3500);};
+
+  // Name match against existing candidates (first + last name)
+  const byName={};
+  cands.forEach(c=>{const p=cvNameParts(c.name);if(p)(byName[p.first+" "+p.last]=byName[p.first+" "+p.last]||[]).push(c);});
+  const matchFor=it=>{const p=cvNameParts(it.guess_name||"");return p?(byName[p.first+" "+p.last]||[])[0]:null;};
+
+  const uploadFiles=async e=>{
+    const files=[...(e.target.files||[])].filter(f=>/\.(pdf|docx?)$/i.test(f.name));e.target.value="";
+    if(!files.length)return;
+    let ok=0,skip=0;const failed=[];
+    setUpload({done:0,total:files.length});
+    for(let i=0;i<files.length;i++){
+      const f=files[i];
+      if(f.size>10*1024*1024){failed.push(f.name+": over 10MB");}
+      else{const r=await storeInInbox(f);if(r.ok)ok++;else if(r.skipped)skip++;else failed.push(f.name+": "+r.error);}
+      setUpload({done:i+1,total:files.length});
+      await new Promise(r=>setTimeout(r,0));
+    }
+    setUpload(null);
+    if(failed.length)setErr(failed.join(" · ")+(failed.some(x=>/cv_inbox/.test(x))?INBOX_HINT:""));
+    flash(`Added ${ok} CV${ok!==1?"s":""} to the inbox${skip?` · ${skip} already there`:""}`);
+    load();
+  };
+
+  const open=async it=>{
+    const tab=window.open("","_blank");
+    const{data,error}=await db.storage.from("candidate-cvs").createSignedUrl(it.file_path,3600);
+    if(error||!data?.signedUrl){if(tab)tab.close();setErr("Could not open: "+(error?.message||"not found"));return;}
+    if(tab)tab.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  };
+
+  const remove=async it=>{
+    if(!confirm(`Delete "${it.file_name}" from the inbox? The file is removed for good.`))return;
+    await db.storage.from("candidate-cvs").remove([it.file_path]);
+    await db.from("cv_inbox").delete().eq("id",it.id);
+    load();
+  };
+
+  // Read the CV with AI (if a key is set) to pre-fill the new candidate form
+  const startCreate=async it=>{
+    let initial={name:it.guess_name||"",notes:`CV: ${it.file_name}`};
+    if(getKey()&&it.cv_text){
+      setParsing(it.id);
+      try{
+        let raw="";
+        await claude("You are a CV parser. Extract details from this CV. Respond ONLY with a JSON object (no markdown) with keys: name, role, email, phone, location, experience, salary, notice, skills (array of strings), notes (2-sentence summary). Use null for unknown fields.",
+          "CV FILENAME: "+it.file_name+"\n\nCV TEXT:\n"+it.cv_text.slice(0,6000),c=>{raw+=c;});
+        const m=raw.match(/\{[\s\S]*\}/);const o=m?JSON.parse(m[0]):{};
+        Object.keys(o).forEach(k=>{if(o[k]===null)delete o[k];});
+        initial={...initial,...o,skills:Array.isArray(o.skills)?o.skills.join(", "):(o.skills||""),notes:[o.notes,`CV: ${it.file_name}`].filter(Boolean).join("\n")};
+      }catch(e){/* fall back to the guessed name */}
+      setParsing(null);
+    }
+    setCreating({item:it,initial});
+  };
+
+  const doAttach=async(it,candId,name)=>{
+    try{await attachInboxCv(it,candId);flash(`CV attached to ${name}`);setAttachFor(null);setAttachPick("");load();}
+    catch(e){setErr(e.message);}
+  };
+
+  const ql=q.trim().toLowerCase();
+  const shown=items.filter(it=>!ql||[it.file_name,it.guess_name,it.cv_text].some(v=>(v||"").toLowerCase().includes(ql)));
+
+  return <div>
+    {creating&&<CandModal initial={creating.initial} onClose={()=>setCreating(null)}
+      onSaved={async row=>{if(row?.id){await attachInboxCv(creating.item,row.id);flash(`Created ${row.name} with their CV attached`);}load();}}/>}
+
+    {attachFor&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setAttachFor(null);}}>
+      <div className="modal" style={{maxWidth:440}}>
+        <h3>Attach to an existing candidate</h3>
+        <div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}>📄 {attachFor.file_name}</div>
+        <select value={attachPick} onChange={e=>setAttachPick(e.target.value)}>
+          <option value="">Choose a candidate…</option>
+          {cands.map(c=><option key={c.id} value={c.id}>{c.name}{c.role?` — ${c.role}`:""}{hasCv(c)?" (has a CV — will replace)":""}</option>)}
+        </select>
+        <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={()=>setAttachFor(null)}>Cancel</button>
+          <button className="btn-a" disabled={!attachPick} onClick={()=>doAttach(attachFor,attachPick,cands.find(c=>c.id===attachPick)?.name)}>Attach CV</button>
+        </div>
+      </div>
+    </div>}
+
+    {preview&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setPreview(null);}}>
+      <div className="modal" style={{maxWidth:640}}>
+        <h3>{preview.guess_name||preview.file_name}</h3>
+        <div style={{fontSize:12,color:"var(--t3)",marginBottom:8}}>📄 {preview.file_name}</div>
+        <div style={{fontSize:12,color:"var(--t1)",lineHeight:1.6,whiteSpace:"pre-wrap",background:"var(--bg2)",borderRadius:8,padding:"10px 12px",maxHeight:"55vh",overflowY:"auto"}}>
+          {preview.cv_text?preview.cv_text.slice(0,4000)+(preview.cv_text.length>4000?"…":""):"No readable text — this may be a scanned CV. Use Open to view it."}
+        </div>
+        <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+          <button className="btn-o" onClick={()=>open(preview)}>Open file ↗</button>
+          <button className="btn-a" onClick={()=>setPreview(null)}>Close</button>
+        </div>
+      </div>
+    </div>}
+
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>CV inbox ({items.length})</span>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+        <input type="text" placeholder="Search names, files and CV text…" value={q} onChange={e=>setQ(e.target.value)} style={{width:240}}/>
+        <button className="btn-a" onClick={()=>fileRef.current.click()} disabled={!!upload}>⬆ Upload CVs</button>
+        <input ref={fileRef} type="file" multiple accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={uploadFiles}/>
+      </div>
+    </div>
+    <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
+      CVs waiting for a candidate record. Upload them here, or use <strong>📎 Bulk CV match</strong> on Candidates and store the unmatched ones.
+      When you're ready, <strong>Create candidate</strong> reads the CV and fills in the form for you.
+    </div>
+    {upload&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}><span className="spin"></span>Uploading {upload.done} of {upload.total}…</div>}
+    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+    <Err msg={err}/>
+
+    {loading?<Spin/>:items.length===0&&!err
+      ?<div style={{textAlign:"center",padding:"50px 20px",color:"var(--t2)",fontSize:13,background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:12}}>
+        <div style={{fontSize:30,marginBottom:8}}>📥</div>
+        Your CV inbox is empty.<br/><span style={{fontSize:12,color:"var(--t3)"}}>Upload CVs here, or store unmatched files from Bulk CV match.</span>
+      </div>
+      :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {shown.map(it=>{
+          const match=matchFor(it);
+          return <div key={it.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+            <div style={{width:38,height:38,borderRadius:9,background:"#fbeaf0",color:"#993556",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📄</div>
+            <div style={{flex:1,minWidth:200}}>
+              <div style={{fontWeight:600,fontSize:13,color:"var(--t1)"}}>{it.guess_name||<span style={{color:"var(--t3)",fontWeight:400}}>Name not found</span>}</div>
+              <div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.file_name} · added {fmtDate(it.created_at)}{!it.cv_text?" · no readable text":""}</div>
+              {match&&<div style={{fontSize:11,color:"#185fa5",marginTop:3}}>Possible match: <strong>{match.name}</strong>{match.role?` · ${match.role}`:""}{hasCv(match)?" (already has a CV)":""}</div>}
+            </div>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+              {match&&<button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>doAttach(it,match.id,match.name)}>Attach to {match.name.split(" ")[0]}</button>}
+              <button className={match?"btn-o":"btn-a"} style={{fontSize:12,padding:"5px 12px"}} disabled={parsing===it.id} onClick={()=>startCreate(it)}>
+                {parsing===it.id?<><span className="spin"></span>Reading CV…</>:"✦ Create candidate"}
+              </button>
+              <button className="btn-o" style={{fontSize:12}} onClick={()=>{setAttachFor(it);setAttachPick(match?.id||"");}}>Attach to…</button>
+              <span className="acts">
+                <button className="act" onClick={()=>setPreview(it)} title="Preview CV text"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button className="act" onClick={()=>open(it)} title="Open file"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+                <button className="act danger" onClick={()=>remove(it)} title="Delete from inbox"><IconTrash/></button>
+              </span>
+            </div>
+          </div>;
+        })}
+        {shown.length===0&&items.length>0&&<div style={{padding:"24px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>Nothing in the inbox matches "{q}".</div>}
+      </div>}
   </div>;
 }
 
@@ -5771,6 +6009,7 @@ const NAV=[
   {k:"dashboard",l:"Dashboard",i:"🏠",s:"main"},
   {k:"reporting",l:"Reporting",i:"📊",s:"main"},
   {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
+  {k:"cvinbox",l:"CV inbox",i:"📥",s:"recruit"},
   {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
   {k:"jds",l:"Job descriptions",i:"📑",s:"recruit"},
   {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
@@ -5897,6 +6136,7 @@ function AuthedApp(){
     sequences:<EmailSequencesPage/>,
     hotlists:<HotlistsPage/>,
     jds:<JDLibraryPage/>,
+    cvinbox:<CvInboxPage/>,
     search:<SearchResultsPage query={searchQ.q} cvFlag={searchQ.cv} nonce={searchQ.n} setPage={setPage}/>,
   };
   let lastS=null;
