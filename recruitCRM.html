@@ -18,7 +18,7 @@
 <script>emailjs.init("MadIajEVnrBSCAMNb");</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
@@ -281,6 +281,96 @@ function CopyButton({text}){
   </button>;
 }
 
+// ── Location suggestions ───────────────────────────────────────────────────
+// Built-in UK towns (always available) + any place already used in the CRM
+// + live lookup of every UK settlement from postcodes.io (free, no key).
+const UK_PLACES=[["London","Greater London","England"],["Birmingham","West Midlands","England"],["Manchester","Greater Manchester","England"],["Liverpool","Merseyside","England"],["Leeds","West Yorkshire","England"],["Sheffield","South Yorkshire","England"],["Bristol","Bristol","England"],["Newcastle upon Tyne","Tyne and Wear","England"],["Nottingham","Nottinghamshire","England"],["Leicester","Leicestershire","England"],["Coventry","West Midlands","England"],["Bradford","West Yorkshire","England"],["Southampton","Hampshire","England"],["Portsmouth","Hampshire","England"],["Plymouth","Devon","England"],["Reading","Berkshire","England"],["Derby","Derbyshire","England"],["Wolverhampton","West Midlands","England"],["Stoke-on-Trent","Staffordshire","England"],["Brighton","East Sussex","England"],["Hull","East Riding of Yorkshire","England"],["Milton Keynes","Buckinghamshire","England"],["Northampton","Northamptonshire","England"],["Norwich","Norfolk","England"],["Luton","Bedfordshire","England"],["Swindon","Wiltshire","England"],["Bournemouth","Dorset","England"],["Poole","Dorset","England"],["Southend-on-Sea","Essex","England"],["Sunderland","Tyne and Wear","England"],["Peterborough","Cambridgeshire","England"],["Cambridge","Cambridgeshire","England"],["Oxford","Oxfordshire","England"],["York","North Yorkshire","England"],["Exeter","Devon","England"],["Gloucester","Gloucestershire","England"],["Cheltenham","Gloucestershire","England"],["Bath","Somerset","England"],["Taunton","Somerset","England"],["Truro","Cornwall","England"],["Falmouth","Cornwall","England"],["Penzance","Cornwall","England"],["Newquay","Cornwall","England"],["Bodmin","Cornwall","England"],["Barnstaple","Devon","England"],["Torquay","Devon","England"],["Totnes","Devon","England"],["Salisbury","Wiltshire","England"],["Chippenham","Wiltshire","England"],["Trowbridge","Wiltshire","England"],["Dorchester","Dorset","England"],["Weymouth","Dorset","England"],["Winchester","Hampshire","England"],["Basingstoke","Hampshire","England"],["Andover","Hampshire","England"],["Farnborough","Hampshire","England"],["Guildford","Surrey","England"],["Woking","Surrey","England"],["Epsom","Surrey","England"],["Redhill","Surrey","England"],["Reigate","Surrey","England"],["Crawley","West Sussex","England"],["Horsham","West Sussex","England"],["Chichester","West Sussex","England"],["Worthing","West Sussex","England"],["Lewes","East Sussex","England"],["Eastbourne","East Sussex","England"],["Hastings","East Sussex","England"],["Maidstone","Kent","England"],["Canterbury","Kent","England"],["Ashford","Kent","England"],["Tunbridge Wells","Kent","England"],["Sevenoaks","Kent","England"],["Tonbridge","Kent","England"],["Dartford","Kent","England"],["Gravesend","Kent","England"],["Folkestone","Kent","England"],["Dover","Kent","England"],["Margate","Kent","England"],["Chelmsford","Essex","England"],["Colchester","Essex","England"],["Basildon","Essex","England"],["Harlow","Essex","England"],["Brentwood","Essex","England"],["Braintree","Essex","England"],["Ipswich","Suffolk","England"],["Bury St Edmunds","Suffolk","England"],["Lowestoft","Suffolk","England"],["King's Lynn","Norfolk","England"],["Great Yarmouth","Norfolk","England"],["Ely","Cambridgeshire","England"],["Huntingdon","Cambridgeshire","England"],["St Albans","Hertfordshire","England"],["Watford","Hertfordshire","England"],["Hemel Hempstead","Hertfordshire","England"],["Stevenage","Hertfordshire","England"],["Hertford","Hertfordshire","England"],["Welwyn Garden City","Hertfordshire","England"],["Hitchin","Hertfordshire","England"],["Bedford","Bedfordshire","England"],["High Wycombe","Buckinghamshire","England"],["Aylesbury","Buckinghamshire","England"],["Amersham","Buckinghamshire","England"],["Slough","Berkshire","England"],["Maidenhead","Berkshire","England"],["Windsor","Berkshire","England"],["Bracknell","Berkshire","England"],["Newbury","Berkshire","England"],["Wokingham","Berkshire","England"],["Banbury","Oxfordshire","England"],["Bicester","Oxfordshire","England"],["Abingdon","Oxfordshire","England"],["Didcot","Oxfordshire","England"],["Witney","Oxfordshire","England"],["Kettering","Northamptonshire","England"],["Corby","Northamptonshire","England"],["Wellingborough","Northamptonshire","England"],["Loughborough","Leicestershire","England"],["Hinckley","Leicestershire","England"],["Market Harborough","Leicestershire","England"],["Lincoln","Lincolnshire","England"],["Grantham","Lincolnshire","England"],["Boston","Lincolnshire","England"],["Grimsby","Lincolnshire","England"],["Scunthorpe","Lincolnshire","England"],["Mansfield","Nottinghamshire","England"],["Newark-on-Trent","Nottinghamshire","England"],["Chesterfield","Derbyshire","England"],["Matlock","Derbyshire","England"],["Buxton","Derbyshire","England"],["Stafford","Staffordshire","England"],["Lichfield","Staffordshire","England"],["Tamworth","Staffordshire","England"],["Burton upon Trent","Staffordshire","England"],["Cannock","Staffordshire","England"],["Walsall","West Midlands","England"],["Dudley","West Midlands","England"],["Solihull","West Midlands","England"],["West Bromwich","West Midlands","England"],["Sutton Coldfield","West Midlands","England"],["Worcester","Worcestershire","England"],["Kidderminster","Worcestershire","England"],["Redditch","Worcestershire","England"],["Malvern","Worcestershire","England"],["Hereford","Herefordshire","England"],["Shrewsbury","Shropshire","England"],["Telford","Shropshire","England"],["Ludlow","Shropshire","England"],["Oswestry","Shropshire","England"],["Warwick","Warwickshire","England"],["Leamington Spa","Warwickshire","England"],["Stratford-upon-Avon","Warwickshire","England"],["Rugby","Warwickshire","England"],["Nuneaton","Warwickshire","England"],["Chester","Cheshire","England"],["Crewe","Cheshire","England"],["Macclesfield","Cheshire","England"],["Warrington","Cheshire","England"],["Northwich","Cheshire","England"],["Knutsford","Cheshire","England"],["Stockport","Greater Manchester","England"],["Bolton","Greater Manchester","England"],["Wigan","Greater Manchester","England"],["Oldham","Greater Manchester","England"],["Rochdale","Greater Manchester","England"],["Salford","Greater Manchester","England"],["Bury","Greater Manchester","England"],["Altrincham","Greater Manchester","England"],["St Helens","Merseyside","England"],["Southport","Merseyside","England"],["Birkenhead","Merseyside","England"],["Preston","Lancashire","England"],["Blackpool","Lancashire","England"],["Blackburn","Lancashire","England"],["Burnley","Lancashire","England"],["Lancaster","Lancashire","England"],["Carlisle","Cumbria","England"],["Kendal","Cumbria","England"],["Penrith","Cumbria","England"],["Barrow-in-Furness","Cumbria","England"],["Keswick","Cumbria","England"],["Workington","Cumbria","England"],["Whitehaven","Cumbria","England"],["Huddersfield","West Yorkshire","England"],["Wakefield","West Yorkshire","England"],["Halifax","West Yorkshire","England"],["Harrogate","North Yorkshire","England"],["Scarborough","North Yorkshire","England"],["Skipton","North Yorkshire","England"],["Northallerton","North Yorkshire","England"],["Doncaster","South Yorkshire","England"],["Rotherham","South Yorkshire","England"],["Barnsley","South Yorkshire","England"],["Beverley","East Riding of Yorkshire","England"],["Middlesbrough","North Yorkshire","England"],["Stockton-on-Tees","County Durham","England"],["Darlington","County Durham","England"],["Durham","County Durham","England"],["Hartlepool","County Durham","England"],["Gateshead","Tyne and Wear","England"],["Hexham","Northumberland","England"],["Morpeth","Northumberland","England"],["Alnwick","Northumberland","England"],["Berwick-upon-Tweed","Northumberland","England"],["Newport","Isle of Wight","England"],["Croydon","Greater London","England"],["Kingston upon Thames","Greater London","England"],["Richmond","Greater London","England"],["Uxbridge","Greater London","England"],["Harrow","Greater London","England"],["Bromley","Greater London","England"],["Stratford","Greater London","England"],["Canary Wharf","Greater London","England"],["Edinburgh","City of Edinburgh","Scotland"],["Glasgow","Glasgow City","Scotland"],["Aberdeen","Aberdeen City","Scotland"],["Dundee","Dundee City","Scotland"],["Inverness","Highland","Scotland"],["Perth","Perth and Kinross","Scotland"],["Stirling","Stirling","Scotland"],["Falkirk","Falkirk","Scotland"],["Livingston","West Lothian","Scotland"],["Dunfermline","Fife","Scotland"],["Kirkcaldy","Fife","Scotland"],["St Andrews","Fife","Scotland"],["Paisley","Renfrewshire","Scotland"],["East Kilbride","South Lanarkshire","Scotland"],["Hamilton","South Lanarkshire","Scotland"],["Ayr","South Ayrshire","Scotland"],["Kilmarnock","East Ayrshire","Scotland"],["Dumfries","Dumfries and Galloway","Scotland"],["Elgin","Moray","Scotland"],["Fort William","Highland","Scotland"],["Oban","Argyll and Bute","Scotland"],["Galashiels","Scottish Borders","Scotland"],["Peebles","Scottish Borders","Scotland"],["Aviemore","Highland","Scotland"],["Thurso","Highland","Scotland"],["Lerwick","Shetland Islands","Scotland"],["Kirkwall","Orkney Islands","Scotland"],["Stornoway","Na h-Eileanan Siar","Scotland"],["Motherwell","North Lanarkshire","Scotland"],["Cumbernauld","North Lanarkshire","Scotland"],["Cardiff","Cardiff","Wales"],["Swansea","Swansea","Wales"],["Newport","Newport","Wales"],["Wrexham","Wrexham","Wales"],["Bangor","Gwynedd","Wales"],["Aberystwyth","Ceredigion","Wales"],["Carmarthen","Carmarthenshire","Wales"],["Llanelli","Carmarthenshire","Wales"],["Bridgend","Bridgend","Wales"],["Neath","Neath Port Talbot","Wales"],["Port Talbot","Neath Port Talbot","Wales"],["Merthyr Tydfil","Merthyr Tydfil","Wales"],["Pontypridd","Rhondda Cynon Taf","Wales"],["Caerphilly","Caerphilly","Wales"],["Barry","Vale of Glamorgan","Wales"],["Cwmbran","Torfaen","Wales"],["Abergavenny","Monmouthshire","Wales"],["Monmouth","Monmouthshire","Wales"],["Brecon","Powys","Wales"],["Llandrindod Wells","Powys","Wales"],["Newtown","Powys","Wales"],["Welshpool","Powys","Wales"],["Haverfordwest","Pembrokeshire","Wales"],["Pembroke","Pembrokeshire","Wales"],["Caernarfon","Gwynedd","Wales"],["Llandudno","Conwy","Wales"],["Colwyn Bay","Conwy","Wales"],["Rhyl","Denbighshire","Wales"],["Mold","Flintshire","Wales"],["Holyhead","Isle of Anglesey","Wales"],["Belfast","Antrim","Northern Ireland"],["Derry","Londonderry","Northern Ireland"],["Lisburn","Antrim","Northern Ireland"],["Newry","Down","Northern Ireland"],["Bangor","Down","Northern Ireland"],["Armagh","Armagh","Northern Ireland"],["Enniskillen","Fermanagh","Northern Ireland"],["Omagh","Tyrone","Northern Ireland"],["Coleraine","Londonderry","Northern Ireland"],["Ballymena","Antrim","Northern Ireland"],["Craigavon","Armagh","Northern Ireland"],["Newtownards","Down","Northern Ireland"]];
+let _crmLocCache=null;
+async function crmLocations(){
+  if(_crmLocCache)return _crmLocCache;
+  try{
+    const rows=await fetchAll("candidates","location");
+    const counts={};
+    rows.forEach(r=>{const l=(r.location||"").trim();if(l)counts[l]=(counts[l]||0)+1;});
+    _crmLocCache=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([l,n])=>({label:l,sub:`Used for ${n} candidate${n!==1?"s":""}`}));
+  }catch(e){_crmLocCache=[];}
+  return _crmLocCache;
+}
+const ukLabel=(town,country)=>`${town}, ${country}, United Kingdom`;
+const LOC_RANK={City:0,Town:1,"Suburban Area":2,Village:3,"Other Settlement":4,Hamlet:5};
+async function livePlaces(q){
+  try{
+    const r=await fetch(`https://api.postcodes.io/places?q=${encodeURIComponent(q)}&limit=40`);
+    if(!r.ok)return [];
+    const j=await r.json();
+    return (j.result||[])
+      .filter(p=>p.name_1&&p.country&&LOC_RANK[p.local_type]!==undefined)
+      .sort((a,b)=>LOC_RANK[a.local_type]-LOC_RANK[b.local_type])
+      .map(p=>({label:ukLabel(p.name_1,p.country),sub:[p.local_type,(p.county_unitary||p.district_borough||"").split(" - ")[0]].filter(Boolean).join(" · ")}));
+  }catch(e){return [];}
+}
+
+function LocationInput({value,onChange,placeholder}){
+  const [open,setOpen]=useState(false);
+  const [items,setItems]=useState([]);
+  const [hi,setHi]=useState(0);
+  const ref=React.useRef();
+  const typed=React.useRef(false);
+
+  useEffect(()=>{
+    const q=(value||"").trim();
+    if(!typed.current||q.length<2){setItems([]);return;}
+    let cancelled=false;
+    const ql=q.toLowerCase();
+    const starts=(t)=>t.toLowerCase().startsWith(ql);
+    const has=(t)=>t.toLowerCase().includes(ql);
+    (async()=>{
+      // Instant: CRM history + built-in towns
+      const crm=(await crmLocations()).filter(x=>has(x.label));
+      const built=UK_PLACES.filter(([t])=>has(t))
+        .sort((a,b)=>(starts(b[0])-starts(a[0]))||a[0].localeCompare(b[0]))
+        .map(([t,c,co])=>({label:ukLabel(t,co),sub:c}));
+      const merge=(...lists)=>{const seen=new Set(),out=[];lists.flat().forEach(x=>{const k=x.label.toLowerCase();if(!seen.has(k)){seen.add(k);out.push(x);}});return out.slice(0,10);};
+      if(cancelled)return;
+      const first=merge(crm.sort((a,b)=>starts(b.label)-starts(a.label)),built);
+      setItems(first);setHi(0);
+      // Then: every UK village/hamlet from the live lookup
+      const live=await livePlaces(q);
+      if(cancelled)return;
+      setItems(merge(first,live));
+    })();
+    return()=>{cancelled=true;};
+  },[value]);
+
+  useEffect(()=>{
+    const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener("mousedown",h);
+    return()=>document.removeEventListener("mousedown",h);
+  },[]);
+
+  const pick=it=>{typed.current=false;onChange(it.label);setOpen(false);setItems([]);};
+  const onKey=e=>{
+    if(!open||!items.length)return;
+    if(e.key==="ArrowDown"){e.preventDefault();setHi(h=>Math.min(h+1,items.length-1));}
+    else if(e.key==="ArrowUp"){e.preventDefault();setHi(h=>Math.max(h-1,0));}
+    else if(e.key==="Enter"){e.preventDefault();pick(items[hi]);}
+    else if(e.key==="Escape"){setOpen(false);}
+  };
+
+  return <div ref={ref} style={{position:"relative"}}>
+    <input type="text" value={value||""} placeholder={placeholder} autoComplete="off"
+      onChange={e=>{typed.current=true;onChange(e.target.value);setOpen(true);}}
+      onFocus={()=>setOpen(true)} onKeyDown={onKey}/>
+    {open&&items.length>0&&<div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,minWidth:260,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:8,boxShadow:"0 8px 24px rgba(0,0,0,0.15)",zIndex:1300,maxHeight:260,overflowY:"auto"}}>
+      {items.map((it,i)=><div key={it.label} onMouseDown={e=>{e.preventDefault();pick(it);}} onMouseEnter={()=>setHi(i)}
+        style={{padding:"7px 11px",cursor:"pointer",background:i===hi?"var(--bg2)":"transparent",borderBottom:"0.5px solid var(--br)"}}>
+        <div style={{fontSize:12,color:"var(--t1)"}}>📍 {it.label}</div>
+        {it.sub&&<div style={{fontSize:10,color:"var(--t3)",marginLeft:18}}>{it.sub}</div>}
+      </div>)}
+    </div>}
+  </div>;
+}
+
 // ── Modals ─────────────────────────────────────────────────────────────────
 function CandModal({cand,onClose,onSaved}){
   const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:""};
@@ -311,7 +401,7 @@ function CandModal({cand,onClose,onSaved}){
         <div><label>Phone</label><input type="tel" value={f.phone||""} onChange={s("phone")} placeholder="+44 7700 000000"/></div>
       </div>
       <div className="fr2">
-        <div><label>Location</label><input type="text" value={f.location||""} onChange={s("location")} placeholder="London"/></div>
+        <div><label>Location</label><LocationInput value={f.location||""} onChange={v=>setF(p=>({...p,location:v}))} placeholder="Start typing a town…"/></div>
         <div><label>Experience</label><input type="text" value={f.experience||""} onChange={s("experience")} placeholder="5 years"/></div>
       </div>
       <div className="fr2">
@@ -5235,7 +5325,7 @@ function LoginScreen(){
   return(
     <div style={{minHeight:"100vh",width:"100%",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1f2e"}}>
       <div style={{background:"#fff",borderRadius:16,padding:"40px 36px",width:340,boxShadow:"0 8px 40px rgba(0,0,0,0.3)",textAlign:"center"}}>
-        <div style={{fontSize:22,fontWeight:700,color:"#1a1f2e",marginBottom:4,letterSpacing:0.5}}>recruit<span style={{color:"#8cc750"}}>CRM</span></div>
+        <div style={{fontFamily:"'Fraunces',Georgia,serif",fontSize:30,fontWeight:400,color:"#1a1f2e",marginBottom:6,letterSpacing:"-0.5px",fontVariationSettings:"'opsz' 72"}}>recruit<span style={{fontWeight:700,color:"#5fa92b"}}>CRM</span></div>
         <div style={{fontSize:12,color:"#9e9e9b",marginBottom:28}}>Gaia Search · Private Access</div>
         <input
           type="email"
@@ -5322,8 +5412,11 @@ function AuthedApp(){
     <div style={{display:"flex",width:"100%",flex:1,minHeight:"100vh",overflow:"hidden",fontSize:13}}>
       <div className="dark-sidebar" style={{width:200,background:SIDEBAR,display:"flex",flexDirection:"column",flexShrink:0}}>
         <div style={{padding:"18px 16px 14px",borderBottom:"0.5px solid rgba(255,255,255,0.07)"}}>
-          <div style={{fontSize:15,fontWeight:500,color:"#fff",letterSpacing:"-0.3px"}}>recruit<span style={{color:ACCENT}}>CRM</span></div>
-          <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(79,110,247,0.2)",color:"#a0b4ff",fontSize:10,borderRadius:10,padding:"2px 7px",marginTop:5}}>✦ AI + Supabase</div>
+          <div onClick={()=>{setPage("dashboard");setActiveJob(null);}} title="Go to Dashboard"
+            style={{fontFamily:"'Fraunces',Georgia,serif",fontSize:21,fontWeight:400,color:"#f4f1e6",letterSpacing:"-0.4px",lineHeight:1,cursor:"pointer",display:"inline-block",fontVariationSettings:"'opsz' 72"}}>
+            recruit<span style={{fontWeight:700,color:"#a0d045",letterSpacing:"0.2px"}}>CRM</span>
+          </div>
+          <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(160,208,69,0.14)",color:"#c3e57a",fontSize:10,borderRadius:10,padding:"2px 8px",marginTop:8,letterSpacing:"0.3px"}}>✦ AI + Supabase</div>
         </div>
         <div style={{flex:1,overflowY:"auto",padding:"8px 0"}}>
           {NAV.map(n=>{
