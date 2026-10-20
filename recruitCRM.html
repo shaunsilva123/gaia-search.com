@@ -32,10 +32,10 @@ body.dark{background:#0f1117;--bg:#1a1f2e;--bg2:#232a3b;--bg3:#0f1117;--t1:#e8ea
 body.dark .banner{background:#2a2200;border-color:#7a5c00;color:#f0c040}
 body.dark .dark-sidebar{background:#0d1117!important}
 body.dark .dark-sidebar *{border-color:rgba(255,255,255,0.06)!important}
-body.dark select,body.dark input[type=text],body.dark input[type=password],body.dark input[type=email],body.dark input[type=tel],body.dark input[type=date],body.dark textarea{background:var(--bg2);color:var(--t1);border-color:var(--brm)}
+body.dark select,body.dark input:not([type]),body.dark input[type=time],body.dark input[type=number],body.dark input[type=datetime-local],body.dark input[type=text],body.dark input[type=password],body.dark input[type=email],body.dark input[type=tel],body.dark input[type=date],body.dark textarea{background:var(--bg2);color:var(--t1);border-color:var(--brm)}
 select,input,button,textarea{font-family:inherit}
 select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b68' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px!important}
-select,input[type=text],input[type=password],input[type=email],input[type=tel],input[type=date],textarea{width:100%;padding:7px 10px;border:0.5px solid var(--brm);border-radius:7px;font-size:13px;color:var(--t1);background:var(--bg);outline:none}
+select,input:not([type]),input[type=text],input[type=password],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=number],input[type=datetime-local],textarea{width:100%;padding:7px 10px;border:0.5px solid var(--brm);border-radius:7px;font-size:13px;color:var(--t1);background:var(--bg);outline:none}
 textarea{resize:vertical;min-height:70px}
 select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(95,169,43,0.22)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
@@ -5304,9 +5304,18 @@ function PlacementsPage(){
       payment_date:f.payment_date||null,
       notes:f.notes.trim()||null,
     };
-    const{error}=await db.from("placements").insert(payload);
-    if(error)setErr(error.message);else{setModal(false);setF(blank);load();}
+    const{error}=editId
+      ?await db.from("placements").update(payload).eq("id",editId)
+      :await db.from("placements").insert(payload);
+    if(error)setErr(error.message);else{setModal(false);setF(blank);setEditId(null);load();}
     setSaving(false);
+  };
+  // Open the form pre-filled to change an existing placement
+  const [editId,setEditId]=useState(null);
+  const openEdit=r=>{
+    const str=v=>v===null||v===undefined?"":String(v);
+    setF({...blank,...Object.fromEntries(Object.keys(blank).map(k=>[k,k==="payment_received"?!!r[k]:str(r[k])]))});
+    setEditId(r.id);setErr("");setModal(true);
   };
 
   // ── Invoice files ── stored in the PRIVATE "invoices" bucket; opened with a 1-hour signed link
@@ -5368,7 +5377,7 @@ function PlacementsPage(){
   return <div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
       <div style={{fontSize:15,fontWeight:500}}>Placements</div>
-      <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ Record Placement</button>
+      <button className="btn-a" onClick={()=>{setF(blank);setEditId(null);setErr("");setModal(true);}}>+ Record Placement</button>
     </div>
     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:16}}>
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
@@ -5409,7 +5418,7 @@ function PlacementsPage(){
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidate_name}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.job_title}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.company_name}</td>
-        <td className="td" style={{color:"var(--t3)"}}><span style={{whiteSpace:"nowrap"}}>{fmtDate(r.start_date)||"—"}</span>
+        <td className="td" style={{color:"var(--t3)"}}><span onClick={()=>openEdit(r)} title="Click to change the start date" style={{whiteSpace:"nowrap",cursor:"pointer",borderBottom:"1px dashed var(--brm)"}}>{fmtDate(r.start_date)||"+ Add start date"}</span>
           {(()=>{const m=placementMoney(r,cos);
             if(!r.start_date)return null;
             if(!m.started)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>Starts in {daysBetween(todayStr(),r.start_date)}d</div>;
@@ -5454,14 +5463,17 @@ function PlacementsPage(){
             <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
               {r.payment_received?"✓ Paid":"Unpaid"}
             </button>
-            <button onClick={()=>del(r.id,r.candidate_name)} title="Delete placement" style={{background:"transparent",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:13,lineHeight:1,padding:"2px 4px"}}>🗑</button>
+            <span className="acts">
+              <button className="act" onClick={()=>openEdit(r)} title="Edit placement (start date, salary, fee…)"><IconEdit/></button>
+              <button className="act danger" onClick={()=>del(r.id,r.candidate_name)} title="Delete placement"><IconTrash/></button>
+            </span>
           </div>
         </td>
       </tr>)}</tbody>
     </table></div>}
     {modal&&<div className="modal-overlay" onClick={()=>setModal(false)}>
       <div className="modal" onClick={e=>e.stopPropagation()}>
-        <h3>Record Placement</h3>
+        <h3>{editId?`Edit placement — ${f.candidate_name||""}`:"Record Placement"}</h3>
         <div className="fr2">
           <div className="fr" style={{margin:0}}><label>Candidate Name *</label>
             <input value={f.candidate_name} onChange={s("candidate_name")} placeholder="Full name" list="placement-candidates"/>
@@ -5493,7 +5505,7 @@ function PlacementsPage(){
         {err&&<div className="err">{err}</div>}
         <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
           <button className="btn-o" onClick={()=>setModal(false)}>Cancel</button>
-          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":"Save Placement"}</button>
+          <button className="btn-a" onClick={save} disabled={saving}>{saving?"Saving…":editId?"Save changes":"Save Placement"}</button>
         </div>
       </div>
     </div>}
