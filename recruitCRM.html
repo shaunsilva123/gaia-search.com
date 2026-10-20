@@ -5405,9 +5405,9 @@ function PlacementsPage(){
     rows.length===0?<div style={{color:"var(--t3)",fontSize:13,padding:"40px 0",textAlign:"center"}}>No placements yet. Click "Record Placement" to add your first.</div>:
     <div className="tbl-scroll"><table style={{width:"100%",minWidth:760,borderCollapse:"collapse",background:"var(--bg)",borderRadius:10,overflow:"hidden",border:"0.5px solid var(--br)",tableLayout:"fixed"}}>
       <colgroup>
-        <col style={{width:"13%"}}/><col style={{width:"15%"}}/><col style={{width:"12%"}}/>
-        <col style={{width:"9%"}}/><col style={{width:"9%"}}/><col style={{width:"8%"}}/>
-        <col style={{width:"21%"}}/><col style={{width:"13%"}}/>
+        <col style={{width:"13%"}}/><col style={{width:"13%"}}/><col style={{width:"11%"}}/>
+        <col style={{width:"11%"}}/><col style={{width:"8%"}}/><col style={{width:"7%"}}/>
+        <col style={{width:"20%"}}/><col style={{width:"17%"}}/>
       </colgroup>
       <thead><tr>
         <th className="th">Candidate</th><th className="th">Role</th><th className="th">Company</th>
@@ -5418,7 +5418,7 @@ function PlacementsPage(){
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidate_name}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.job_title}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.company_name}</td>
-        <td className="td" style={{color:"var(--t3)"}}><span onClick={()=>openEdit(r)} title="Click to change the start date" style={{whiteSpace:"nowrap",cursor:"pointer",borderBottom:"1px dashed var(--brm)"}}>{fmtDate(r.start_date)||"+ Add start date"}</span>
+        <td className="td" style={{color:"var(--t3)"}}><span onClick={()=>openEdit(r)} title="Click to change the start date" style={{whiteSpace:"nowrap",cursor:"pointer",borderBottom:"1px dashed var(--brm)"}}>{fmtDate(r.start_date)||"+ Add date"}</span>
           {(()=>{const m=placementMoney(r,cos);
             if(!r.start_date)return null;
             if(!m.started)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>Starts in {daysBetween(todayStr(),r.start_date)}d</div>;
@@ -5459,8 +5459,8 @@ function PlacementsPage(){
             return null;})()}
         </td>
         <td className="td">
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap",justifyContent:"space-between"}}>
+            <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
               {r.payment_received?"✓ Paid":"Unpaid"}
             </button>
             <span className="acts">
