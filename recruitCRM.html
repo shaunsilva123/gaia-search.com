@@ -965,7 +965,12 @@ function GlobalSearch({setPage}){
     const t=setTimeout(async()=>{
       setLoading(true);
       const [c,j,co]=await Promise.all([
-        db.from("candidates").select("id,name,role,location").ilike("name",`%${q}%`).limit(5),
+        // Match candidates on name, location or role so typing a town finds people based there.
+        // Commas and brackets would break the OR filter, so strip them first.
+        (()=>{const t=q.trim().replace(/[,()*%]/g," ").trim();
+          return db.from("candidates").select("id,name,role,location")
+            .or(`name.ilike.%${t}%,location.ilike.%${t}%,role.ilike.%${t}%`)
+            .order("name").limit(15);})(),
         db.from("jobs").select("id,title,status,companies(name)").ilike("title",`%${q}%`).limit(5),
         db.from("companies").select("id,name,industry").ilike("name",`%${q}%`).limit(4),
       ]);
