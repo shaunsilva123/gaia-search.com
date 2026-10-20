@@ -964,17 +964,21 @@ function GlobalSearch({setPage}){
     if(!q.trim()){setResults(null);return;}
     const t=setTimeout(async()=>{
       setLoading(true);
-      const [c,j,co]=await Promise.all([
-        // Match candidates on name, location or role so typing a town finds people based there.
-        // Commas and brackets would break the OR filter, so strip them first.
-        (()=>{const t=q.trim().replace(/[,()*%]/g," ").trim();
-          return db.from("candidates").select("id,name,role,location")
-            .or(`name.ilike.%${t}%,location.ilike.%${t}%,role.ilike.%${t}%`)
-            .order("name").limit(15);})(),
-        db.from("jobs").select("id,title,status,companies(name)").ilike("title",`%${q}%`).limit(5),
-        db.from("companies").select("id,name,industry").ilike("name",`%${q}%`).limit(4),
+      const term=q.trim();
+      const cf="id,name,role,location";
+      // Three simple searches (name, location, role) merged together, so typing
+      // a town such as "Birmingham" finds everyone based there.
+      const [cn,cl,cr,j,co]=await Promise.all([
+        db.from("candidates").select(cf).ilike("name",`%${term}%`).limit(15),
+        db.from("candidates").select(cf).ilike("location",`%${term}%`).limit(25),
+        db.from("candidates").select(cf).ilike("role",`%${term}%`).limit(15),
+        db.from("jobs").select("id,title,status,companies(name)").ilike("title",`%${term}%`).limit(5),
+        db.from("companies").select("id,name,industry").ilike("name",`%${term}%`).limit(4),
       ]);
-      setResults({candidates:c.data||[],jobs:j.data||[],companies:co.data||[]});
+      const errs=[cn,cl,cr,j,co].map(r=>r.error&&r.error.message).filter(Boolean);
+      const seen=new Set(),cands=[];
+      [...(cn.data||[]),...(cl.data||[]),...(cr.data||[])].forEach(c=>{if(!seen.has(c.id)){seen.add(c.id);cands.push(c);}});
+      setResults({candidates:cands.slice(0,25),jobs:j.data||[],companies:co.data||[],error:errs[0]||""});
       setLoading(false);
     },300);
     return()=>clearTimeout(t);
@@ -993,6 +997,15 @@ function GlobalSearch({setPage}){
     return()=>document.removeEventListener("keydown",h);
   },[]);
 
+  // Open the full results page for the current search
+  const seeAll=()=>{
+    const term=q.trim();
+    if(!term)return;
+    setOpen(false);
+    window._pendingSearch=term;
+    window.dispatchEvent(new CustomEvent("globalSearch",{detail:term}));
+  };
+
   const total=(results?.candidates?.length||0)+(results?.jobs?.length||0)+(results?.companies?.length||0);
 
   // Open the candidate's record, not just the Candidates page
@@ -1010,13 +1023,15 @@ function GlobalSearch({setPage}){
 
   return <div ref={ref} style={{position:"relative"}}>
     <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--bg2)",border:"0.5px solid var(--brm)",borderRadius:8,padding:"5px 10px",width:220}}>
-      <span style={{color:"var(--t3)",fontSize:13}}>🔍</span>
+      <span onClick={seeAll} title="See all results" style={{color:"var(--t3)",fontSize:13,cursor:"pointer"}}>🔍</span>
       <input type="text" value={q} onChange={e=>{setQ(e.target.value);setOpen(true);}} onFocus={()=>setOpen(true)}
+        onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();seeAll();}if(e.key==="Escape")setOpen(false);}}
         placeholder="Search… (⌘K)" style={{border:"none",background:"transparent",outline:"none",fontSize:12,color:"var(--t1)",width:"100%",padding:0}}/>
       {q&&<button onClick={()=>{setQ("");setResults(null);}} style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:11,padding:0}}>✕</button>}
     </div>
     {open&&q&&<div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:10,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:600,minWidth:300,maxHeight:380,overflowY:"auto"}}>
       {loading&&<div style={{padding:"12px 14px",fontSize:12,color:"var(--t3)"}}>Searching…</div>}
+      {!loading&&results?.error&&<div style={{padding:"10px 14px",fontSize:12,color:"#a32d2d"}}>Search error: {results.error}</div>}
       {!loading&&results&&total===0&&<div style={{padding:"16px 14px",fontSize:12,color:"var(--t3)",textAlign:"center"}}>No results for "{q}"</div>}
       {!loading&&results&&total>0&&<>
         {results.candidates.length>0&&<>
@@ -1037,8 +1052,186 @@ function GlobalSearch({setPage}){
             <span style={{fontSize:18}}>🏢</span><div><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.industry||"—"}</div></div>
           </div>)}
         </>}
+        <div onClick={seeAll} style={{position:"sticky",bottom:0,background:"var(--bg)",borderTop:"0.5px solid var(--brm)",padding:"10px 14px",fontSize:12,fontWeight:600,color:ACCENT,cursor:"pointer",textAlign:"center"}}>
+          See all results for "{q.trim()}" →  <span style={{fontWeight:400,color:"var(--t3)"}}>(or press Enter)</span>
+        </div>
       </>}
     </div>}
+  </div>;
+}
+
+// ── Full search results page ───────────────────────────────────────────────
+// Opened by pressing Enter (or "See all results") in the top search bar.
+// Finds every candidate whose name, location or role matches, plus jobs and companies.
+function SearchResultsPage({query,setPage}){
+  const [term,setTerm]=useState(query||"");
+  const [input,setInput]=useState(query||"");
+  const [res,setRes]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState("");
+  const [tab,setTab]=useState("candidates");
+  const [detail,setDetail]=useState(null);
+  const [editRow,setEditRow]=useState(null);
+  const [selected,setSelected]=useState(new Set());
+  const [hotlists,setHotlists]=useState([]);
+  const [hlPick,setHlPick]=useState("");
+  const [msg,setMsg]=useState("");
+
+  // A new search from the top bar replaces the current one
+  useEffect(()=>{setTerm(query||"");setInput(query||"");},[query]);
+
+  const run=useCallback(async()=>{
+    const t=(term||"").trim();
+    if(!t){setRes(null);return;}
+    setLoading(true);setErr("");setSelected(new Set());
+    const cf="id,name,role,location,email,status,skills,cv_url,cv_path,cv_filename";
+    const [cn,cl,cr,j,co]=await Promise.all([
+      db.from("candidates").select(cf).ilike("name",`%${t}%`).limit(1000),
+      db.from("candidates").select(cf).ilike("location",`%${t}%`).limit(1000),
+      db.from("candidates").select(cf).ilike("role",`%${t}%`).limit(1000),
+      db.from("jobs").select("id,title,status,salary,companies(name)").ilike("title",`%${t}%`).limit(200),
+      db.from("companies").select("id,name,industry,status").ilike("name",`%${t}%`).limit(200),
+    ]);
+    const e=[cn,cl,cr,j,co].map(r=>r.error&&r.error.message).filter(Boolean);
+    if(e.length)setErr(e[0]);
+    // Merge, remembering which field(s) matched
+    const map=new Map();
+    const add=(rows,field)=>(rows||[]).forEach(c=>{
+      const ex=map.get(c.id);
+      if(ex)ex._match.push(field);else map.set(c.id,{...c,_match:[field]});
+    });
+    add(cn.data,"Name");add(cl.data,"Location");add(cr.data,"Role");
+    const cands=[...map.values()].sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+    setRes({candidates:cands,jobs:j.data||[],companies:co.data||[]});
+    setTab(cands.length?"candidates":(j.data||[]).length?"jobs":(co.data||[]).length?"companies":"candidates");
+    setLoading(false);
+  },[term]);
+  useEffect(()=>{run();},[run]);
+
+  useEffect(()=>{
+    db.from("hotlists").select("id,name").order("created_at",{ascending:false}).then(({data})=>setHotlists(data||[]));
+  },[]);
+
+  const cands=res?.candidates||[];
+  const toggle=id=>setSelected(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n;});
+  const toggleAll=()=>setSelected(s=>s.size===cands.length?new Set():new Set(cands.map(c=>c.id)));
+
+  const addToHotlist=async()=>{
+    if(!hlPick||!selected.size)return;
+    const{data:existing}=await db.from("hotlist_candidates").select("candidate_id").eq("hotlist_id",hlPick);
+    const have=new Set((existing||[]).map(r=>r.candidate_id));
+    const rows=[...selected].filter(id=>!have.has(id)).map(id=>({hotlist_id:hlPick,candidate_id:id}));
+    if(rows.length){
+      const{error}=await db.from("hotlist_candidates").insert(rows);
+      if(error){setErr(error.message);return;}
+    }
+    const name=hotlists.find(h=>h.id===hlPick)?.name||"hotlist";
+    const skipped=selected.size-rows.length;
+    setMsg(`Added ${rows.length} to "${name}"${skipped?` (${skipped} already on it)`:""}`);
+    setTimeout(()=>setMsg(""),3000);
+    setSelected(new Set());setHlPick("");
+  };
+
+  const exportCSV=()=>{
+    const list=selected.size?cands.filter(c=>selected.has(c.id)):cands;
+    const head=["Name","Role","Location","Email","Status"];
+    const rows=[head,...list.map(c=>[c.name,c.role,c.location,c.email,c.status].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`))];
+    const a=document.createElement("a");
+    a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(rows.map(r=>r.join(",")).join("\n"));
+    a.download=`search_${term.replace(/[^a-z0-9]+/gi,"_")}.csv`;
+    a.click();
+  };
+
+  // The list only holds a few fields, so fetch the full record before opening it
+  const openCand=async c=>{
+    const{data}=await db.from("candidates").select("*").eq("id",c.id).single();
+    setDetail(data||c);
+  };
+
+  const counts={candidates:cands.length,jobs:res?.jobs?.length||0,companies:res?.companies?.length||0};
+  const tabBtn=(k,l)=><button key={k} onClick={()=>setTab(k)} style={{fontSize:12,padding:"5px 12px",borderRadius:20,border:"0.5px solid var(--brm)",cursor:"pointer",background:tab===k?ACCENT:"transparent",color:tab===k?"#fff":"var(--t2)",fontFamily:"inherit"}}>{l} ({counts[k]})</button>;
+
+  return <div>
+    {detail&&<CandidateDetailPanel cand={detail} onClose={()=>setDetail(null)} onEdit={c=>{setDetail(null);setEditRow(c);}} onRefresh={run}/>}
+    {editRow&&<CandModal cand={editRow} onClose={()=>setEditRow(null)} onSaved={run}/>}
+
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>
+        {loading?"Searching…":res?`${counts.candidates+counts.jobs+counts.companies} results for "${term}"`:"Search"}
+      </span>
+      <div style={{display:"flex",gap:8}}>
+        <input type="text" value={input} onChange={e=>setInput(e.target.value)}
+          onKeyDown={e=>{if(e.key==="Enter")setTerm(input.trim());}}
+          placeholder="Name, location or role…" style={{width:240}}/>
+        <button className="btn-a" onClick={()=>setTerm(input.trim())}>Search</button>
+      </div>
+    </div>
+
+    <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+      {tabBtn("candidates","Candidates")}{tabBtn("jobs","Jobs")}{tabBtn("companies","Companies")}
+    </div>
+
+    <Err msg={err}/>
+    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+
+    {loading?<Spin/>:!res?null:<>
+      {tab==="candidates"&&<>
+        {cands.length>0&&<div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:10}}>
+          <span style={{fontSize:12,color:"var(--t2)"}}>{selected.size?`${selected.size} selected`:"Select candidates to add them to a hotlist or export"}</span>
+          <span style={{flex:1}}/>
+          {selected.size>0&&<>
+            <select value={hlPick} onChange={e=>setHlPick(e.target.value)} style={{width:"auto",fontSize:12}}>
+              <option value="">Add to hotlist…</option>
+              {hotlists.map(h=><option key={h.id} value={h.id}>{h.name}</option>)}
+            </select>
+            <button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} disabled={!hlPick} onClick={addToHotlist}>Add</button>
+          </>}
+          <button className="btn-o" style={{fontSize:12}} onClick={exportCSV}>⬇ Export {selected.size?"selected":"all"}</button>
+        </div>}
+        <Panel title={`${cands.length} candidate${cands.length!==1?"s":""}`}>
+          {cands.length===0
+            ?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates match "{term}". Try "🔍 Search CVs" on the Candidates page to look inside CV text.</div>
+            :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",minWidth:680}}>
+              <thead><tr>
+                <th className="th" style={{width:36}}><input type="checkbox" checked={selected.size===cands.length&&cands.length>0} onChange={toggleAll} style={{cursor:"pointer"}}/></th>
+                <th className="th">Candidate</th><th className="th">Role</th><th className="th">Location</th><th className="th">Matched on</th><th className="th">Status</th>
+              </tr></thead>
+              <tbody>{cands.map(c=><tr key={c.id} style={{cursor:"pointer",background:selected.has(c.id)?"rgba(95,169,43,0.08)":""}} onClick={()=>openCand(c)}
+                onMouseOver={e=>{if(!selected.has(c.id))e.currentTarget.style.background="var(--bg2)";}} onMouseOut={e=>{if(!selected.has(c.id))e.currentTarget.style.background="";}}>
+                <td className="td" onClick={e=>{e.stopPropagation();toggle(c.id);}}><input type="checkbox" checked={selected.has(c.id)} onChange={()=>toggle(c.id)} style={{cursor:"pointer"}}/></td>
+                <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}>
+                  <div style={{fontWeight:500,color:ACCENT}}>{c.name}{hasCv(c)&&<span style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
+                  {c.email&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.email}</div>}
+                </div></div></td>
+                <td className="td" style={{color:"var(--t2)"}}>{c.role||"—"}</td>
+                <td className="td" style={{color:"var(--t2)"}}>{c.location||"—"}</td>
+                <td className="td" style={{fontSize:11,color:"var(--t3)"}}>{c._match.join(", ")}</td>
+                <td className="td"><Pill label={c.status||"New"}/></td>
+              </tr>)}</tbody>
+            </table></div>}
+        </Panel>
+      </>}
+
+      {tab==="jobs"&&<Panel title={`${counts.jobs} job${counts.jobs!==1?"s":""}`}>
+        {counts.jobs===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No jobs match "{term}".</div>:
+        res.jobs.map(j=><div key={j.id} onClick={()=>setPage("jobs")} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer"}}
+          onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+          <span style={{fontSize:18}}>💼</span>
+          <div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{j.title}</div><div style={{fontSize:11,color:"var(--t2)"}}>{j.companies?.name||"—"}{j.salary?` · ${j.salary}`:""}</div></div>
+          <Pill label={j.status||"Open"}/>
+        </div>)}
+      </Panel>}
+
+      {tab==="companies"&&<Panel title={`${counts.companies} compan${counts.companies!==1?"ies":"y"}`}>
+        {counts.companies===0?<div style={{padding:"30px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No companies match "{term}".</div>:
+        res.companies.map(c=><div key={c.id} onClick={()=>setPage("companies")} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"0.5px solid var(--br)",cursor:"pointer"}}
+          onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+          <CoLogo company={c}/>
+          <div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{c.name}</div><div style={{fontSize:11,color:"var(--t2)"}}>{c.industry||"—"}</div></div>
+          <Pill label={c.status||"Active"}/>
+        </div>)}
+      </Panel>}
+    </>}
   </div>;
 }
 
@@ -4308,6 +4501,48 @@ function PlacementsPage(){
     setSaving(false);
   };
 
+  // ── Invoice files ── stored in the PRIVATE "invoices" bucket; opened with a 1-hour signed link
+  const invRef=React.useRef(null);
+  const [invFor,setInvFor]=useState(null);   // placement row awaiting a file
+  const [invBusy,setInvBusy]=useState(null); // id of row currently uploading
+  const [invErr,setInvErr]=useState("");
+  const [invNoFor,setInvNoFor]=useState(null); // row whose invoice number is being edited
+  const [invNo,setInvNo]=useState("");
+  const pickInvoice=r=>{setInvFor(r);setInvErr("");invRef.current&&invRef.current.click();};
+  const uploadInvoice=async e=>{
+    const file=e.target.files[0];e.target.value="";
+    const r=invFor;setInvFor(null);
+    if(!file||!r)return;
+    if(file.size>10*1024*1024){setInvErr("File too large (max 10MB)");return;}
+    setInvBusy(r.id);setInvErr("");
+    const ext=(file.name.split(".").pop()||"pdf").toLowerCase();
+    const path=`placements/${r.id}_${Date.now()}.${ext}`;
+    const{error:upErr}=await db.storage.from("invoices").upload(path,file,{upsert:true,contentType:file.type||undefined});
+    if(upErr){setInvErr("Upload failed: "+upErr.message+(/bucket/i.test(upErr.message)?" — run the invoice setup SQL in Supabase first.":""));setInvBusy(null);return;}
+    const today=new Date().toISOString().split("T")[0];
+    const{error:dbErr}=await db.from("placements")
+      .update({invoice_path:path,invoice_filename:file.name,invoice_date:r.invoice_date||today}).eq("id",r.id);
+    if(dbErr){setInvErr("Saved the file but couldn't link it: "+dbErr.message+(/column/i.test(dbErr.message)?" — run the invoice setup SQL in Supabase first.":""));setInvBusy(null);return;}
+    if(r.invoice_path&&r.invoice_path!==path) await db.storage.from("invoices").remove([r.invoice_path]);
+    setInvBusy(null);load();
+  };
+  const viewInvoice=async r=>{
+    const tab=window.open("","_blank");
+    const{data,error}=await db.storage.from("invoices").createSignedUrl(r.invoice_path,3600);
+    if(error||!data?.signedUrl){if(tab)tab.close();setInvErr("Could not open invoice: "+(error?.message||"not found"));return;}
+    if(tab)tab.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  };
+  const removeInvoice=async r=>{
+    if(!confirm(`Remove the invoice file for ${r.candidate_name}?`))return;
+    await db.storage.from("invoices").remove([r.invoice_path]);
+    await db.from("placements").update({invoice_path:null,invoice_filename:null}).eq("id",r.id);
+    load();
+  };
+  const saveInvNo=async r=>{
+    await db.from("placements").update({invoice_number:invNo.trim()||null}).eq("id",r.id);
+    setInvNoFor(null);setInvNo("");load();
+  };
+
   const togglePaid=async(id,val)=>{await db.from("placements").update({payment_received:val,payment_date:val?new Date().toISOString().split("T")[0]:null}).eq("id",id);load();};
 
   const del=async(id,name)=>{
@@ -4340,13 +4575,15 @@ function PlacementsPage(){
         <div style={{fontSize:24,fontWeight:700,color:"#3b6d11"}}>£{paidFees.toLocaleString()}</div>
       </div>
     </div>
+    <input ref={invRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" style={{display:"none"}} onChange={uploadInvoice}/>
+    {invErr&&<div className="err" style={{marginBottom:10}}>{invErr}</div>}
     {loading?<Spin/>:
     rows.length===0?<div style={{color:"var(--t3)",fontSize:13,padding:"40px 0",textAlign:"center"}}>No placements yet. Click "Record Placement" to add your first.</div>:
     <table style={{width:"100%",borderCollapse:"collapse",background:"var(--bg)",borderRadius:10,overflow:"hidden",border:"0.5px solid var(--br)",tableLayout:"fixed"}}>
       <colgroup>
-        <col style={{width:"14%"}}/><col style={{width:"18%"}}/><col style={{width:"14%"}}/>
-        <col style={{width:"10%"}}/><col style={{width:"10%"}}/><col style={{width:"10%"}}/>
-        <col style={{width:"12%"}}/><col style={{width:"12%"}}/>
+        <col style={{width:"13%"}}/><col style={{width:"15%"}}/><col style={{width:"12%"}}/>
+        <col style={{width:"9%"}}/><col style={{width:"9%"}}/><col style={{width:"8%"}}/>
+        <col style={{width:"21%"}}/><col style={{width:"13%"}}/>
       </colgroup>
       <thead><tr>
         <th className="th">Candidate</th><th className="th">Role</th><th className="th">Company</th>
@@ -4360,7 +4597,27 @@ function PlacementsPage(){
         <td className="td" style={{color:"var(--t3)"}}>{r.start_date||"—"}</td>
         <td className="td">{r.salary?`£${parseFloat(r.salary).toLocaleString()}`:"—"}</td>
         <td className="td" style={{color:"#185fa5",fontWeight:500}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
-        <td className="td" style={{fontSize:11,color:"var(--t3)"}}>{r.invoice_number||"—"}</td>
+        <td className="td">
+          {invNoFor===r.id
+            ?<div style={{display:"flex",gap:4}}>
+              <input type="text" value={invNo} onChange={e=>setInvNo(e.target.value)} autoFocus placeholder="INV-001"
+                onKeyDown={e=>{if(e.key==="Enter")saveInvNo(r);if(e.key==="Escape")setInvNoFor(null);}} style={{fontSize:11,padding:"3px 6px"}}/>
+              <button className="btn-a" style={{fontSize:10,padding:"2px 7px"}} onClick={()=>saveInvNo(r)}>✓</button>
+            </div>
+            :<div onClick={()=>{setInvNoFor(r.id);setInvNo(r.invoice_number||"");}} title="Click to edit invoice number"
+              style={{fontSize:11,color:r.invoice_number?"var(--t1)":"var(--t3)",cursor:"pointer",marginBottom:4}}>
+              {r.invoice_number||"+ Invoice no."}{r.invoice_date?<span style={{color:"var(--t3)"}}> · {r.invoice_date}</span>:null}
+            </div>}
+          {invBusy===r.id
+            ?<span style={{fontSize:11,color:"var(--t2)"}}><span className="spin"></span>Uploading…</span>
+            :r.invoice_path
+              ?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                <button onClick={()=>viewInvoice(r)} title={r.invoice_filename||"Invoice"} style={{background:"#eaf3de",color:"#3b6d11",border:"none",borderRadius:6,padding:"2px 8px",fontSize:11,cursor:"pointer",maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>📄 View invoice</button>
+                <button onClick={()=>pickInvoice(r)} title="Replace invoice" style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"2px 6px",fontSize:10,cursor:"pointer",color:"var(--t2)"}}>Replace</button>
+                <button onClick={()=>removeInvoice(r)} title="Remove invoice" style={{background:"none",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:11,padding:"0 2px"}}>✕</button>
+              </div>
+              :<button onClick={()=>pickInvoice(r)} style={{background:"none",border:"1px dashed var(--brm)",borderRadius:6,padding:"2px 8px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>⬆ Upload invoice</button>}
+        </td>
         <td className="td">
           <div style={{display:"flex",alignItems:"center",gap:6}}>
             <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer"}}>
@@ -4759,6 +5016,12 @@ function AuthedApp(){
   const [page,setPage]=useState("dashboard");
   const [allTasks,setAllTasks]=useState([]);
   const [activeJob,setActiveJob]=useState(null);
+  const [searchQ,setSearchQ]=useState("");
+  useEffect(()=>{
+    const h=e=>{setSearchQ(e.detail);setPage("search");setActiveJob(null);};
+    window.addEventListener("globalSearch",h);
+    return()=>window.removeEventListener("globalSearch",h);
+  },[]);
   useEffect(()=>{
     const h=e=>{setPage(e.detail);if(e.detail!=="jobs")setActiveJob(null);};
     window.addEventListener("nav",h);
@@ -4787,6 +5050,7 @@ function AuthedApp(){
     sequences:<EmailSequencesPage/>,
     hotlists:<HotlistsPage/>,
     jds:<JDLibraryPage/>,
+    search:<SearchResultsPage query={searchQ} setPage={setPage}/>,
   };
   let lastS=null;
   return <>
@@ -4812,7 +5076,7 @@ function AuthedApp(){
       <div style={{flex:1,background:"var(--bg3)",display:"flex",flexDirection:"column",minWidth:0}}>
         <div style={{background:"var(--bg)",borderBottom:"0.5px solid var(--br)",padding:"0 18px",height:52,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
           <span style={{fontSize:15,fontWeight:500,color:"var(--t1)"}}>
-            {page==="jobs"&&activeJob ? activeJob.title : NAV.find(n=>n.k===page)?.l||""}
+            {page==="jobs"&&activeJob ? activeJob.title : page==="search" ? "Search results" : NAV.find(n=>n.k===page)?.l||""}
           </span>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <GlobalSearch setPage={setPage}/>
