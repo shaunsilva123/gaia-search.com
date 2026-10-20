@@ -1424,6 +1424,112 @@ function SendToClientSection({cand}){
 }
 
 // ── Candidate Detail Panel ─────────────────────────────────────────────────
+// ── Candidate-linked tasks ─────────────────────────────────────────────────
+const TASK_SQL_HINT=" — run the task setup SQL in Supabase (adds candidate_id and candidate_name to tasks).";
+
+// Open any candidate's record from anywhere in the app (e.g. from a task)
+async function openCandidateById(id){
+  const{data}=await db.from("candidates").select("*").eq("id",id).single();
+  if(!data){alert("That candidate no longer exists.");return;}
+  window._pendingOpenCandidate=data;
+  window.dispatchEvent(new CustomEvent("nav",{detail:"candidates"}));
+  setTimeout(()=>window.dispatchEvent(new CustomEvent("openCandidate",{detail:data})),400);
+}
+
+function AddTaskModal({cand,onClose,onSaved}){
+  const [title,setTitle]=useState(`Follow up with ${cand.name}`);
+  const [due,setDue]=useState(todayStr());
+  const [time,setTime]=useState("");
+  const [priority,setPriority]=useState("normal");
+  const [saving,setSaving]=useState(false);
+  const [err,setErr]=useState("");
+  const save=async()=>{
+    if(!title.trim()){setErr("Give the task a title");return;}
+    setSaving(true);setErr("");
+    const{error}=await db.from("tasks").insert({
+      title:title.trim(),due_date:due||null,due_time:time||null,priority,done:false,
+      candidate_id:String(cand.id),candidate_name:cand.name||null,
+    });
+    setSaving(false);
+    if(error){setErr(error.message+(/candidate_/i.test(error.message)?TASK_SQL_HINT:""));return;}
+    if(onSaved)onSaved();
+    onClose();
+  };
+  return <div className="modal-overlay" style={{zIndex:1100}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="modal" style={{maxWidth:420}}>
+      <h3>✅ New task <span style={{fontWeight:400,color:"var(--t2)"}}>— {cand.name}</span></h3>
+      <div className="fr"><label>Task</label>
+        <input type="text" value={title} onChange={e=>setTitle(e.target.value)} autoFocus onKeyDown={e=>e.key==="Enter"&&save()}/></div>
+      <div className="fr2">
+        <div><label>Due date</label><input type="date" value={due} onChange={e=>setDue(e.target.value)}/></div>
+        <div><label>Remind me at (optional)</label><input type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
+      </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10,fontSize:11}}>
+        <span style={{color:"var(--t3)"}}>Quick:</span>
+        {[["Today",todayStr()],["Tomorrow",tomorrowStr()],["Next week",(()=>{const d=new Date();d.setDate(d.getDate()+7);return d.toISOString().slice(0,10)})()]].map(([l,v])=>
+          <span key={l} onClick={()=>setDue(v)} style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}}>{l}</span>)}
+      </div>
+      <div className="fr"><label>Priority</label>
+        <select value={priority} onChange={e=>setPriority(e.target.value)}>
+          <option value="urgent">🔴 Urgent</option><option value="high">🟠 High</option>
+          <option value="normal">🔵 Normal</option><option value="low">⚪ Low</option>
+        </select></div>
+      <Err msg={err}/>
+      <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+        <button className="btn-o" onClick={onClose}>Cancel</button>
+        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Add to Tasks"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// The tasks section inside a candidate's record
+function CandidateTasks({cand}){
+  const [tasks,setTasks]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [adding,setAdding]=useState(false);
+  const [err,setErr]=useState("");
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data,error}=await db.from("tasks").select("*").eq("candidate_id",String(cand.id))
+      .order("done",{ascending:true}).order("due_date",{ascending:true,nullsFirst:false});
+    if(error)setErr(error.message+(/candidate_/i.test(error.message)?TASK_SQL_HINT:""));
+    else{setErr("");setTasks(data||[]);}
+    setLoading(false);
+  },[cand.id]);
+  useEffect(()=>{load();},[load]);
+  const toggle=async t=>{await db.from("tasks").update({done:!t.done}).eq("id",t.id);load();};
+  const today=todayStr();
+  const open=tasks.filter(t=>!t.done).length;
+  return <div>
+    {adding&&<AddTaskModal cand={cand} onClose={()=>setAdding(false)} onSaved={load}/>}
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Tasks ({open} open)</div>
+      <div style={{display:"flex",gap:6}}>
+        <button onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"tasks"}))} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"3px 9px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>All tasks →</button>
+        <button onClick={()=>setAdding(true)} style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>+ Add task</button>
+      </div>
+    </div>
+    {err&&<div style={{fontSize:11,color:"#a32d2d",marginBottom:6}}>{err}</div>}
+    {loading?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:tasks.length===0
+      ?<div style={{fontSize:12,color:"var(--t3)"}}>No tasks for this candidate yet.</div>
+      :<div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {tasks.map(t=>{
+          const overdue=!t.done&&t.due_date&&t.due_date<today;
+          return <div key={t.id} style={{background:"var(--bg2)",borderRadius:8,padding:"8px 12px",display:"flex",alignItems:"center",gap:10}}>
+            <div onClick={()=>toggle(t)} title={t.done?"Mark not done":"Mark done"} style={{width:17,height:17,borderRadius:4,border:"0.5px solid var(--brm)",cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:t.done?"#1d9e75":"var(--bg)"}}>
+              {t.done&&<span style={{color:"#fff",fontSize:10}}>✓</span>}
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:12,color:t.done?"var(--t3)":"var(--t1)",textDecoration:t.done?"line-through":"none"}}>{t.title}</div>
+              {t.due_date&&<div style={{fontSize:11,color:overdue?"#a32d2d":"var(--t3)"}}>{overdue?"⚠️ Overdue · ":""}{t.due_date===today?"Today":t.due_date}{t.due_time?` · ${t.due_time}`:""}</div>}
+            </div>
+          </div>;
+        })}
+      </div>}
+  </div>;
+}
+
 function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
   // The list only carries the columns it displays, so fetch the whole record
   // here — that way any field added to the table later still shows up.
@@ -1590,6 +1696,8 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
             </div>)}
           </div>}
         </div>
+        {/* Tasks */}
+        <CandidateTasks cand={c}/>
         {/* Activity log */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Recent activity</div>
@@ -1921,6 +2029,8 @@ function CandidatesPage(){
   const [bulkStatus,setBulkStatus]=useState("");
   const [lastContacted,setLastContacted]=useState({});
   const [bulkCv,setBulkCv]=useState(false);
+  const [taskFor,setTaskFor]=useState(null);
+  const [taskMsg,setTaskMsg]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -2054,6 +2164,8 @@ function CandidatesPage(){
 
   return <div>
     {modal&&<CandModal onClose={()=>setModal(false)} onSaved={load}/>}
+    {taskFor&&<AddTaskModal cand={taskFor} onClose={()=>setTaskFor(null)} onSaved={()=>{setTaskMsg(`Task added for ${taskFor.name}`);setTimeout(()=>setTaskMsg(""),3000);}}/>}
+    {taskMsg&&<div style={{position:"fixed",bottom:20,right:20,zIndex:1200,background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"10px 14px",fontSize:12,boxShadow:"0 4px 16px rgba(0,0,0,0.12)"}}>✓ {taskMsg} · <span style={{cursor:"pointer",textDecoration:"underline"}} onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"tasks"}))}>View tasks</span></div>}
     {bulkCv&&<BulkCvMatch candidates={rows} onClose={()=>setBulkCv(false)} onDone={load}/>}
     {editRow&&<CandModal cand={editRow} onClose={()=>{setEditRow(null);}} onSaved={()=>{load();setDetailCand(null);}}/>}
     {detailCand&&<CandidateDetailPanel cand={detailCand} onClose={()=>setDetailCand(null)} onEdit={c=>{setDetailCand(null);setEditRow(c);}} onRefresh={load}/>}
@@ -2098,13 +2210,13 @@ function CandidatesPage(){
         :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:760}}>
           <colgroup>
             <col style={{width:"3%"}}/>
-            <col style={{width:"20%"}}/>
-            <col style={{width:"20%"}}/>
-            <col style={{width:"14%"}}/>
-            <col style={{width:"14%"}}/>
+            <col style={{width:"19%"}}/>
+            <col style={{width:"18%"}}/>
+            <col style={{width:"13%"}}/>
+            <col style={{width:"10%"}}/>
             <col style={{width:"9%"}}/>
             <col style={{width:"10%"}}/>
-            <col style={{width:"10%"}}/>
+            <col style={{width:"18%"}}/>
           </colgroup>
           <thead><tr>
             <th className="th"><input type="checkbox" checked={selected.size===filtered.length&&filtered.length>0} onChange={toggleAll} style={{cursor:"pointer"}}/></th>
@@ -2127,6 +2239,7 @@ function CandidatesPage(){
             <td className="td"><Pill label={c.status||"New"}/></td>
             <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
               {c.linkedin&&<a href={c.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" style={{background:"#0a66c2",color:"#fff",borderRadius:6,padding:"3px 7px",fontSize:11,textDecoration:"none",display:"inline-flex",alignItems:"center"}}>in</a>}
+              <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setTaskFor(c)} title="Add a task for this candidate">+ Task</button>
               <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
               <button className="btn-d" onClick={()=>del(c.id)} disabled={delId===c.id}>{delId===c.id?"…":"Del"}</button>
             </div></td>
@@ -2785,13 +2898,16 @@ function HotlistsPage(){
   const saveLater=async()=>{
     if(!laterFor||!laterDate)return;
     const c=laterFor.candidates;
-    await db.from("tasks").insert({
+    const task={
       title:`Contact ${c.name}${c.role?" ("+c.role+")":""} — from hotlist "${activeList.name}"`,
       due_date:laterDate,
       due_time:laterTime||null,
       priority:"normal",
       done:false,
-    });
+    };
+    // Link to the candidate; if the task setup SQL hasn't been run yet, save it unlinked
+    const{error}=await db.from("tasks").insert({...task,candidate_id:String(c.id),candidate_name:c.name||null});
+    if(error&&/candidate_/i.test(error.message)) await db.from("tasks").insert(task);
     setLaterFor(null);setLaterDate("");setLaterTime("");
     setShareMsg("Follow-up added to Tasks");setTimeout(()=>setShareMsg(""),2500);
   };
@@ -3672,6 +3788,8 @@ function TasksPage(){
             {dl.overdue?"⚠️ ":dl.today?"📅 ":""}{dl.label}{t.due_time?" · "+t.due_time:""}
           </span>}
           <span style={{fontSize:11,background:ps.bg,color:ps.fg,padding:"1px 6px",borderRadius:8}}>{ps.label}</span>
+          {t.candidate_id&&<span onClick={()=>openCandidateById(t.candidate_id)} title="Open candidate record"
+            style={{fontSize:11,background:"rgba(95,169,43,0.14)",color:"#2e7a2c",padding:"1px 7px",borderRadius:8,cursor:"pointer"}}>👤 {t.candidate_name||"Candidate"} →</span>}
         </div>
       </div>
       <div style={{display:"flex",gap:4,flexShrink:0}}>
