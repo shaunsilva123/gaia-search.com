@@ -398,18 +398,67 @@ function LocationInput({value,onChange,placeholder}){
 }
 
 // ── Modals ─────────────────────────────────────────────────────────────────
+// ── Ecology & GDPR fields ──────────────────────────────────────────────────
+const LICENCES=["Bat – Level 1","Bat – Level 2","Bat – Level 3/4","GCN – Class 1","GCN – Class 2","Dormouse","Barn owl","Water vole","White-clawed crayfish","Badger","Natterjack toad","Smooth snake / sand lizard","Schedule 1 birds","Bird ringing (BTO)"];
+const LICENCE_ICON=l=>l.startsWith("Bat")?"🦇":l.startsWith("GCN")?"🦎":l==="Dormouse"?"🐭":l==="Barn owl"||l.includes("bird")||l.includes("Bird")?"🦉":l==="Badger"?"🦡":l==="Water vole"?"🐀":"📜";
+const LICENCE_SHORT=l=>l.replace("Bat – Level ","Bat L").replace("GCN – Class ","GCN C").replace("White-clawed crayfish","Crayfish").replace("Smooth snake / sand lizard","Reptile").replace("Schedule 1 birds","Sch.1 birds").replace("Bird ringing (BTO)","BTO ringer");
+const CIEEM_LEVELS=["Student","Affiliate","Graduate","Associate (ACIEEM)","Qualifying","Full (MCIEEM)","Fellow (FCIEEM)"];
+const CIEEM_RANK=l=>Math.max(0,CIEEM_LEVELS.indexOf(l));
+const SOURCES=["LinkedIn","Applied to advert","Referral","Job board","CV database","Direct approach","Event","Other"];
+const salaryNum=v=>{const n=parseFloat(String(v||"").replace(/[^0-9.k]/gi,"").replace(/k$/i,"000"));return n>0?Math.round(n<1000?n*1000:n):null;};
+const UPGRADE_HINT=" — run crm-upgrade.sql in Supabase first.";
+// Fields the candidate form is allowed to write (keeps system columns out of saves)
+const CAND_FIELDS=["name","role","email","phone","location","experience","salary","notice","skills","status","notes","linkedin","source","licences","cieem_level","driving_licence","salary_expect"];
+
 function CandModal({cand,onClose,onSaved}){
-  const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:""};
-  const [f,setF]=useState(cand?{...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||""}:blank);
+  const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:"",source:"",licences:[],cieem_level:"",driving_licence:"",salary_expect:""};
+  const [f,setF]=useState(cand?{...blank,...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||"",licences:cand.licences||[],salary_expect:cand.salary_expect||""}:blank);
   const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const [genDesc,setGenDesc]=useState(false);
+  const [dupes,setDupes]=useState(null); // possible duplicates found before saving a new candidate
+  const dupeRef=React.useRef(null);
+  useEffect(()=>{if(dupes&&dupeRef.current)dupeRef.current.scrollIntoView({behavior:"smooth",block:"center"});},[dupes]);
   const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
-  const save=async()=>{
+  const toggleLicence=l=>setF(p=>{const has=(p.licences||[]).includes(l);return{...p,licences:has?p.licences.filter(x=>x!==l):[...(p.licences||[]),l]};});
+
+  // The list view only loads some columns, so fill in the rest when editing
+  useEffect(()=>{
+    if(!cand?.id)return;
+    db.from("candidates").select(CAND_FIELDS.join(",")).eq("id",cand.id).single().then(({data})=>{
+      if(data)setF(p=>({...p,...data,skills:Array.isArray(data.skills)?data.skills.join(", "):data.skills||"",licences:data.licences||[],salary_expect:data.salary_expect||"",
+        cieem_level:data.cieem_level||"",driving_licence:data.driving_licence||"",source:data.source||"",linkedin:data.linkedin||""}));
+    });
+  },[cand?.id]);
+
+  const findDupes=async()=>{
+    const q=[];
+    const em=(f.email||"").trim(),li=(f.linkedin||"").trim().split("?")[0].replace(/\/$/,""),nm=f.name.trim();
+    const sel="id,name,role,location,email";
+    if(em)q.push(db.from("candidates").select(sel).ilike("email",em).limit(3));
+    if(li){const slug=(li.match(/linkedin\.com\/in\/([^/?#]+)/i)||[])[1];if(slug)q.push(db.from("candidates").select(sel).ilike("linkedin",`%${slug}%`).limit(3));}
+    if(nm)q.push(db.from("candidates").select(sel).ilike("name",nm).limit(3));
+    const res=await Promise.all(q);
+    const seen=new Set(),out=[];
+    res.forEach(r=>(r.data||[]).forEach(c=>{if(!seen.has(c.id)){seen.add(c.id);out.push(c);}}));
+    return out;
+  };
+
+  const save=async(force)=>{
     if(!f.name.trim()){setErr("Name is required");return;}
     setSaving(true);setErr("");
-    const payload={...f,skills:f.skills.split(",").map(x=>x.trim()).filter(Boolean),initials:ini(f.name)};
+    if(!cand&&!force){
+      const d=await findDupes();
+      if(d.length){setDupes(d);setSaving(false);return;}
+    }
+    const payload={};
+    CAND_FIELDS.forEach(k=>{if(f[k]!==undefined)payload[k]=f[k];});
+    payload.skills=String(f.skills||"").split(",").map(x=>x.trim()).filter(Boolean);
+    payload.initials=ini(f.name);
+    payload.salary_expect=salaryNum(f.salary_expect);
+    ["source","cieem_level","driving_licence"].forEach(k=>{if(!payload[k])payload[k]=null;});
     const{error}=cand?await db.from("candidates").update(payload).eq("id",cand.id):await db.from("candidates").insert(payload);
-    setSaving(false);if(error){setErr(error.message);return;}
+    setSaving(false);
+    if(error){setErr(error.message+(/source|licences|cieem|driving|salary_expect/i.test(error.message)?UPGRADE_HINT:""));return;}
     onSaved();onClose();
   };
   return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
@@ -441,14 +490,52 @@ function CandModal({cand,onClose,onSaved}){
         </div>
       </div>
       <div className="fr"><label>Skills (comma separated)</label><input type="text" value={f.skills||""} onChange={s("skills")} placeholder="Python, SQL, Tableau"/></div>
-      <div className="fr"><label>Status</label>
-        <select value={f.status} onChange={s("status")}>{["New","Active","Pipeline","Interview","Offer stage","Placed","Cold"].map(x=><option key={x}>{x}</option>)}</select>
+      <div className="fr2">
+        <div><label>Status</label>
+          <select value={f.status} onChange={s("status")}>{["New","Active","Pipeline","Interview","Offer stage","Placed","Cold"].map(x=><option key={x}>{x}</option>)}</select>
+        </div>
+        <div><label title="Where their details came from — needed for GDPR">Source</label>
+          <select value={f.source||""} onChange={s("source")}><option value="">— Not recorded —</option>{SOURCES.map(x=><option key={x}>{x}</option>)}</select>
+        </div>
       </div>
+
+      {/* Ecology */}
+      <div style={{borderTop:"0.5px solid var(--br)",margin:"12px 0",paddingTop:12}}>
+        <div style={{fontSize:12,fontWeight:500,color:"var(--t1)",marginBottom:10}}>🌿 Ecology</div>
+        <div className="fr"><label>Protected species licences</label>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+            {LICENCES.map(l=>{const on=(f.licences||[]).includes(l);return <button type="button" key={l} onClick={()=>toggleLicence(l)}
+              style={{fontSize:11,padding:"4px 9px",borderRadius:14,cursor:"pointer",fontFamily:"inherit",
+                border:on?"0.5px solid #2e7a2c":"0.5px solid var(--brm)",background:on?"#2e7a2c":"transparent",color:on?"#fff":"var(--t2)"}}>{on?"✓ ":""}{l}</button>;})}
+          </div>
+        </div>
+        <div className="fr2">
+          <div><label>CIEEM membership</label>
+            <select value={f.cieem_level||""} onChange={s("cieem_level")}><option value="">— None / unknown —</option>{CIEEM_LEVELS.map(x=><option key={x}>{x}</option>)}</select>
+          </div>
+          <div><label>Full driving licence</label>
+            <select value={f.driving_licence||""} onChange={s("driving_licence")}><option value="">— Unknown —</option><option>Yes</option><option>No</option></select>
+          </div>
+        </div>
+        <div className="fr"><label>Salary expectation (£ — used for filtering)</label>
+          <input type="text" value={f.salary_expect||""} onChange={s("salary_expect")} placeholder="e.g. 42000 or 42k"/>
+        </div>
+      </div>
+
       <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")} placeholder="Additional notes…"/></div>
+      {dupes&&<div ref={dupeRef} style={{background:"#fff6e0",border:"0.5px solid #e8c97a",borderRadius:8,padding:"10px 12px",fontSize:12,color:"#854f0b",marginTop:8}}>
+        <div style={{fontWeight:600,marginBottom:6}}>⚠️ This person may already be in your CRM:</div>
+        {dupes.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+          <span style={{flex:1}}><strong>{d.name}</strong>{d.role?` · ${d.role}`:""}{d.location?` · ${d.location}`:""}{d.email?` · ${d.email}`:""}</span>
+          <button type="button" className="btn-o" style={{fontSize:11,padding:"2px 8px"}} onClick={()=>{onClose();openCandidateById(d.id);}}>Open</button>
+        </div>)}
+      </div>}
       <Err msg={err}/>
       <div style={{display:"flex",gap:8,marginTop:16,justifyContent:"flex-end"}}>
         <button className="btn-o" onClick={onClose}>Cancel</button>
-        <button className="btn-a" onClick={save} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save candidate"}</button>
+        {dupes
+          ?<button className="btn-a" onClick={()=>save(true)} disabled={saving}>{saving?<><span className="spin"></span>Saving…</>:"Save anyway"}</button>
+          :<button className="btn-a" onClick={()=>save(false)} disabled={saving}>{saving?<><span className="spin"></span>Checking…</>:"Save candidate"}</button>}
       </div>
     </div>
   </div>;
@@ -999,6 +1086,9 @@ function DashboardPage({setPage}){
       Nothing in play yet. Move a candidate to Interview on an open job and the fee will appear here.
     </div>}
 
+    {/* Invoices to chase and fees still in rebate */}
+    <MoneyToChase setPage={setPage}/>
+
     {/* Stat cards */}
     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
       {statCards.map(c=><div key={c.l} className="g-stat">
@@ -1056,6 +1146,90 @@ function DashboardPage({setPage}){
   </div>;
 }
 
+// ── Money: invoice due dates and rebate periods ───────────────────────────
+// Uses each client's terms (Companies → Edit → Terms agreed):
+//   payment terms (days)  → invoice due date (30 days if not set)
+//   rebate / refund period → how long after the start date the fee is at risk
+function rebateDays(text){
+  // "100% to 4wks, 50% to 8wks" → 56. Takes the longest period mentioned.
+  let max=0;const re=/(\d+)\s*(weeks?|wks?|w|months?|mths?|mo|m|days?|d)\b/gi;let m;
+  while((m=re.exec(text||""))!==null){
+    const n=parseInt(m[1],10),u=m[2].toLowerCase();
+    const d=u.startsWith("w")?n*7:u.startsWith("m")?n*30:n;
+    if(d>max)max=d;
+  }
+  return max||null;
+}
+// Works in local dates (toISOString would shift a day during UK summer time)
+const addDays=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);const z=x=>String(x).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;};
+const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5);
+const niceDate=iso=>iso?new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"";
+function placementMoney(p,companies){
+  const today=todayStr();
+  const co=(companies||[]).find(c=>(c.name||"").trim().toLowerCase()===(p.company_name||"").trim().toLowerCase())||{};
+  const payDays=parseInt(co.terms_payment_days,10)||30;
+  const out={payDays,payDaysDefault:!co.terms_payment_days};
+  if(p.payment_received)out.invoice="paid";
+  else if(p.invoice_date){
+    out.dueDate=addDays(p.invoice_date,payDays);
+    const late=daysBetween(out.dueDate,today);
+    out.daysLate=late;
+    out.invoice=late>0?"overdue":late>=-7?"due_soon":"invoiced";
+  }else{
+    out.invoice=(!p.start_date||p.start_date<=today)?"to_invoice":"not_started";
+  }
+  const rd=rebateDays(co.terms_rebate);
+  out.rebateKnown=!!rd;
+  out.started=!!p.start_date&&p.start_date<=today;
+  if(rd&&p.start_date){
+    out.rebateEnd=addDays(p.start_date,rd);
+    out.rebateLeft=daysBetween(today,out.rebateEnd);
+    out.inRebate=out.started&&out.rebateLeft>0; // the rebate clock only runs once they've started
+  }
+  return out;
+}
+
+function MoneyToChase({setPage}){
+  const [items,setItems]=useState(null);
+  useEffect(()=>{
+    Promise.all([
+      db.from("placements").select("*"),
+      db.from("companies").select("name,terms_payment_days,terms_rebate"),
+    ]).then(([{data:pl},{data:cos}])=>{
+      setItems((pl||[]).map(p=>({p,m:placementMoney(p,cos||[])})));
+    });
+  },[]);
+  if(!items)return null;
+  const fee=p=>`£${(parseFloat(p.fee_amount)||0).toLocaleString()}`;
+  const overdue=items.filter(x=>x.m.invoice==="overdue").sort((a,b)=>b.m.daysLate-a.m.daysLate);
+  const dueSoon=items.filter(x=>x.m.invoice==="due_soon");
+  const toInvoice=items.filter(x=>x.m.invoice==="to_invoice");
+  const rebate=items.filter(x=>x.m.inRebate).sort((a,b)=>a.m.rebateLeft-b.m.rebateLeft);
+  if(!overdue.length&&!dueSoon.length&&!toInvoice.length&&!rebate.length)return null;
+  const sum=list=>list.reduce((t,x)=>t+(parseFloat(x.p.fee_amount)||0),0);
+  const Row=({x,colour,right})=><div className="g-row" onClick={()=>setPage("placements")} style={{borderLeftColor:colour,cursor:"pointer"}}>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontWeight:600,fontSize:13,color:"var(--g-ink)"}}>{x.p.company_name||"—"} <span style={{fontWeight:400,color:"var(--g-mute)"}}>· {x.p.candidate_name}</span></div>
+      <div style={{fontSize:11,color:colour,marginTop:1}}>{right}</div>
+    </div>
+    <span className="g-num" style={{fontSize:16,color:"var(--g-ink)",letterSpacing:"-0.5px",flexShrink:0}}>{fee(x.p)}</span>
+  </div>;
+  const Group=({title,list,children})=>list.length?<div style={{marginBottom:12}}>
+    <div className="g-eyebrow" style={{marginBottom:6}}>{title} · {fee({fee_amount:sum(list)})}</div>
+    <div style={{display:"flex",flexDirection:"column",gap:3}}>{children}</div>
+  </div>:null;
+  return <div className="g-canvas">
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12}}>
+      <div className="g-eyebrow">💷 Money to chase</div>
+      <button onClick={()=>setPage("placements")} style={{background:"none",border:"none",color:"var(--g-deep)",cursor:"pointer",fontSize:11,fontWeight:600,fontFamily:"var(--g-face)"}}>Placements →</button>
+    </div>
+    <Group title="Overdue invoices" list={overdue}>{overdue.map(x=><Row key={x.p.id} x={x} colour="#c0392b" right={`⚠️ ${x.m.daysLate} day${x.m.daysLate!==1?"s":""} overdue · was due ${niceDate(x.m.dueDate)}`}/>)}</Group>
+    <Group title="Due in the next 7 days" list={dueSoon}>{dueSoon.map(x=><Row key={x.p.id} x={x} colour="#ba7517" right={`Due ${niceDate(x.m.dueDate)}`}/>)}</Group>
+    <Group title="Ready to invoice" list={toInvoice}>{toInvoice.map(x=><Row key={x.p.id} x={x} colour="#185fa5" right={x.p.start_date?`Started ${niceDate(x.p.start_date)} — no invoice recorded yet`:"No invoice recorded yet"}/>)}</Group>
+    <Group title="Inside rebate period" list={rebate}>{rebate.map(x=><Row key={x.p.id} x={x} colour="#7f77dd" right={`🛡 Fee at risk until ${niceDate(x.m.rebateEnd)} · ${x.m.rebateLeft} day${x.m.rebateLeft!==1?"s":""} to go`}/>)}</Group>
+  </div>;
+}
+
 // ── Dark Mode Toggle ──────────────────────────────────────────────────────
 function DarkModeToggle(){
   const [dark,setDark]=useState(()=>localStorage.getItem("crm_dark")==="1");
@@ -1071,6 +1245,7 @@ function DarkModeToggle(){
 // ── Global Search ─────────────────────────────────────────────────────────
 function GlobalSearch({setPage}){
   const [q,setQ]=useState("");
+  const [savedList,setSavedList]=useState(null);
   const [results,setResults]=useState(null);
   const [open,setOpen]=useState(false);
   const [loading,setLoading]=useState(false);
@@ -1141,11 +1316,19 @@ function GlobalSearch({setPage}){
   return <div ref={ref} style={{position:"relative"}}>
     <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--bg2)",border:"0.5px solid var(--brm)",borderRadius:8,padding:"5px 10px",width:220}} className="global-search">
       <span onClick={seeAll} title="See all results" style={{color:"var(--t3)",fontSize:13,cursor:"pointer"}}>🔍</span>
-      <input type="text" value={q} onChange={e=>{setQ(e.target.value);setOpen(true);}} onFocus={()=>setOpen(true)}
+      <input type="text" value={q} onChange={e=>{setQ(e.target.value);setOpen(true);}} onFocus={()=>{setOpen(true);db.from("saved_searches").select("id,name,query,include_cv").order("name").then(({data,error})=>setSavedList(error?[]:data||[]));}}
         onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();seeAll();}if(e.key==="Escape")setOpen(false);}}
         placeholder="Search… (⌘K)" style={{border:"none",background:"transparent",outline:"none",fontSize:12,color:"var(--t1)",width:"100%",padding:0}}/>
       {q&&<button onClick={()=>{setQ("");setResults(null);}} style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:11,padding:0}}>✕</button>}
     </div>
+    {open&&!q&&savedList&&savedList.length>0&&<div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:10,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:600,minWidth:300,maxHeight:380,overflowY:"auto"}}>
+      <div style={{padding:"8px 14px 4px",fontSize:10,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>⭐ Saved searches</div>
+      {savedList.map(x=><div key={x.id} onMouseDown={e=>{e.preventDefault();setOpen(false);window.dispatchEvent(new CustomEvent("globalSearch",{detail:{q:x.query,cv:x.include_cv}}));}}
+        style={{padding:"8px 14px",cursor:"pointer",borderBottom:"0.5px solid var(--br)"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg2)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+        <div style={{fontSize:13,fontWeight:500,color:"var(--t1)"}}>{x.name}{x.include_cv?" 📄":""}</div>
+        <div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{x.query}</div>
+      </div>)}
+    </div>}
     {open&&q&&<div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:10,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:600,minWidth:300,maxHeight:380,overflowY:"auto"}}>
       {loading&&<div style={{padding:"12px 14px",fontSize:12,color:"var(--t3)"}}>Searching…</div>}
       {!loading&&results?.error&&<div style={{padding:"10px 14px",fontSize:12,color:"#a32d2d"}}>Search error: {results.error}</div>}
@@ -1185,7 +1368,7 @@ function isBooleanQuery(q){
   return /\b(AND|OR|NOT)\b/.test(q)||/["()*]/.test(q)||/(^|\s)-\S/.test(q);
 }
 function boolNorm(s){
-  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[–—]/g," ");
 }
 function boolTermRegex(text){
   const wild=text.endsWith("*");
@@ -1267,7 +1450,7 @@ async function fetchAll(table,cols){
 // ── Full search results page ───────────────────────────────────────────────
 // Opened by pressing Enter (or "See all results") in the top search bar.
 // Finds every candidate whose name, location or role matches, plus jobs and companies.
-function SearchResultsPage({query,setPage}){
+function SearchResultsPage({query,cvFlag,nonce,setPage}){
   const [term,setTerm]=useState(query||"");
   const [input,setInput]=useState(query||"");
   const [res,setRes]=useState(null);
@@ -1285,7 +1468,28 @@ function SearchResultsPage({query,setPage}){
   const [mode,setMode]=useState("simple");
 
   // A new search from the top bar replaces the current one
-  useEffect(()=>{setTerm(query||"");setInput(query||"");},[query]);
+  useEffect(()=>{setTerm(query||"");setInput(query||"");setIncludeCv(!!cvFlag);},[nonce]);
+
+  // ── Saved searches ──
+  const [saved,setSaved]=useState([]);
+  const [savedErr,setSavedErr]=useState("");
+  const loadSaved=useCallback(async()=>{
+    const{data,error}=await db.from("saved_searches").select("*").order("name");
+    if(error)setSavedErr(/saved_searches/.test(error.message)?"Saved searches aren't set up yet"+UPGRADE_HINT:error.message);
+    else{setSavedErr("");setSaved(data||[]);}
+  },[]);
+  useEffect(()=>{loadSaved();},[loadSaved]);
+  const saveSearch=async()=>{
+    const t=(term||"").trim();if(!t)return;
+    const name=prompt("Name this search (e.g. \"Senior ecologists – Midlands\")",t.length>40?t.slice(0,40)+"…":t);
+    if(!name||!name.trim())return;
+    const{error}=await db.from("saved_searches").insert({name:name.trim(),query:t,include_cv:includeCv});
+    if(error){setErr(error.message+(/saved_searches/.test(error.message)?UPGRADE_HINT:""));return;}
+    setMsg(`Saved "${name.trim()}"`);setTimeout(()=>setMsg(""),2500);loadSaved();
+  };
+  const runSaved=x=>{setInput(x.query);setIncludeCv(!!x.include_cv);setTerm(x.query);};
+  const delSaved=async x=>{if(!confirm(`Remove saved search "${x.name}"?`))return;await db.from("saved_searches").delete().eq("id",x.id);loadSaved();};
+  const isSaved=saved.some(x=>x.query===term&&!!x.include_cv===includeCv);
 
   const run=useCallback(async()=>{
     const t=(term||"").trim();
@@ -1297,14 +1501,17 @@ function SearchResultsPage({query,setPage}){
       try{ast=parseBoolean(t);}catch(e){setErr(e.message);setRes({candidates:[],jobs:[],companies:[]});setLoading(false);return;}
       try{
         const base="id,name,role,location,email,status,skills,notes,experience,cv_url,cv_path,cv_filename";
+        const cv=includeCv?",cv_text":"";
+        // Include the ecology fields when they exist; fall back if the upgrade SQL hasn't run
+        const candRows=()=>fetchAll("candidates",base+",licences,cieem_level"+cv).catch(()=>fetchAll("candidates",base+cv));
         const [allC,allJ,allCo]=await Promise.all([
-          fetchAll("candidates",includeCv?base+",cv_text":base),
+          candRows(),
           fetchAll("jobs","id,title,status,salary,industry,description,companies(name)"),
           fetchAll("companies","id,name,industry,status,website"),
         ]);
         const pos=positiveTerms(ast);
         const fields=[["Name",c=>c.name],["Role",c=>c.role],["Location",c=>c.location],
-          ["Skills",c=>(c.skills||[]).join(" ")],["Notes",c=>c.notes],["Experience",c=>c.experience],["Email",c=>c.email]];
+          ["Skills",c=>(c.skills||[]).join(" ")],["Licences",c=>(c.licences||[]).join(" · ")+" "+(c.cieem_level||"")],["Notes",c=>c.notes],["Experience",c=>c.experience],["Email",c=>c.email]];
         if(includeCv)fields.push(["CV",c=>c.cv_text]);
         const cands=[];
         allC.forEach(c=>{
@@ -1398,7 +1605,7 @@ function SearchResultsPage({query,setPage}){
 
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>
-        {loading?"Searching…":res?`${counts.candidates+counts.jobs+counts.companies} results for "${term}"`:"Search"}
+        {loading?"Searching…":res?`${counts.candidates+counts.jobs+counts.companies} result${counts.candidates+counts.jobs+counts.companies!==1?"s":""} for: ${term}`:"Search"}
       </span>
       <div style={{display:"flex",gap:8}}>
         <input type="text" value={input} onChange={e=>setInput(e.target.value)}
@@ -1413,7 +1620,7 @@ function SearchResultsPage({query,setPage}){
         <input type="checkbox" checked={includeCv} onChange={e=>setIncludeCv(e.target.checked)} style={{width:15,height:15,accentColor:ACCENT}}/>
         Also search inside CVs
       </label>
-      <span style={{color:"var(--t3)"}}>{mode==="boolean"?"Boolean search · searching name, role, location, skills, notes"+(includeCv?" and CV text":""):"Simple search · name, location and role"}</span>
+      <span style={{color:"var(--t3)"}}>{mode==="boolean"?"Boolean search · searching name, role, location, licences, skills, notes"+(includeCv?" and CV text":""):"Simple search · name, location and role"}</span>
       <span style={{flex:1}}/>
       <button onClick={()=>setShowHelp(h=>!h)} style={{background:"none",border:"none",color:ACCENT,cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>{showHelp?"Hide":"How to"} Boolean search</button>
     </div>
@@ -1428,6 +1635,19 @@ function SearchResultsPage({query,setPage}){
       ].map(([ex,d])=><div key={ex}><code style={{background:"var(--bg2)",borderRadius:5,padding:"2px 7px",color:"var(--t1)",cursor:"pointer"}} onClick={()=>{setInput(ex);setTerm(ex);}} title="Click to try it">{ex}</code> <span style={{color:"var(--t3)"}}>— {d}</span></div>)}
       <div style={{marginTop:6,color:"var(--t3)"}}>Words side by side count as AND. Matches whole words, so "bat" won't match "battery" (use bat* for that). Tick "Also search inside CVs" to include CV text — slower the first time.</div>
     </div>}
+
+    {/* Saved searches */}
+    {(saved.length>0||term)&&<div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:12}}>
+      {saved.length>0&&<span style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.5px",marginRight:2}}>⭐ Saved</span>}
+      {saved.map(x=><span key={x.id} style={{display:"inline-flex",alignItems:"center",gap:4,background:x.query===term?"rgba(95,169,43,0.18)":"var(--bg)",border:"0.5px solid "+(x.query===term?ACCENT:"var(--brm)"),borderRadius:16,padding:"3px 4px 3px 10px",fontSize:12}}>
+        <span onClick={()=>runSaved(x)} title={x.query+(x.include_cv?" (incl. CVs)":"")} style={{cursor:"pointer",color:"var(--t1)"}}>{x.name}{x.include_cv?" 📄":""}</span>
+        <button onClick={()=>delSaved(x)} title="Remove" style={{background:"none",border:"none",cursor:"pointer",color:"var(--t3)",fontSize:11,padding:"0 4px"}}>✕</button>
+      </span>)}
+      <span style={{flex:1}}/>
+      {term&&!isSaved&&!savedErr&&<button className="btn-o" style={{fontSize:12,padding:"4px 12px"}} onClick={saveSearch}>☆ Save this search</button>}
+      {term&&isSaved&&<span style={{fontSize:12,color:ACCENT}}>★ Saved</span>}
+    </div>}
+    {savedErr&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:8}}>{savedErr}</div>}
 
     <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
       {tabBtn("candidates","Candidates")}{tabBtn("jobs","Jobs")}{tabBtn("companies","Companies")}
@@ -1780,9 +2000,20 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Details</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
-            {[["💼 Experience",c.experience],["💰 Salary",c.salary]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div></div>:null)}
+            {[["💼 Experience",c.experience],["💰 Salary",c.salary],["🎯 Expects",c.salary_expect?`£${Number(c.salary_expect).toLocaleString()}`:null],["📥 Source",c.source]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div></div>:null)}
           </div>
+          {!c.source&&<div style={{fontSize:11,color:"#854f0b",marginTop:6}}>Source not recorded — add it via Edit (GDPR).</div>}
         </div>
+        {/* Ecology */}
+        {((c.licences||[]).length>0||c.cieem_level||c.driving_licence)&&<div>
+          <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Ecology</div>
+          {(c.licences||[]).length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:8}}>
+            {c.licences.map(l=><span key={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:11,borderRadius:10,padding:"3px 10px"}}>{LICENCE_ICON(l)} {l}</span>)}
+          </div>}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
+            {[["🏅 CIEEM",c.cieem_level],["🚗 Driving licence",c.driving_licence]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div></div>:null)}
+          </div>
+        </div>}
         {/* Skills */}
         {(c.skills||[]).length>0&&<div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Skills</div>
@@ -2147,18 +2378,33 @@ function CandidatesPage(){
   const [bulkCv,setBulkCv]=useState(false);
   const [taskFor,setTaskFor]=useState(null);
   const [taskMsg,setTaskMsg]=useState("");
+  // Ecology / GDPR filters
+  const [showFilters,setShowFilters]=useState(false);
+  const [licF,setLicF]=useState("");
+  const [cieemF,setCieemF]=useState("");
+  const [driveF,setDriveF]=useState(false);
+  const [maxSal,setMaxSal]=useState("");
+  const [sourceF,setSourceF]=useState("");
+  const [reviewMode,setReviewMode]=useState(false);
+  const [needsUpgrade,setNeedsUpgrade]=useState(false);
 
   const load=useCallback(async()=>{
     setLoading(true);
-    const[{data,error},{data:acts}]=await Promise.all([
-      // Deliberately NOT select("*") — that would pull every CV's full text
-      // into the browser on every page load. CV text is only needed for the
-      // server-side search, and the detail panel fetches the full row itself.
-      db.from("candidates")
-        .select("id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at")
-        .order("created_at",{ascending:false}),
+    // Deliberately NOT select("*") — that would pull every CV's full text
+    // into the browser on every page load. CV text is only needed for the
+    // server-side search, and the detail panel fetches the full row itself.
+    const base="id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at,linkedin";
+    const extra=",source,licences,cieem_level,driving_licence,salary_expect";
+    const[cRes,{data:acts}]=await Promise.all([
+      db.from("candidates").select(base+extra).order("created_at",{ascending:false}),
       db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}),
     ]);
+    let{data,error}=cRes;
+    // New columns not added yet? Load without them so the page still works
+    if(error&&/source|licences|cieem|driving|salary_expect/i.test(error.message)){
+      setNeedsUpgrade(true);
+      ({data,error}=await db.from("candidates").select(base).order("created_at",{ascending:false}));
+    }else setNeedsUpgrade(false);
     if(error)setErr(error.message);else setRows(data||[]);
     // Build last-contacted map
     const lc={};
@@ -2245,15 +2491,54 @@ function CandidatesPage(){
     load();
   };
 
+  // GDPR: no contact (or added, if never contacted) for 2+ years
+  const REVIEW_DAYS=730;
+  const lastTouch=r=>lastContacted[r.id]||r.created_at;
+  const isStale=r=>{const d=lastTouch(r);return d&&(Date.now()-new Date(d))/(864e5)>REVIEW_DAYS;};
+  const staleCount=rows.filter(isStale).length;
+  const noSourceCount=rows.filter(r=>!r.source).length;
+  const maxSalNum=salaryNum(maxSal);
+  const activeFilters=[licF,cieemF,driveF,maxSalNum,sourceF].filter(Boolean).length;
+
   const filtered=rows.filter(r=>{
     const ms=deep&&deepIds
       ?deepIds.has(r.id)
       :(!search||[r.name,r.role,r.location,r.email].some(v=>v?.toLowerCase().includes(search.toLowerCase())));
-    const mf=statusF==="All"||r.status===statusF;return ms&&mf;
+    const mf=statusF==="All"||r.status===statusF;
+    if(!(ms&&mf))return false;
+    if(reviewMode&&!isStale(r))return false;
+    if(licF){
+      const L=r.licences||[];
+      // "Bat (any)" style family filters, or an exact licence
+      if(licF.endsWith("(any)")){if(!L.some(l=>l.startsWith(licF.replace(" (any)",""))))return false;}
+      else if(!L.includes(licF))return false;
+    }
+    if(cieemF&&CIEEM_RANK(r.cieem_level)<CIEEM_RANK(cieemF))return false;
+    if(cieemF&&!r.cieem_level)return false;
+    if(driveF&&r.driving_licence!=="Yes")return false;
+    if(maxSalNum){const se=r.salary_expect||salaryNum(r.salary);if(!se||se>maxSalNum)return false;}
+    if(sourceF==="__none__"&&r.source)return false;
+    if(sourceF&&sourceF!=="__none__"&&r.source!==sourceF)return false;
+    return true;
   });
+  const clearFilters=()=>{setLicF("");setCieemF("");setDriveF(false);setMaxSal("");setSourceF("");setReviewMode(false);};
 
   const toggleSelect=id=>setSelected(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n;});
   const toggleAll=()=>setSelected(s=>s.size===filtered.length?new Set():new Set(filtered.map(c=>c.id)));
+
+  // Delete selected candidates, including their CV files (GDPR erasure)
+  const bulkDelete=async()=>{
+    if(!selected.size)return;
+    if(!confirm(`Permanently delete ${selected.size} candidate${selected.size!==1?"s":""} and their CVs?\n\nThis can't be undone.`))return;
+    const ids=[...selected];
+    const paths=rows.filter(r=>selected.has(r.id)).map(cvStoragePath).filter(Boolean);
+    if(paths.length)await db.storage.from("candidate-cvs").remove(paths);
+    await db.from("hotlist_candidates").delete().in("candidate_id",ids);
+    await db.from("job_candidates").delete().in("candidate_id",ids);
+    const{error}=await db.from("candidates").delete().in("id",ids);
+    if(error)setErr("Some couldn't be deleted: "+error.message);
+    setSelected(new Set());load();
+  };
 
   const bulkUpdateStatus=async()=>{
     if(!bulkStatus||selected.size===0)return;
@@ -2263,8 +2548,8 @@ function CandidatesPage(){
 
   const exportCSV=()=>{
     const toExport=selected.size>0?filtered.filter(c=>selected.has(c.id)):filtered;
-    const headers=["Name","Role","Location","Email","Phone","Status","Experience","Salary","Notice","Skills","Notes"];
-    const rows=[headers,...toExport.map(c=>[c.name,c.role,c.location,c.email,c.phone,c.status,c.experience,c.salary,c.notice,(c.skills||[]).join("; "),c.notes].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`))];
+    const headers=["Name","Role","Location","Email","Phone","Status","Experience","Salary","Salary expectation","Notice","Licences","CIEEM","Driving licence","Source","Skills","Notes"];
+    const rows=[headers,...toExport.map(c=>[c.name,c.role,c.location,c.email,c.phone,c.status,c.experience,c.salary,c.salary_expect,c.notice,(c.licences||[]).join("; "),c.cieem_level,c.driving_licence,c.source,(c.skills||[]).join("; "),c.notes].map(v=>`"${(v||"").toString().replace(/"/g,'""')}"`))];
     const csv=rows.map(r=>r.join(",")).join("\n");
     const a=document.createElement("a");
     a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
@@ -2295,6 +2580,9 @@ function CandidatesPage(){
           {deepBusy?<><span className="spin"></span>Searching…</>:"🔍 Search CVs"}
         </button>
         <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{width:"auto"}}>{statuses.map(s=><option key={s}>{s}</option>)}</select>
+        <button className={showFilters||activeFilters?"btn-a":"btn-o"} style={{fontSize:12,padding:"6px 12px"}} onClick={()=>setShowFilters(v=>!v)}>
+          🌿 Filters{activeFilters?` (${activeFilters})`:""}
+        </button>
         <button className="btn-o" style={{fontSize:12}} onClick={exportCSV} title="Export to CSV">⬇ Export CSV</button>
         <button className="btn-o" style={{fontSize:12}} onClick={()=>setBulkCv(true)} title="Match a batch of CV files to candidates">📎 Bulk CV match</button>
         <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate <span style={{opacity:0.6,fontSize:10,marginLeft:2}}>N</span></button>
@@ -2309,6 +2597,45 @@ function CandidatesPage(){
     </div>}
     {deepErr&&<Err msg={deepErr}/>}
 
+    {needsUpgrade&&<div className="err" style={{marginBottom:10}}>The new ecology and source fields aren't set up yet — run <strong>crm-upgrade.sql</strong> in Supabase, then refresh.</div>}
+
+    {showFilters&&<div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 14px",marginBottom:10}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:10,alignItems:"end"}}>
+        <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Licence</label>
+          <select value={licF} onChange={e=>setLicF(e.target.value)}>
+            <option value="">Any</option>
+            <option value="Bat (any)">🦇 Any bat licence</option>
+            <option value="GCN (any)">🦎 Any GCN licence</option>
+            {LICENCES.map(l=><option key={l} value={l}>{l}</option>)}
+          </select></div>
+        <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>CIEEM (at least)</label>
+          <select value={cieemF} onChange={e=>setCieemF(e.target.value)}>
+            <option value="">Any</option>{CIEEM_LEVELS.map(l=><option key={l}>{l}</option>)}
+          </select></div>
+        <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Max salary expectation</label>
+          <input type="text" value={maxSal} onChange={e=>setMaxSal(e.target.value)} placeholder="e.g. 40k"/></div>
+        <div><label style={{fontSize:11,color:"var(--t2)",display:"block",marginBottom:4}}>Source</label>
+          <select value={sourceF} onChange={e=>setSourceF(e.target.value)}>
+            <option value="">Any</option><option value="__none__">⚠️ Not recorded ({noSourceCount})</option>
+            {SOURCES.map(x=><option key={x}>{x}</option>)}
+          </select></div>
+        <label style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--t2)",cursor:"pointer",paddingBottom:8}}>
+          <input type="checkbox" checked={driveF} onChange={e=>setDriveF(e.target.checked)} style={{width:15,height:15,accentColor:ACCENT}}/> 🚗 Driving licence
+        </label>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginTop:10,flexWrap:"wrap",fontSize:12}}>
+        <button onClick={()=>setReviewMode(v=>!v)} className={reviewMode?"btn-a":"btn-o"} style={{fontSize:12,padding:"5px 12px"}}>
+          🛡 GDPR review — no contact in 2+ years ({staleCount})
+        </button>
+        <span style={{flex:1}}/>
+        {(activeFilters>0||reviewMode)&&<button onClick={clearFilters} style={{background:"none",border:"none",color:ACCENT,cursor:"pointer",fontSize:12,fontFamily:"inherit"}}>Clear filters</button>}
+      </div>
+      {reviewMode&&<div style={{marginTop:10,fontSize:12,color:"var(--t2)",lineHeight:1.55,background:"var(--bg2)",borderRadius:8,padding:"8px 12px"}}>
+        These candidates haven't been contacted (or added) in over 2 years. Under UK GDPR you shouldn't keep personal data longer than you need it —
+        either get back in touch (which logs fresh contact) or tick them and use <strong>Delete selected</strong>, which also removes their CVs.
+      </div>}
+    </div>}
+
     {selected.size>0&&<div style={{background:"rgba(95,169,43,0.10)",border:"0.5px solid rgba(95,169,43,0.35)",borderRadius:8,padding:"8px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <span style={{fontSize:13,fontWeight:500,color:ACCENT}}>{selected.size} selected</span>
       <select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)} style={{width:"auto",fontSize:12}}>
@@ -2317,12 +2644,15 @@ function CandidatesPage(){
       </select>
       <button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} onClick={bulkUpdateStatus} disabled={!bulkStatus}>Apply</button>
       <button className="btn-o" style={{fontSize:12,padding:"5px 10px"}} onClick={exportCSV}>⬇ Export selected</button>
+      <button className="btn-d" style={{fontSize:12,padding:"5px 10px"}} onClick={bulkDelete}>🗑 Delete selected</button>
       <button onClick={()=>setSelected(new Set())} style={{background:"none",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:12,marginLeft:"auto"}}>✕ Clear</button>
     </div>}
     <Err msg={err}/>
     <Panel title={`${filtered.length} records`}>
       {loading?<Spin/>:filtered.length===0
-        ?<EmptyState icon="👥" title="No candidates yet" sub="Add your first candidate to get started tracking your talent pool." action="+ Add candidate" onAction={()=>setModal(true)}/>
+        ?(rows.length>0
+          ?<div style={{padding:"36px 20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates match these filters. <span onClick={()=>{clearFilters();setSearch("");setStatusF("All");}} style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}}>Clear filters</span></div>
+          :<EmptyState icon="👥" title="No candidates yet" sub="Add your first candidate to get started tracking your talent pool." action="+ Add candidate" onAction={()=>setModal(true)}/>)
         :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:760}}>
           <colgroup>
             <col style={{width:"3%"}}/>
@@ -2351,7 +2681,7 @@ function CandidatesPage(){
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
             <td className="td"><span style={{fontSize:11,color:lcColor,fontWeight:ds!==null?500:400}}>{ds===null?"Never":ds===0?"Today":ds===1?"Yesterday":`${ds}d ago`}</span></td>
-            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.skills||[]).slice(0,2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
+            <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.licences||[]).slice(0,2).map(l=><span key={l} title={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{LICENCE_ICON(l)} {LICENCE_SHORT(l)}</span>)}{(c.skills||[]).slice(0,(c.licences||[]).length?1:2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
             <td className="td"><Pill label={c.status||"New"}/></td>
             <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
               {c.linkedin&&<a href={c.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" style={{background:"#0a66c2",color:"#fff",borderRadius:6,padding:"3px 7px",fontSize:11,textDecoration:"none",display:"inline-flex",alignItems:"center"}}>in</a>}
@@ -3816,6 +4146,12 @@ function TasksPage(){
   const [notifStatus,setNotifStatus]=useState(typeof Notification!=="undefined"?Notification.permission:"unsupported");
   const [toast,setToast]=useState(null);
   const [snoozeId,setSnoozeId]=useState(null);
+  // Bulk clean-up
+  const [selMode,setSelMode]=useState(false);
+  const [sel,setSel]=useState(new Set());
+  const [bulkDate,setBulkDate]=useState(todayStr());
+  const [bulkBusy,setBulkBusy]=useState(false);
+  const [bulkMsg,setBulkMsg]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -3898,11 +4234,31 @@ function TasksPage(){
   const upcoming=pending.filter(t=>t.due_date&&t.due_date>todayStr());
   const undated=pending.filter(t=>!t.due_date);
 
+  // ── Bulk actions ──
+  const isoOf=d=>{const z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;};
+  const nextMonday=()=>{const d=new Date();d.setDate(d.getDate()+((8-d.getDay())%7||7));return isoOf(d);};
+  const nextWorkdays=n=>{const out=[];const d=new Date();while(out.length<n){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)out.push(isoOf(d));}return out;};
+  const flash=m=>{setBulkMsg(m);setTimeout(()=>setBulkMsg(""),3500);};
+  const togglePick=id=>setSel(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n;});
+  const bulkRun=async(fn,msg)=>{setBulkBusy(true);await fn();setBulkBusy(false);setSel(new Set());setSelMode(false);flash(msg);load();};
+  const moveTo=(ids,date)=>bulkRun(()=>db.from("tasks").update({due_date:date}).in("id",ids),`Moved ${ids.length} task${ids.length!==1?"s":""} to ${new Date(date+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}`);
+  const markDone=ids=>bulkRun(()=>db.from("tasks").update({done:true}).in("id",ids),`Marked ${ids.length} task${ids.length!==1?"s":""} done`);
+  const delTasks=ids=>{if(!confirm(`Delete ${ids.length} task${ids.length!==1?"s":""}? This can't be undone.`))return;bulkRun(()=>db.from("tasks").delete().in("id",ids),`Deleted ${ids.length} task${ids.length!==1?"s":""}`);};
+  // Share tasks evenly over the next 5 working days, most urgent first
+  const spread=ids=>{
+    const days=nextWorkdays(5);
+    const order=tasks.filter(t=>ids.includes(t.id)).sort((a,b)=>({urgent:0,high:1,normal:2,low:3}[a.priority||"normal"]-{urgent:0,high:1,normal:2,low:3}[b.priority||"normal"])||(a.due_date||"").localeCompare(b.due_date||""));
+    const groups=days.map(()=>[]);
+    order.forEach((t,i)=>groups[Math.floor(i*days.length/order.length)].push(t.id));
+    bulkRun(()=>Promise.all(groups.map((g,i)=>g.length?db.from("tasks").update({due_date:days[i]}).in("id",g):null)),`Spread ${ids.length} tasks across ${new Date(days[0]+"T00:00").toLocaleDateString("en-GB",{weekday:"short"})}–${new Date(days[4]+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}`);
+  };
+
   const renderTask=(t)=>{
     const dl=dueLabel(t.due_date,t.due_time);
     const ps=PRIORITY_STYLES[t.priority||"normal"];
-    return <div key={t.id} style={{position:"relative",display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"0.5px solid var(--br)",background:dl?.overdue?"#fffaf9":"transparent"}}>
-      <div onClick={()=>toggle(t)} style={{width:18,height:18,borderRadius:4,border:"0.5px solid var(--brm)",cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:t.done?"#1d9e75":"transparent"}}>
+    return <div key={t.id} onClick={selMode?()=>togglePick(t.id):undefined} style={{position:"relative",display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"0.5px solid var(--br)",background:selMode&&sel.has(t.id)?"rgba(95,169,43,0.12)":dl?.overdue?"#fffaf9":"transparent",cursor:selMode?"pointer":"default"}}>
+      {selMode&&<input type="checkbox" checked={sel.has(t.id)} onChange={()=>togglePick(t.id)} onClick={e=>e.stopPropagation()} style={{width:16,height:16,accentColor:ACCENT,flexShrink:0,cursor:"pointer"}}/>}
+      <div onClick={selMode?undefined:()=>toggle(t)} style={{width:18,height:18,borderRadius:4,border:"0.5px solid var(--brm)",cursor:selMode?"inherit":"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:t.done?"#1d9e75":"transparent",opacity:selMode?0.5:1}}>
         {t.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
       </div>
       <div style={{flex:1,minWidth:0}}>
@@ -3956,13 +4312,36 @@ function TasksPage(){
       </div>
     </div>
 
-    {/* Overdue alert banner */}
-    {overdue.length>0&&<div style={{background:"#fcebeb",border:"0.5px solid #f09595",borderRadius:8,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
-      <span style={{fontSize:16}}>⚠️</span>
-      <div>
-        <div style={{fontSize:13,fontWeight:500,color:"#a32d2d"}}>{overdue.length} overdue task{overdue.length!==1?"s":""}</div>
-        <div style={{fontSize:12,color:"#c53030"}}>{overdue.map(t=>t.title).slice(0,2).join(" · ")}{overdue.length>2?` + ${overdue.length-2} more`:""}</div>
+    {/* Overdue alert banner with one-click clean-up */}
+    {overdue.length>0&&!selMode&&<div style={{background:"#fcebeb",border:"0.5px solid #f09595",borderRadius:8,padding:"10px 14px",marginBottom:12}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:16}}>⚠️</span>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:13,fontWeight:500,color:"#a32d2d"}}>{overdue.length} overdue task{overdue.length!==1?"s":""}</div>
+          <div style={{fontSize:12,color:"#c53030"}}>{overdue.map(t=>t.title).slice(0,2).join(" · ")}{overdue.length>2?` + ${overdue.length-2} more`:""}</div>
+        </div>
       </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>
+        <button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} disabled={bulkBusy} onClick={()=>spread(overdue.map(t=>t.id))} title="Shares them evenly over the next 5 working days, urgent ones first">📆 Spread over next 5 working days</button>
+        <button className="btn-o" style={{fontSize:12,background:"var(--bg)"}} disabled={bulkBusy} onClick={()=>moveTo(overdue.map(t=>t.id),todayStr())}>Move all to today</button>
+        <button className="btn-o" style={{fontSize:12,background:"var(--bg)"}} disabled={bulkBusy} onClick={()=>moveTo(overdue.map(t=>t.id),nextMonday())}>Move all to next Monday</button>
+        <button className="btn-o" style={{fontSize:12,background:"var(--bg)"}} onClick={()=>{setFilter("overdue");setSelMode(true);setSel(new Set());}}>Pick which ones…</button>
+      </div>
+    </div>}
+
+    {bulkMsg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {bulkMsg}</div>}
+
+    {/* Bulk action bar */}
+    {selMode&&<div style={{position:"sticky",top:0,zIndex:30,background:"var(--bg)",border:"1px solid "+ACCENT,borderRadius:10,padding:"10px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",boxShadow:"0 4px 16px rgba(0,0,0,0.08)"}}>
+      <span style={{fontSize:13,fontWeight:600,color:ACCENT}}>{sel.size} selected</span>
+      <button onClick={()=>{const vis=filter==="done"?done:filter==="today"?todayTasks:filter==="overdue"?overdue:filter==="upcoming"?upcoming:pending;setSel(new Set(vis.map(t=>t.id)));}} style={{background:"none",border:"none",color:ACCENT,cursor:"pointer",fontSize:12,fontFamily:"inherit",textDecoration:"underline"}}>Select all shown</button>
+      <span style={{flex:1}}/>
+      <input type="date" value={bulkDate} onChange={e=>setBulkDate(e.target.value)} style={{width:"auto",fontSize:12}}/>
+      <button className="btn-a" style={{fontSize:12,padding:"5px 10px"}} disabled={!sel.size||bulkBusy} onClick={()=>moveTo([...sel],bulkDate)}>Move to date</button>
+      <button className="btn-o" style={{fontSize:12}} disabled={!sel.size||bulkBusy} onClick={()=>spread([...sel])}>Spread over week</button>
+      <button className="btn-o" style={{fontSize:12}} disabled={!sel.size||bulkBusy} onClick={()=>markDone([...sel])}>✓ Mark done</button>
+      <button className="btn-d" style={{fontSize:12,padding:"5px 10px"}} disabled={!sel.size||bulkBusy} onClick={()=>delTasks([...sel])}>Delete</button>
+      <button onClick={()=>{setSelMode(false);setSel(new Set());}} style={{background:"none",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:12,fontFamily:"inherit"}}>✕ Cancel</button>
     </div>}
 
     {/* Add task */}
@@ -4006,6 +4385,7 @@ function TasksPage(){
 
     {/* Filter tabs */}
     <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+      {!selMode&&<button onClick={()=>{setSelMode(true);setSel(new Set());}} style={{fontSize:12,padding:"5px 12px",borderRadius:20,border:"0.5px dashed var(--brm)",cursor:"pointer",background:"transparent",color:"var(--t2)",fontFamily:"inherit",order:99}}>☑ Select…</button>}
       {[["pending","Pending"],["today","Today"],["overdue","Overdue"],["upcoming","Upcoming"],["done","Completed"]].map(([k,l])=>(
         <button key={k} onClick={()=>setFilter(k)} style={{fontSize:12,padding:"5px 12px",borderRadius:20,border:"0.5px solid var(--brm)",cursor:"pointer",background:filter===k?ACCENT:"transparent",color:filter===k?"#fff":"var(--t2)",fontFamily:"inherit"}}>
           {l} {k==="overdue"&&overdue.length>0?`(${overdue.length})`:k==="today"?`(${todayTasks.length})`:k==="pending"?`(${pending.length})`:k==="done"?`(${done.length})`:k==="upcoming"?`(${upcoming.length})`:""}
@@ -4854,14 +5234,16 @@ function PlacementsPage(){
   const [err,setErr]=useState("");
   const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
 
+  const [cos,setCos]=useState([]);
   const load=useCallback(async()=>{
     setLoading(true);
-    const[{data:pl},{data:cands},{data:js}]=await Promise.all([
+    const[{data:pl},{data:cands},{data:js},{data:co}]=await Promise.all([
       db.from("placements").select("*").order("created_at",{ascending:false}),
       db.from("candidates").select("id,name").order("name"),
       db.from("jobs").select("id,title,companies(name)").order("title"),
+      db.from("companies").select("name,terms_payment_days,terms_rebate"),
     ]);
-    setRows(pl||[]);setCandidates(cands||[]);setJobs(js||[]);setLoading(false);
+    setRows(pl||[]);setCandidates(cands||[]);setJobs(js||[]);setCos(co||[]);setLoading(false);
   },[]);
   useEffect(()=>{load();},[load]);
 
@@ -4926,9 +5308,10 @@ function PlacementsPage(){
     await db.from("placements").update({invoice_path:null,invoice_filename:null}).eq("id",r.id);
     load();
   };
+  const [invDate,setInvDate]=useState("");
   const saveInvNo=async r=>{
-    await db.from("placements").update({invoice_number:invNo.trim()||null}).eq("id",r.id);
-    setInvNoFor(null);setInvNo("");load();
+    await db.from("placements").update({invoice_number:invNo.trim()||null,invoice_date:invDate||null}).eq("id",r.id);
+    setInvNoFor(null);setInvNo("");setInvDate("");load();
   };
 
   const togglePaid=async(id,val)=>{await db.from("placements").update({payment_received:val,payment_date:val?new Date().toISOString().split("T")[0]:null}).eq("id",id);load();};
@@ -4949,7 +5332,7 @@ function PlacementsPage(){
       <div style={{fontSize:15,fontWeight:500}}>Placements</div>
       <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ Record Placement</button>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:16}}>
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>TOTAL PLACEMENTS</div>
         <div style={{fontSize:24,fontWeight:700,color:"var(--t1)"}}>{rows.length}</div>
@@ -4962,6 +5345,12 @@ function PlacementsPage(){
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>FEES RECEIVED</div>
         <div style={{fontSize:24,fontWeight:700,color:"#3b6d11"}}>£{paidFees.toLocaleString()}</div>
       </div>
+      {(()=>{const od=rows.filter(r=>placementMoney(r,cos).invoice==="overdue");const amt=od.reduce((t,r)=>t+(parseFloat(r.fee_amount)||0),0);
+        return <div style={{background:"var(--bg)",borderRadius:10,border:od.length?"0.5px solid #f09595":"0.5px solid var(--br)",padding:14}}>
+          <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>OVERDUE INVOICES</div>
+          <div style={{fontSize:24,fontWeight:700,color:od.length?"#c0392b":"var(--t3)"}}>£{amt.toLocaleString()}</div>
+          <div style={{fontSize:11,color:"var(--t3)"}}>{od.length} invoice{od.length!==1?"s":""}</div>
+        </div>;})()}
     </div>
     <input ref={invRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" style={{display:"none"}} onChange={uploadInvoice}/>
     {invErr&&<div className="err" style={{marginBottom:10}}>{invErr}</div>}
@@ -4982,17 +5371,28 @@ function PlacementsPage(){
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidate_name}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.job_title}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.company_name}</td>
-        <td className="td" style={{color:"var(--t3)"}}>{r.start_date||"—"}</td>
+        <td className="td" style={{color:"var(--t3)"}}>{r.start_date||"—"}
+          {(()=>{const m=placementMoney(r,cos);
+            if(!r.start_date)return null;
+            if(!m.started)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>Starts in {daysBetween(todayStr(),r.start_date)}d</div>;
+            if(!m.rebateKnown)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}} title="Add the rebate period on the company's terms">Rebate ?</div>;
+            return m.inRebate
+              ?<div style={{fontSize:10,color:"#7f77dd",marginTop:2}} title={`Fee at risk until ${niceDate(m.rebateEnd)}`}>🛡 {m.rebateLeft}d rebate left</div>
+              :<div style={{fontSize:10,color:"#3b6d11",marginTop:2}}>✓ Fee safe</div>;})()}
+        </td>
         <td className="td">{r.salary?`£${parseFloat(r.salary).toLocaleString()}`:"—"}</td>
         <td className="td" style={{color:"#185fa5",fontWeight:500}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
         <td className="td">
           {invNoFor===r.id
-            ?<div style={{display:"flex",gap:4}}>
+            ?<div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:4}}>
               <input type="text" value={invNo} onChange={e=>setInvNo(e.target.value)} autoFocus placeholder="INV-001"
                 onKeyDown={e=>{if(e.key==="Enter")saveInvNo(r);if(e.key==="Escape")setInvNoFor(null);}} style={{fontSize:11,padding:"3px 6px"}}/>
-              <button className="btn-a" style={{fontSize:10,padding:"2px 7px"}} onClick={()=>saveInvNo(r)}>✓</button>
+              <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                <input type="date" value={invDate} onChange={e=>setInvDate(e.target.value)} title="Invoice date" style={{fontSize:11,padding:"3px 6px"}}/>
+                <button className="btn-a" style={{fontSize:10,padding:"2px 7px"}} onClick={()=>saveInvNo(r)}>✓</button>
+              </div>
             </div>
-            :<div onClick={()=>{setInvNoFor(r.id);setInvNo(r.invoice_number||"");}} title="Click to edit invoice number"
+            :<div onClick={()=>{setInvNoFor(r.id);setInvNo(r.invoice_number||"");setInvDate(r.invoice_date||todayStr());}} title="Click to edit invoice number and date"
               style={{fontSize:11,color:r.invoice_number?"var(--t1)":"var(--t3)",cursor:"pointer",marginBottom:4}}>
               {r.invoice_number||"+ Invoice no."}{r.invoice_date?<span style={{color:"var(--t3)"}}> · {r.invoice_date}</span>:null}
             </div>}
@@ -5005,6 +5405,11 @@ function PlacementsPage(){
                 <button onClick={()=>removeInvoice(r)} title="Remove invoice" style={{background:"none",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:11,padding:"0 2px"}}>✕</button>
               </div>
               :<button onClick={()=>pickInvoice(r)} style={{background:"none",border:"1px dashed var(--brm)",borderRadius:6,padding:"2px 8px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>⬆ Upload invoice</button>}
+          {(()=>{const m=placementMoney(r,cos);
+            if(m.invoice==="overdue")return <div style={{fontSize:11,color:"#c0392b",fontWeight:600,marginTop:4}}>⚠️ {m.daysLate}d overdue</div>;
+            if(m.invoice==="due_soon"||m.invoice==="invoiced")return <div style={{fontSize:11,color:m.invoice==="due_soon"?"#ba7517":"var(--t3)",marginTop:4}} title={`${m.payDays}-day terms${m.payDaysDefault?" (default — set on the company)":""}`}>Due {niceDate(m.dueDate)}</div>;
+            if(m.invoice==="to_invoice")return <div style={{fontSize:11,color:"#185fa5",marginTop:4}}>Ready to invoice</div>;
+            return null;})()}
         </td>
         <td className="td">
           <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -5404,10 +5809,13 @@ function AuthedApp(){
   const [page,setPage]=useState("dashboard");
   const [allTasks,setAllTasks]=useState([]);
   const [activeJob,setActiveJob]=useState(null);
-  const [searchQ,setSearchQ]=useState("");
+  const [searchQ,setSearchQ]=useState({q:"",cv:false,n:0});
   const [navOpen,setNavOpen]=useState(false); // phone menu
   useEffect(()=>{
-    const h=e=>{setSearchQ(e.detail);setPage("search");setActiveJob(null);};
+    const h=e=>{
+      const d=typeof e.detail==="string"?{q:e.detail,cv:false}:e.detail;
+      setSearchQ({q:d.q,cv:!!d.cv,n:Date.now()});setPage("search");setActiveJob(null);
+    };
     window.addEventListener("globalSearch",h);
     return()=>window.removeEventListener("globalSearch",h);
   },[]);
@@ -5439,7 +5847,7 @@ function AuthedApp(){
     sequences:<EmailSequencesPage/>,
     hotlists:<HotlistsPage/>,
     jds:<JDLibraryPage/>,
-    search:<SearchResultsPage query={searchQ} setPage={setPage}/>,
+    search:<SearchResultsPage query={searchQ.q} cvFlag={searchQ.cv} nonce={searchQ.n} setPage={setPage}/>,
   };
   let lastS=null;
   return <>
