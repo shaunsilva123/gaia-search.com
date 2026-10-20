@@ -962,6 +962,7 @@ function GlobalSearch({setPage}){
 
   useEffect(()=>{
     if(!q.trim()){setResults(null);return;}
+    if(isBooleanQuery(q)){setResults({candidates:[],jobs:[],companies:[],boolean:true});return;}
     const t=setTimeout(async()=>{
       setLoading(true);
       const term=q.trim();
@@ -1032,7 +1033,8 @@ function GlobalSearch({setPage}){
     {open&&q&&<div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:10,boxShadow:"0 8px 32px rgba(0,0,0,0.15)",zIndex:600,minWidth:300,maxHeight:380,overflowY:"auto"}}>
       {loading&&<div style={{padding:"12px 14px",fontSize:12,color:"var(--t3)"}}>Searching…</div>}
       {!loading&&results?.error&&<div style={{padding:"10px 14px",fontSize:12,color:"#a32d2d"}}>Search error: {results.error}</div>}
-      {!loading&&results&&total===0&&<div style={{padding:"16px 14px",fontSize:12,color:"var(--t3)",textAlign:"center"}}>No results for "{q}"</div>}
+      {!loading&&results?.boolean&&<div onClick={seeAll} style={{padding:"14px",fontSize:12,color:ACCENT,textAlign:"center",cursor:"pointer",fontWeight:600}}>Boolean search — press Enter to see results →</div>}
+      {!loading&&results&&!results.boolean&&total===0&&<div style={{padding:"16px 14px",fontSize:12,color:"var(--t3)",textAlign:"center"}}>No results for "{q}"</div>}
       {!loading&&results&&total>0&&<>
         {results.candidates.length>0&&<>
           <div style={{padding:"8px 14px 4px",fontSize:10,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Candidates</div>
@@ -1060,6 +1062,92 @@ function GlobalSearch({setPage}){
   </div>;
 }
 
+// ── Boolean search engine ──────────────────────────────────────────────────
+// Supports: AND, OR, NOT (any case), -word, "exact phrase", (brackets), ecolog* wildcards.
+// Words next to each other with no operator are treated as AND.
+function isBooleanQuery(q){
+  return /\b(AND|OR|NOT)\b/.test(q)||/["()*]/.test(q)||/(^|\s)-\S/.test(q);
+}
+function boolNorm(s){
+  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+function boolTermRegex(text){
+  const wild=text.endsWith("*");
+  const core=boolNorm(wild?text.slice(0,-1):text).trim();
+  if(!core)return null;
+  const body=core.split(/\s+/).map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("\\s+");
+  return new RegExp("(?<![a-z0-9])"+body+(wild?"":"(?![a-z0-9])"));
+}
+function parseBoolean(q){
+  const toks=[];
+  const re=/\s*(\(|\)|"[^"]*"?|[^\s()"]+)/g;let m;
+  while((m=re.exec(q))!==null){
+    const t=m[1];
+    if(t==="("||t===")")toks.push({k:t});
+    else if(t.startsWith('"'))toks.push({k:"term",text:t.replace(/"/g,""),phrase:true});
+    else if(/^(and|or|not)$/i.test(t))toks.push({k:t.toUpperCase()});
+    else if(t.length>1&&t.startsWith("-")){toks.push({k:"NOT"});toks.push({k:"term",text:t.slice(1)});}
+    else toks.push({k:"term",text:t});
+  }
+  let i=0;
+  const peek=()=>toks[i];
+  const parseOr=()=>{
+    let l=parseAnd();
+    while(peek()&&peek().k==="OR"){i++;l={op:"OR",a:l,b:parseAnd()};}
+    return l;
+  };
+  const parseAnd=()=>{
+    let l=parseNot();
+    while(peek()&&peek().k!=="OR"&&peek().k!==")"){
+      if(peek().k==="AND")i++;
+      l={op:"AND",a:l,b:parseNot()};
+    }
+    return l;
+  };
+  const parseNot=()=>{
+    if(peek()&&peek().k==="NOT"){i++;return{op:"NOT",a:parseNot()};}
+    return parsePrimary();
+  };
+  const parsePrimary=()=>{
+    const t=peek();
+    if(!t)throw new Error("Search ends too early — check for a missing word after AND / OR / NOT");
+    if(t.k==="("){i++;const e=parseOr();if(!peek()||peek().k!==")")throw new Error("Missing closing bracket )");i++;return e;}
+    if(t.k==="term"){i++;const r=boolTermRegex(t.text);if(!r)throw new Error("Empty search term");return{op:"TERM",re:r,text:t.text};}
+    throw new Error(`Unexpected "${t.k}" — check your brackets and operators`);
+  };
+  if(!toks.length)throw new Error("Type something to search for");
+  const ast=parseOr();
+  if(i<toks.length)throw new Error(toks[i].k===")"?"Extra closing bracket )":"Couldn't understand the search");
+  return ast;
+}
+function evalBoolean(ast,text){
+  switch(ast.op){
+    case "TERM":return ast.re.test(text);
+    case "NOT":return !evalBoolean(ast.a,text);
+    case "AND":return evalBoolean(ast.a,text)&&evalBoolean(ast.b,text);
+    case "OR":return evalBoolean(ast.a,text)||evalBoolean(ast.b,text);
+  }
+  return false;
+}
+// The terms that count towards a match (anything not under a NOT)
+function positiveTerms(ast,neg=false,out=[]){
+  if(ast.op==="TERM"){if(!neg)out.push(ast.re);}
+  else if(ast.op==="NOT")positiveTerms(ast.a,!neg,out);
+  else{positiveTerms(ast.a,neg,out);positiveTerms(ast.b,neg,out);}
+  return out;
+}
+// Fetch every row of a table in pages (Supabase returns at most 1000 at a time)
+async function fetchAll(table,cols){
+  const out=[];
+  for(let from=0;;from+=1000){
+    const{data,error}=await db.from(table).select(cols).range(from,from+999);
+    if(error)throw error;
+    out.push(...(data||[]));
+    if(!data||data.length<1000)break;
+  }
+  return out;
+}
+
 // ── Full search results page ───────────────────────────────────────────────
 // Opened by pressing Enter (or "See all results") in the top search bar.
 // Finds every candidate whose name, location or role matches, plus jobs and companies.
@@ -1076,6 +1164,9 @@ function SearchResultsPage({query,setPage}){
   const [hotlists,setHotlists]=useState([]);
   const [hlPick,setHlPick]=useState("");
   const [msg,setMsg]=useState("");
+  const [includeCv,setIncludeCv]=useState(false);
+  const [showHelp,setShowHelp]=useState(false);
+  const [mode,setMode]=useState("simple");
 
   // A new search from the top bar replaces the current one
   useEffect(()=>{setTerm(query||"");setInput(query||"");},[query]);
@@ -1084,6 +1175,40 @@ function SearchResultsPage({query,setPage}){
     const t=(term||"").trim();
     if(!t){setRes(null);return;}
     setLoading(true);setErr("");setSelected(new Set());
+    if(isBooleanQuery(t)||includeCv){
+      setMode("boolean");
+      let ast;
+      try{ast=parseBoolean(t);}catch(e){setErr(e.message);setRes({candidates:[],jobs:[],companies:[]});setLoading(false);return;}
+      try{
+        const base="id,name,role,location,email,status,skills,notes,experience,cv_url,cv_path,cv_filename";
+        const [allC,allJ,allCo]=await Promise.all([
+          fetchAll("candidates",includeCv?base+",cv_text":base),
+          fetchAll("jobs","id,title,status,salary,industry,description,companies(name)"),
+          fetchAll("companies","id,name,industry,status,website"),
+        ]);
+        const pos=positiveTerms(ast);
+        const fields=[["Name",c=>c.name],["Role",c=>c.role],["Location",c=>c.location],
+          ["Skills",c=>(c.skills||[]).join(" ")],["Notes",c=>c.notes],["Experience",c=>c.experience],["Email",c=>c.email]];
+        if(includeCv)fields.push(["CV",c=>c.cv_text]);
+        const cands=[];
+        allC.forEach(c=>{
+          const texts=fields.map(([l,f])=>[l,boolNorm(f(c))]);
+          const all=texts.map(x=>x[1]).join(" \n ");
+          if(!evalBoolean(ast,all))return;
+          const hit=texts.filter(([,tx])=>pos.some(re=>re.test(tx))).map(([l])=>l);
+          const{cv_text,...rest}=c;
+          cands.push({...rest,_match:hit.length?hit:["—"]});
+        });
+        cands.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+        const jobs=allJ.filter(j=>evalBoolean(ast,boolNorm([j.title,j.industry,j.description,j.salary,j.companies?.name].join(" \n "))));
+        const cos=allCo.filter(c=>evalBoolean(ast,boolNorm([c.name,c.industry,c.website].join(" \n "))));
+        setRes({candidates:cands,jobs,companies:cos});
+        setTab(cands.length?"candidates":jobs.length?"jobs":cos.length?"companies":"candidates");
+      }catch(e){setErr(e.message||String(e));}
+      setLoading(false);
+      return;
+    }
+    setMode("simple");
     const cf="id,name,role,location,email,status,skills,cv_url,cv_path,cv_filename";
     const [cn,cl,cr,j,co]=await Promise.all([
       db.from("candidates").select(cf).ilike("name",`%${t}%`).limit(1000),
@@ -1105,7 +1230,7 @@ function SearchResultsPage({query,setPage}){
     setRes({candidates:cands,jobs:j.data||[],companies:co.data||[]});
     setTab(cands.length?"candidates":(j.data||[]).length?"jobs":(co.data||[]).length?"companies":"candidates");
     setLoading(false);
-  },[term]);
+  },[term,includeCv]);
   useEffect(()=>{run();},[run]);
 
   useEffect(()=>{
@@ -1162,10 +1287,31 @@ function SearchResultsPage({query,setPage}){
       <div style={{display:"flex",gap:8}}>
         <input type="text" value={input} onChange={e=>setInput(e.target.value)}
           onKeyDown={e=>{if(e.key==="Enter")setTerm(input.trim());}}
-          placeholder="Name, location or role…" style={{width:240}}/>
+          placeholder={'e.g. ("senior ecologist" OR principal) AND birmingham'} style={{width:340}}/>
         <button className="btn-a" onClick={()=>setTerm(input.trim())}>Search</button>
       </div>
     </div>
+
+    <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:12,fontSize:12,color:"var(--t2)"}}>
+      <label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}>
+        <input type="checkbox" checked={includeCv} onChange={e=>setIncludeCv(e.target.checked)} style={{width:15,height:15,accentColor:ACCENT}}/>
+        Also search inside CVs
+      </label>
+      <span style={{color:"var(--t3)"}}>{mode==="boolean"?"Boolean search · searching name, role, location, skills, notes"+(includeCv?" and CV text":""):"Simple search · name, location and role"}</span>
+      <span style={{flex:1}}/>
+      <button onClick={()=>setShowHelp(h=>!h)} style={{background:"none",border:"none",color:ACCENT,cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>{showHelp?"Hide":"How to"} Boolean search</button>
+    </div>
+    {showHelp&&<div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 16px",marginBottom:12,fontSize:12,color:"var(--t2)",lineHeight:1.9}}>
+      {[
+        ['ecologist AND birmingham','both words'],
+        ['bristol OR bath','either word'],
+        ['ecologist NOT junior','leave out anyone mentioning junior (-junior also works)'],
+        ['"bat licence"','exact phrase'],
+        ['ecolog*','word starting with ecolog — ecologist, ecology, ecological'],
+        ['("senior ecologist" OR "principal ecologist") AND (birmingham OR coventry)','brackets to group'],
+      ].map(([ex,d])=><div key={ex}><code style={{background:"var(--bg2)",borderRadius:5,padding:"2px 7px",color:"var(--t1)",cursor:"pointer"}} onClick={()=>{setInput(ex);setTerm(ex);}} title="Click to try it">{ex}</code> <span style={{color:"var(--t3)"}}>— {d}</span></div>)}
+      <div style={{marginTop:6,color:"var(--t3)"}}>Words side by side count as AND. Matches whole words, so "bat" won't match "battery" (use bat* for that). Tick "Also search inside CVs" to include CV text — slower the first time.</div>
+    </div>}
 
     <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
       {tabBtn("candidates","Candidates")}{tabBtn("jobs","Jobs")}{tabBtn("companies","Companies")}
