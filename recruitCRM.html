@@ -68,6 +68,23 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 @media (max-width:760px){.g-num{letter-spacing:-1px}}
 .th{text-align:left;font-family:var(--g-face);font-size:10px;font-weight:700;color:var(--g-mute);padding:9px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:1.2px}
 .td{padding:10px 12px;border-bottom:0.5px solid var(--br);color:var(--t1);font-size:13px;vertical-align:middle}
+/* ── Row action buttons ── */
+.acts{display:inline-flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+.act{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;
+  border:0.5px solid var(--br);background:var(--bg);color:var(--t2);cursor:pointer;text-decoration:none;padding:0;
+  transition:background 0.15s,color 0.15s,border-color 0.15s,transform 0.1s;font-family:inherit}
+.act:hover{background:var(--bg2);color:var(--t1);border-color:var(--brm)}
+.act:active{transform:scale(0.94)}
+.act:disabled{opacity:0.5;cursor:default}
+.act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.act.li{background:#0a66c2;border-color:#0a66c2;color:#fff;font-weight:800;font-size:13px;letter-spacing:-0.3px}
+.act.li:hover{background:#004182;border-color:#004182;color:#fff}
+.act.li-find{border:1px dashed rgba(10,102,194,0.55);color:#0a66c2;font-weight:800;font-size:13px;letter-spacing:-0.3px;background:transparent}
+.act.li-find:hover{background:rgba(10,102,194,0.08);border-style:solid}
+.act.task:hover{color:var(--g-deep);border-color:rgba(95,169,43,0.5);background:rgba(95,169,43,0.10)}
+.act.danger{color:var(--t3)}
+.act.danger:hover{color:#c0392b;border-color:#f09595;background:#fdecea}
+body.dark .act.danger:hover{background:rgba(192,57,43,0.18)}
 /* ── Phone-friendly layout ── */
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
 .menu-btn{display:none;background:none;border:0.5px solid var(--brm);border-radius:7px;font-size:18px;line-height:1;padding:5px 9px;cursor:pointer;color:var(--t1);flex-shrink:0}
@@ -835,7 +852,7 @@ function TodayAgenda({setPage,style={}}){
             <span style={{fontSize:16}}>{overdue?"🔴":"🟡"}</span>
             <div style={{flex:1}}>
               <div style={{fontSize:13,color:"var(--t1)",fontWeight:500}}>{t.title}</div>
-              <div style={{fontSize:11,color:overdue?"#e24b4a":"var(--t3)"}}>{overdue?`Overdue · ${t.due_date}`:t.due_date}{t.due_time?` · ${t.due_time}`:""}</div>
+              <div style={{fontSize:11,color:overdue?"#e24b4a":"var(--t3)"}}>{overdue?`Overdue · ${fmtDate(t.due_date)}`:fmtDate(t.due_date)}{t.due_time?` · ${t.due_time}`:""}</div>
             </div>
             <button className="btn-o" style={{fontSize:11,padding:"3px 8px"}} onClick={()=>setPage("tasks")}>View</button>
           </div>;
@@ -1163,6 +1180,23 @@ function rebateDays(text){
 // Works in local dates (toISOString would shift a day during UK summer time)
 const addDays=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);const z=x=>String(x).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;};
 const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5);
+// Small line icons for row actions
+const IconTask=()=><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2.5v3M16 2.5v3M3 9h18M12 12.5v5M9.5 15h5"/></svg>;
+const IconEdit=()=><svg viewBox="0 0 24 24"><path d="M15.5 4.5l4 4L8 20H4v-4z"/><path d="M13.5 6.5l4 4"/></svg>;
+const IconTrash=()=><svg viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg>;
+
+// LinkedIn people search for someone without a saved profile link
+function linkedinSearchUrl(c){
+  const company=(c.role||"").split(/ at | @ /i)[1]||"";
+  const kw=[c.name,company].filter(Boolean).join(" ").replace(/\s*\(.*?\)\s*/g," ").trim();
+  return "https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(kw);
+}
+// "2026-12-14" → "14 Dec 2026" (used wherever a date is shown)
+function fmtDate(iso){
+  if(!iso)return "";
+  const d=new Date(String(iso).slice(0,10)+"T12:00:00");
+  return isNaN(d)?String(iso):d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+}
 const niceDate=iso=>iso?new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"";
 function placementMoney(p,companies){
   const today=todayStr();
@@ -1858,7 +1892,7 @@ function CandidateTasks({cand}){
             </div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:12,color:t.done?"var(--t3)":"var(--t1)",textDecoration:t.done?"line-through":"none"}}>{t.title}</div>
-              {t.due_date&&<div style={{fontSize:11,color:overdue?"#a32d2d":"var(--t3)"}}>{overdue?"⚠️ Overdue · ":""}{t.due_date===today?"Today":t.due_date}{t.due_time?` · ${t.due_time}`:""}</div>}
+              {t.due_date&&<div style={{fontSize:11,color:overdue?"#a32d2d":"var(--t3)"}}>{overdue?"⚠️ Overdue · ":""}{t.due_date===today?"Today":fmtDate(t.due_date)}{t.due_time?` · ${t.due_time}`:""}</div>}
             </div>
           </div>;
         })}
@@ -1942,7 +1976,9 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
           <button onClick={onClose} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"4px 10px",fontSize:12,cursor:"pointer",color:"var(--t2)"}}>✕ Close</button>
           <div style={{display:"flex",gap:6}}>
-            {c.linkedin&&<a href={c.linkedin} target="_blank" rel="noreferrer" style={{background:"#0a66c2",color:"#fff",border:"none",borderRadius:6,padding:"5px 10px",fontSize:11,cursor:"pointer",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:4}}>in LinkedIn</a>}
+            {c.linkedin
+              ?<a href={c.linkedin} target="_blank" rel="noreferrer" style={{background:"#0a66c2",color:"#fff",border:"none",borderRadius:6,padding:"5px 10px",fontSize:11,cursor:"pointer",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:4}}>in LinkedIn</a>
+              :<a href={linkedinSearchUrl(c)} target="_blank" rel="noreferrer" title="No LinkedIn link saved — search for them, then paste their profile URL in via Edit" style={{border:"0.5px dashed #0a66c2",color:"#0a66c2",borderRadius:6,padding:"4px 10px",fontSize:11,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:4}}>🔍 Find on LinkedIn</a>}
             <button className="btn-o" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>onEdit(c)}>Edit</button>
           </div>
         </div>
@@ -2656,13 +2692,13 @@ function CandidatesPage(){
         :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:760}}>
           <colgroup>
             <col style={{width:"3%"}}/>
+            <col style={{width:"21%"}}/>
             <col style={{width:"19%"}}/>
-            <col style={{width:"18%"}}/>
-            <col style={{width:"13%"}}/>
-            <col style={{width:"10%"}}/>
+            <col style={{width:"14%"}}/>
             <col style={{width:"9%"}}/>
-            <col style={{width:"10%"}}/>
-            <col style={{width:"18%"}}/>
+            <col style={{width:"11%"}}/>
+            <col style={{width:"9%"}}/>
+            <col style={{width:"14%",minWidth:150}}/>
           </colgroup>
           <thead><tr>
             <th className="th"><input type="checkbox" checked={selected.size===filtered.length&&filtered.length>0} onChange={toggleAll} style={{cursor:"pointer"}}/></th>
@@ -2683,11 +2719,13 @@ function CandidatesPage(){
             <td className="td"><span style={{fontSize:11,color:lcColor,fontWeight:ds!==null?500:400}}>{ds===null?"Never":ds===0?"Today":ds===1?"Yesterday":`${ds}d ago`}</span></td>
             <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.licences||[]).slice(0,2).map(l=><span key={l} title={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{LICENCE_ICON(l)} {LICENCE_SHORT(l)}</span>)}{(c.skills||[]).slice(0,(c.licences||[]).length?1:2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
             <td className="td"><Pill label={c.status||"New"}/></td>
-            <td className="td"><div style={{display:"flex",gap:5}} onClick={e=>e.stopPropagation()}>
-              {c.linkedin&&<a href={c.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" style={{background:"#0a66c2",color:"#fff",borderRadius:6,padding:"3px 7px",fontSize:11,textDecoration:"none",display:"inline-flex",alignItems:"center"}}>in</a>}
-              <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setTaskFor(c)} title="Add a task for this candidate">+ Task</button>
-              <button className="btn-o" style={{padding:"4px 8px",fontSize:11}} onClick={()=>setEditRow(c)}>Edit</button>
-              <button className="btn-d" onClick={()=>del(c.id)} disabled={delId===c.id}>{delId===c.id?"…":"Del"}</button>
+            <td className="td" style={{textAlign:"right"}}><div className="acts" onClick={e=>e.stopPropagation()}>
+              {c.linkedin
+                ?<a className="act li" href={c.linkedin} target="_blank" rel="noreferrer" title="Open LinkedIn profile">in</a>
+                :<a className="act li-find" href={linkedinSearchUrl(c)} target="_blank" rel="noreferrer" title="No LinkedIn saved — search LinkedIn for them">in</a>}
+              <button className="act task" onClick={()=>setTaskFor(c)} title="Add a task"><IconTask/></button>
+              <button className="act" onClick={()=>setEditRow(c)} title="Edit candidate"><IconEdit/></button>
+              <button className="act danger" onClick={()=>del(c.id)} disabled={delId===c.id} title="Delete candidate">{delId===c.id?<span className="spin" style={{margin:0}}></span>:<IconTrash/>}</button>
             </div></td>
           </tr>;})}
           </tbody>
@@ -2860,7 +2898,7 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
                 ["Rebate period",c.terms_rebate],
                 ["Payment terms",c.terms_payment_days?`${c.terms_payment_days} days from invoice`:null],
                 ["Invoice raised",c.terms_invoice_trigger],
-                ["Date signed",c.terms_signed_date],
+                ["Date signed",fmtDate(c.terms_signed_date)],
               ].map(([l,v])=>v?<div key={l}>
                 <div style={{fontSize:11,color:"var(--t3)"}}>{l}</div>
                 <div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div>
@@ -2972,7 +3010,7 @@ function CompaniesPage(){
           <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><CoLogo company={c}/><div style={{minWidth:0}}><div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}</div>{c.website&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.website}</div>}</div></div></td>
           <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.industry||"—"}</td>
           <td className="td"><div style={{fontSize:12,color:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?"#3b6d11":"var(--t3)",fontWeight:c.fee_type!=="none"&&(c.fee_percentage||c.fee_fixed)?500:400}}>{termsStr(c)}</div>{c.terms_signed
-            ?<div style={{fontSize:11,color:"#3b6d11"}}>✓ ToB signed{c.terms_signed_date?` ${c.terms_signed_date}`:""}</div>
+            ?<div style={{fontSize:11,color:"#3b6d11"}}>✓ ToB signed{c.terms_signed_date?` ${fmtDate(c.terms_signed_date)}`:""}</div>
             :<div style={{fontSize:11,color:"#854f0b"}}>ToB not signed</div>}{c.terms_doc_path&&<div style={{fontSize:10,color:"var(--t3)"}}>📄 Document on file</div>}</td>
           <td className="td"><Pill label={c.status||"Active"}/></td>
           <td className="td"><ContactCount companyId={c.id}/></td>
@@ -4125,7 +4163,7 @@ function tomorrowStr(){const d=new Date();d.setDate(d.getDate()+1);return d.toIS
 function dueLabel(due_date,due_time){
   if(!due_date)return null;
   const today=todayStr(),tom=tomorrowStr();
-  const label=due_date===today?"Today":due_date===tom?"Tomorrow":due_date<today?"Overdue":due_date;
+  const label=due_date===today?"Today":due_date===tom?"Tomorrow":due_date<today?`Overdue · ${fmtDate(due_date).replace(/ \d{4}$/,"")}`:fmtDate(due_date);
   return{label,overdue:due_date<today,today:due_date===today};
 }
 function requestNotifPerm(){
@@ -5067,7 +5105,7 @@ function SubmittalsPage(){
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidates?.name||"—"}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.jobs?.title||"—"}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.jobs?.companies?.name||"—"}</td>
-        <td className="td" style={{color:"var(--t3)"}}>{r.submitted_date||"—"}</td>
+        <td className="td" style={{color:"var(--t3)",whiteSpace:"nowrap"}}>{fmtDate(r.submitted_date)||"—"}</td>
         <td className="td">
           <select value={r.status} onChange={e=>updateStatus(r.id,e.target.value)} style={{fontSize:11,padding:"2px 6px",background:statusColor(r.status),border:"none",borderRadius:6,fontWeight:500}}>
             {SUBMITTAL_STATUSES.map(x=><option key={x}>{x}</option>)}
@@ -5371,7 +5409,7 @@ function PlacementsPage(){
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidate_name}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.job_title}</td>
         <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.company_name}</td>
-        <td className="td" style={{color:"var(--t3)"}}>{r.start_date||"—"}
+        <td className="td" style={{color:"var(--t3)"}}><span style={{whiteSpace:"nowrap"}}>{fmtDate(r.start_date)||"—"}</span>
           {(()=>{const m=placementMoney(r,cos);
             if(!r.start_date)return null;
             if(!m.started)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>Starts in {daysBetween(todayStr(),r.start_date)}d</div>;
@@ -5394,7 +5432,7 @@ function PlacementsPage(){
             </div>
             :<div onClick={()=>{setInvNoFor(r.id);setInvNo(r.invoice_number||"");setInvDate(r.invoice_date||todayStr());}} title="Click to edit invoice number and date"
               style={{fontSize:11,color:r.invoice_number?"var(--t1)":"var(--t3)",cursor:"pointer",marginBottom:4}}>
-              {r.invoice_number||"+ Invoice no."}{r.invoice_date?<span style={{color:"var(--t3)"}}> · {r.invoice_date}</span>:null}
+              {r.invoice_number||"+ Invoice no."}{r.invoice_date?<span style={{color:"var(--t3)",whiteSpace:"nowrap"}}> · {fmtDate(r.invoice_date)}</span>:null}
             </div>}
           {invBusy===r.id
             ?<span style={{fontSize:11,color:"var(--t2)"}}><span className="spin"></span>Uploading…</span>
