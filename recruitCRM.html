@@ -4553,6 +4553,10 @@ function TasksPage(){
   const [notifStatus,setNotifStatus]=useState(typeof Notification!=="undefined"?Notification.permission:"unsupported");
   const [toast,setToast]=useState(null);
   const [snoozeId,setSnoozeId]=useState(null);
+  const [laterTask,setLaterTask]=useState(null);
+  const [laterD,setLaterD]=useState("");
+  const [laterT,setLaterT]=useState("");
+  const laterDateRef=React.useRef(null);
   // Bulk clean-up
   const [selMode,setSelMode]=useState(false);
   const [sel,setSel]=useState(new Set());
@@ -4627,6 +4631,21 @@ function TasksPage(){
     setSnoozeId(null);setToast(null);load();
   };
 
+  const openLater=t=>{
+    const d=new Date();d.setDate(d.getDate()+7);
+    const z=n=>String(n).padStart(2,"0");
+    setLaterTask(t);setLaterD(`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`);setLaterT(t.due_time||"");
+    setTimeout(()=>{try{laterDateRef.current&&laterDateRef.current.showPicker&&laterDateRef.current.showPicker();}catch(e){}},80);
+  };
+  const saveLaterTask=async()=>{
+    if(!laterTask||!laterD)return;
+    await db.from("tasks").update({due_date:laterD,due_time:laterT||null}).eq("id",laterTask.id);
+    const nm=laterTask.candidate_name||laterTask.title;
+    setLaterTask(null);
+    flash(`${nm} moved to ${new Date(laterD+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}`);
+    load();
+  };
+
   const PRIORITY_STYLES={
     urgent:{bg:"#fcebeb",fg:"#a32d2d",label:"Urgent"},
     high:{bg:"#faeeda",fg:"#854f0b",label:"High"},
@@ -4680,7 +4699,8 @@ function TasksPage(){
         </div>
       </div>
       <div style={{display:"flex",gap:4,flexShrink:0}}>
-        {!t.done&&<button className="btn-o" style={{padding:"3px 7px",fontSize:11}} onClick={()=>setSnoozeId(snoozeId===t.id?null:t.id)}>⏰</button>}
+        {!t.done&&!selMode&&<button className="btn-o" title="Contact later — pick a new date" style={{padding:"3px 8px",fontSize:11,whiteSpace:"nowrap"}} onClick={e=>{e.stopPropagation();openLater(t);}}>📅 Contact later</button>}
+        {!t.done&&<button className="btn-o" title="Snooze for a few minutes" style={{padding:"3px 7px",fontSize:11}} onClick={()=>setSnoozeId(snoozeId===t.id?null:t.id)}>⏰</button>}
         <button className="btn-d" style={{padding:"3px 8px"}} onClick={()=>del(t.id)}>×</button>
       </div>
       {snoozeId===t.id&&<div style={{position:"absolute",right:14,top:"100%",background:"var(--bg)",border:"0.5px solid var(--brm)",borderRadius:8,padding:10,zIndex:20,boxShadow:"0 4px 16px rgba(0,0,0,0.12)",minWidth:130}}>
@@ -4736,6 +4756,31 @@ function TasksPage(){
       </div>
     </div>}
 
+    {laterTask&&(()=>{
+      const z=n=>String(n).padStart(2,"0");
+      const iso=d=>`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+      const plus=(days,months)=>{const d=new Date();d.setDate(d.getDate()+(days||0));if(months)d.setMonth(d.getMonth()+months);return iso(d);};
+      const mon=()=>{const d=new Date();d.setDate(d.getDate()+((8-d.getDay())%7||7));return iso(d);};
+      const picks=[["Tomorrow",plus(1)],["Next Monday",mon()],["1 week",plus(7)],["2 weeks",plus(14)],["1 month",plus(0,1)],["3 months",plus(0,3)],["6 months",plus(0,6)]];
+      return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setLaterTask(null);}}>
+        <div className="modal" style={{maxWidth:400}}>
+          <h3>📅 Contact later</h3>
+          <div style={{fontSize:12,color:"var(--t2)",marginBottom:12}}>Move <strong>{laterTask.title}</strong> to a new date.</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
+            {picks.map(([l,v])=><button key={l} className={laterD===v?"btn-a":"btn-o"} style={{fontSize:11,padding:"4px 10px"}} onClick={()=>setLaterD(v)}>{l}</button>)}
+          </div>
+          <div className="fr2">
+            <div><label>Date</label><input ref={laterDateRef} type="date" min={todayStr()} value={laterD} onChange={e=>setLaterD(e.target.value)} onClick={e=>{try{e.target.showPicker&&e.target.showPicker();}catch(x){}}}/></div>
+            <div><label>Time (optional)</label><input type="time" value={laterT} onChange={e=>setLaterT(e.target.value)}/></div>
+          </div>
+          {laterD&&<div style={{fontSize:12,color:"var(--t2)",marginTop:10}}>New date: <strong>{new Date(laterD+"T00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</strong>{laterT?` at ${laterT}`:""}</div>}
+          <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+            <button className="btn-o" onClick={()=>setLaterTask(null)}>Cancel</button>
+            <button className="btn-a" onClick={saveLaterTask} disabled={!laterD}>Save</button>
+          </div>
+        </div>
+      </div>;
+    })()}
     {bulkMsg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {bulkMsg}</div>}
 
     {/* Bulk action bar */}
