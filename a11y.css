@@ -45,9 +45,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .hero > p{color:rgba(245,245,220,.85)!important}
 
 /* Transparent logo (logo-light.png) – sized for the wider, boxless wordmark */
-.nav-logo img,nav .logo img{height:34px!important;width:auto}
-.footer-logo img,.footer-brand .logo img{height:30px!important;width:auto}
-@media (max-width:600px){.nav-logo img,nav .logo img{height:28px!important}}
+.nav-logo img,nav .logo img{height:40px!important;width:auto}
+.footer-logo img,.footer-brand .logo img{height:36px!important;width:auto}
+@media (max-width:600px){.nav-logo img,nav .logo img{height:32px!important}}
 
 /* Stray mobile menus showing on desktop (about/jobs) */
 .mobile-menu:not(.open){display:none!important}
