@@ -48,3 +48,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .nav-logo img,nav .logo img{height:34px!important;width:auto}
 .footer-logo img,.footer-brand .logo img{height:30px!important;width:auto}
 @media (max-width:600px){.nav-logo img,nav .logo img{height:28px!important}}
+
+/* Stray mobile menus showing on desktop (about/jobs) */
+.mobile-menu:not(.open){display:none!important}
+
+/* Shared mobile menu for pages that had none */
+.gs-burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:44px;background:none;border:0;cursor:pointer;padding:10px;margin-left:auto}
+.gs-burger span{display:block;height:2px;width:24px;background:#f5f5dc;border-radius:2px;transition:transform .25s,opacity .25s}
+html.gs-collapsed .gs-burger{display:flex}
+.gs-burger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.gs-burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.gs-burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.gs-menu{position:fixed;inset:0;z-index:9000;background:rgba(15,32,15,.98);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;padding:5rem 1.5rem 2rem}
+.gs-menu.open{display:flex}
+.gs-menu a{color:#f5f5dc;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:1.15rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:.4rem .8rem}
+.gs-menu a:hover{color:#8fd872}
+.gs-menu a.gs-cta{background:#5bb544;color:#0f200f;padding:.85rem 2rem;border-radius:2px;margin-top:.6rem}
+.gs-menu-close{position:absolute;top:1.1rem;right:1.1rem;width:44px;height:44px;background:none;border:0;color:#f5f5dc;font-size:2rem;line-height:1;cursor:pointer}
+body.gs-menu-open{overflow:hidden}
