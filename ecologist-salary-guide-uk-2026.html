@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -149,7 +149,7 @@
   }
   .article-meta {
     display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
-    font-size: 0.78rem; color: rgba(245,245,220,0.6);
+    font-size: 0.78rem; color: rgba(245,245,220,0.8);
     letter-spacing: 0.06em; text-transform: uppercase;
   }
   .article-meta span { display: flex; align-items: center; gap: 0.4rem; }
@@ -340,7 +340,7 @@
 
   /* FOOTER */
   footer {
-    background: var(--forest-dark); color: rgba(245,245,220,0.65);
+    background: var(--forest-dark); color: rgba(245,245,220,0.8);
     padding: 3rem 4rem 1.5rem;
   }
   .footer-bottom {
@@ -462,6 +462,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Gaia Search – specialist environmental and clean energy recruitment">
 <meta property="og:locale" content="en_GB">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
@@ -479,6 +481,7 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+<main>
 
 <div class="article-hero">
   <div class="article-hero-video">
@@ -516,7 +519,7 @@
     <h2 id="by-level">Salaries by Level</h2>
     <p>The table below shows typical permanent salary ranges across the main career levels in ecological consultancy. Ranges reflect base salary only and exclude benefits, bonuses and car allowances.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 1" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -574,7 +577,7 @@
     <h2 id="by-location">Salaries by Location</h2>
     <p>Location remains one of the biggest drivers of salary variation in ecology. London and the South East consistently command a premium, while roles in Scotland and the regions outside the South East tend to sit at the lower end of their respective bands, though this gap has narrowed as hybrid and remote working has become standard.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 2" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -640,7 +643,7 @@
     <h2 id="by-specialism">Salaries by Specialism</h2>
     <p>Not all ecologists are paid equally. Specialism matters enormously. Ecologists with licences for protected species surveys, or those with BNG expertise, consistently out-earn generalists at the same career level.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 3" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -694,7 +697,7 @@
     <h2 id="by-sector">Salaries by Employer Type</h2>
     <p>Where you work matters as much as what you do. Large global consultancies tend to offer the highest base salaries and the most structured benefits packages. Smaller specialist firms often compensate with flexibility, faster progression, and sometimes profit share.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 4" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -778,7 +781,7 @@
     <h2 id="gaia">A note from Gaia Search</h2>
     <p>The salary data in this guide is based on Gaia Search's direct experience placing ecologists across the UK, supported by publicly available data from Glassdoor, Indeed, and sector salary surveys. Ranges reflect the market as of May 2026.</p>
     <p>If you're an ecologist thinking about your next move, or an employer benchmarking your offer, we're happy to have a confidential conversation about what the market looks like right now for your specific situation.</p>
-    <p>You can reach the team directly at <a href="mailto:hello@gaia-search.com" style="color:var(--forest);"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a> or via WhatsApp below.</p>
+    <p>You can reach the team directly at <a href="mailto:hello@gaia-search.com" style="color:var(--forest);">hello@gaia-search.com</a> or via WhatsApp below.</p>
 
   </article>
 
@@ -815,10 +818,11 @@
   </div>
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.65)'"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a> · Company Registration Number: 15162203 · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a></span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">hello@gaia-search.com</a> · Company Registration Number: 15162203 · <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.6)'">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a></span>
   </div>
 </footer>
 
@@ -863,13 +867,13 @@
   }
   .cookie-btn-accept:hover { background: #7ccc66; }
   .cookie-btn-decline {
-    background: transparent; color: rgba(245,245,220,0.6);
+    background: transparent; color: rgba(245,245,220,0.8);
     border: 1px solid rgba(245,245,220,0.25);
     padding: 0.6rem 1.4rem; border-radius: 2px;
     font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
     font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
   }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">

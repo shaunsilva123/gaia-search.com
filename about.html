@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,7 +125,7 @@
   .btn-outline { border: 1px solid rgba(255,255,255,0.6); color: white; padding: 0.9rem 2.2rem; border-radius: 2px; text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.2s; display: inline-block; }
   .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
 
-  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 3rem 4rem 1.5rem; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 3rem 4rem 1.5rem; }
   .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 1rem; }
   .footer-logo img { height: 36px; width: auto; }
 
@@ -192,8 +192,11 @@
   }
 }
 </script>
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
@@ -208,6 +211,7 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+<main id="main">
 
 <div class="mobile-menu" id="mobileMenuAbout">
   <a href="about.html" onclick="closeMobileMenuAbout()">About</a>
@@ -327,10 +331,11 @@
   </div>
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;">hello@gaia-search.com</a> &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a></span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;">hello@gaia-search.com</a> &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a></span>
   </div>
 </footer>
 
@@ -360,8 +365,8 @@
   .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
   .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
   .cookie-btn-accept:hover { background: #7ccc66; }
-  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.8); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">
   <p style="font-size:0.85rem;line-height:1.6;flex:1;min-width:200px;margin:0;color:rgba(245,245,220,0.85);">

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,7 +111,7 @@
   .whatsapp-float { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; background: #25D366; color: white; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(37,211,102,0.4); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
   .whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
   .whatsapp-float svg { width: 30px; height: 30px; }
-  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 3rem 4rem 1.5rem; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 3rem 4rem 1.5rem; }
   .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 1rem; }
   .footer-logo img { height: 36px; width: auto; }
   @media (max-width: 900px) {
@@ -160,8 +160,11 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="../a11y.css">
+<script src="../a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 <nav>
   <a href="../index.html" class="nav-logo"><img src="../logo.png" alt="Gaia Search"></a>
   <ul class="nav-links">
@@ -172,6 +175,7 @@
     <li><a href="../jobs.html#register" class="nav-cta">Register CV</a></li>
   </ul>
 </nav>
+<main id="main">
 <div class="job-hero">
   <div class="job-hero-inner">
     <a href="../jobs.html" class="back-link">← Back to all roles</a>
@@ -241,6 +245,7 @@
   <p>We work with leading environmental consultancies and clean energy businesses across the UK. Get in touch and we'll help you find the right fit.</p>
   <a href="../jobs.html" class="btn-primary">View all roles</a>
 </div>
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="../index.html" class="footer-logo"><img src="../logo.png" alt="Gaia Search"></a>

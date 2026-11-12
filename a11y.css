@@ -1,0 +1,45 @@
+/* Gaia Search – accessibility layer (WCAG 2.2 AA). Loaded last on every page. */
+
+/* Skip link */
+.a11y-skip{position:absolute;left:1rem;top:-100px;z-index:10000;background:#0f200f;color:#fff;padding:.75rem 1.1rem;border-radius:4px;font-weight:600;text-decoration:none}
+.a11y-skip:focus{top:1rem}
+
+/* Visible keyboard focus everywhere */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #ffbf47!important;outline-offset:2px!important;box-shadow:0 0 0 5px #0f200f!important}
+
+/* Bright-green buttons: dark text instead of white (white on #5bb544 is only 2.6:1) */
+.nav-cta,.apply-btn-hero,.cookie-btn-accept,.callout-btn,.btn-green,.a11y-btn-dark{color:#0f200f!important}
+.whatsapp-btn,.btn-whatsapp{color:#0b2e17!important}
+
+/* Brand green used as text on light backgrounds: darker accessible shade */
+.toc-num,.section-eyebrow,.tag,.value-num,.service-num,.clear-filters{color:#3e7a2e!important}
+.list-num{color:#6f956f!important}
+
+/* Footer text on dark green */
+.footer-col h4,.footer-col h5{color:#8fd872!important}
+.footer-tagline,.footer-brand p,.footer-bottom p,.footer-bottom span{color:rgba(245,245,220,.8)!important}
+
+/* Links inside running text in the footer must not rely on colour alone */
+.footer-bottom a:not(.footer-logo),.footer-bottom span a{text-decoration:underline!important;text-underline-offset:2px}
+
+/* Misc low-contrast text */
+.stat-item .stat-label{color:#e2eee2}
+.badge-hot{color:#9a4507!important}
+
+/* Small in-page contents links: give them a comfortable tap target */
+.toc-list a{display:inline-block;min-height:24px;padding:3px 0}
+
+/* Scrollable tables reachable by keyboard */
+[data-a11y-scroll]:focus-visible{outline:3px solid #ffbf47;outline-offset:2px}
+
+/* Respect "reduce motion" */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* Remaining green buttons with white text */
+.btn-primary,.btn-full:not(.secondary):not([style*="dark-green"]),.search-bar > button,.filter-drawer-apply{color:#0f200f!important}
+/* Green label on dark section */
+.specialisms-inner .section-label{color:#8fd872!important}
+/* Policy page hero meta line */
+.hero > p{color:rgba(245,245,220,.85)!important}

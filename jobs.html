@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -208,7 +208,7 @@
   .whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
   .whatsapp-float svg { width: 30px; height: 30px; max-width: 30px; max-height: 30px; }
 
-  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 3rem 4rem 1.5rem; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 3rem 4rem 1.5rem; }
   .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 1rem; }
   .footer-logo img { height: 36px; width: auto; }
 
@@ -287,6 +287,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Gaia Search – specialist environmental and clean energy recruitment">
 <meta property="og:locale" content="en_GB">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
 <a href="#jobsList" class="skip-link">Skip to job listings</a>
@@ -304,6 +306,7 @@
     <li><a href="#register" class="nav-cta">Register CV</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <div class="mobile-menu" id="mobileMenuJobs">
   <a href="about.html" onclick="closeMobileMenuJobs()">About</a>
@@ -649,7 +652,7 @@
 <div class="cant-find">
   <h2>Can't find the right role?</h2>
   <p>We're in constant contact with leading environmental consultancies and clean energy businesses across the UK. Even if the perfect role isn't listed, get in touch — we'd love to hear about you.</p>
-  <p style="margin-top:0.8rem;font-size:0.85rem;color:rgba(245,245,220,0.6);">Not sure what salary to expect? Read our <a href="ecologist-salary-guide-uk-2026.html" style="color:var(--leaf-light);text-decoration:underline;">Ecologist Salary Guide 2026 →</a></p>
+  <p style="margin-top:0.8rem;font-size:0.85rem;color:rgba(245,245,220,0.8);">Not sure what salary to expect? Read our <a href="ecologist-salary-guide-uk-2026.html" style="color:var(--leaf-light);text-decoration:underline;">Ecologist Salary Guide 2026 →</a></p>
   <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center;">
     <a href="mailto:hello@gaia-search.com" class="btn-primary">Get in touch</a>
     <a href="https://wa.me/447484855801?text=Hi%2C%20I%20found%20you%20on%20Gaia%20Search%20and%20would%20love%20to%20chat." class="btn-whatsapp" target="_blank" style="margin-top:0;">
@@ -712,16 +715,17 @@
   </div>
 </section>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
     <div style="display:flex;flex-direction:column;gap:0.4rem;">
-      <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.65)'">hello@gaia-search.com</a> &nbsp;·&nbsp; London, UK &nbsp;·&nbsp; Company Registration Number: 15162203</span>
+      <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">hello@gaia-search.com</a> &nbsp;·&nbsp; London, UK &nbsp;·&nbsp; Company Registration Number: 15162203</span>
       <span style="font-size:0.72rem;">
-        <a href="ecologist-salary-guide-uk-2026.html" style="color:rgba(245,245,220,0.5);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.5)'">Salary Guide</a> &nbsp;·&nbsp;
-        <a href="privacy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.5)'">Privacy Policy</a> &nbsp;·&nbsp;
-        <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.5)'">Cookie Policy</a> &nbsp;·&nbsp;
-        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.5)'">Data Retention Policy</a>
+        <a href="ecologist-salary-guide-uk-2026.html" style="color:rgba(245,245,220,0.8);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">Salary Guide</a> &nbsp;·&nbsp;
+        <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">Privacy Policy</a> &nbsp;·&nbsp;
+        <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">Cookie Policy</a> &nbsp;·&nbsp;
+        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">Data Retention Policy</a>
       </span>
     </div>
   </div>
@@ -917,8 +921,8 @@
   .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
   .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
   .cookie-btn-accept:hover { background: #7ccc66; }
-  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.8); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">

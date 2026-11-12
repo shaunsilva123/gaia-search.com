@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -132,7 +132,7 @@
   }
   .article-meta {
     display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
-    font-size: 0.78rem; color: rgba(245,245,220,0.6);
+    font-size: 0.78rem; color: rgba(245,245,220,0.8);
     letter-spacing: 0.06em; text-transform: uppercase;
   }
   .article-meta span { display: flex; align-items: center; gap: 0.4rem; }
@@ -210,7 +210,7 @@
   .btn-outline { border: 1px solid rgba(255,255,255,0.6); color: white; padding: 0.9rem 2.2rem; border-radius: 2px; text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.2s; display: inline-block; }
   .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
 
-  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 3rem 4rem 1.5rem; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 3rem 4rem 1.5rem; }
   .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 1rem; }
   .footer-logo img { height: 36px; width: auto; }
 
@@ -245,6 +245,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Gaia Search – specialist environmental and clean energy recruitment">
 <meta property="og:locale" content="en_GB">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to main content</a>
@@ -262,6 +264,7 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+<main>
 
 <div class="article-hero">
   <div class="article-hero-video">
@@ -299,7 +302,7 @@
     <h2 id="by-level">Salaries by Level</h2>
     <p>The table below shows typical permanent salary ranges across the main career levels in flood risk and drainage consultancy. Ranges reflect base salary only and exclude benefits, bonuses, car allowances and professional membership fees, all of which are commonly provided by larger consultancies.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 1" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -357,7 +360,7 @@
     <h2 id="by-location">Salaries by Location</h2>
     <p>Unlike some environmental disciplines, flood risk work is distributed across the whole of the UK, driven by the geography of river basins, coastal exposure, and major infrastructure investment rather than concentration in London and the South East. That said, location still meaningfully affects salary, particularly at senior levels.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 2" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -429,7 +432,7 @@
     <h2 id="by-specialism">Salaries by Specialism</h2>
     <p>Flood risk is a broad discipline and the premium you can command varies considerably depending on your technical specialism. The table below shows how specific skills affect salary at Senior Engineer level.</p>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 3" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -485,7 +488,7 @@
       <p>Consultancies, particularly the large global firms, consistently pay 10–20% above client side roles such as local authorities and the Environment Agency. However, client side roles often offer better defined benefit pensions, more predictable hours, and greater job security. The right choice depends as much on what you value as what you earn.</p>
     </div>
 
-    <div class="salary-table-wrap">
+    <div class="salary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table 4" data-a11y-scroll>
       <table class="salary-table">
         <thead>
           <tr>
@@ -607,10 +610,11 @@
   </div>
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;">hello@gaia-search.com</a> &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a></span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;">hello@gaia-search.com</a> &nbsp;·&nbsp; Company Registration Number: 15162203 &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp; <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> &nbsp;·&nbsp; <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a></span>
   </div>
 </footer>
 
@@ -641,8 +645,8 @@
   .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
   .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
   .cookie-btn-accept:hover { background: #7ccc66; }
-  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.8); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">
