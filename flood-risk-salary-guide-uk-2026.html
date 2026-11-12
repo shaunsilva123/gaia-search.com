@@ -269,8 +269,9 @@
 
 <div class="article-hero">
   <div class="article-hero-video">
-    <video autoplay muted loop playsinline>
-      <source src="12905502_compressed.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline preload="auto" poster="12905502_compressed-poster.jpg" disablepictureinpicture aria-hidden="true">
+        <source src="12905502_compressed-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
+        <source src="12905502_compressed.mp4" type="video/mp4">
     </video>
   </div>
   <div class="article-hero-overlay"></div>

@@ -66,3 +66,18 @@ html.gs-collapsed .gs-burger{display:flex}
 .gs-menu a.gs-cta{background:#5bb544;color:#0f200f;padding:.85rem 2rem;border-radius:2px;margin-top:.6rem}
 .gs-menu-close{position:absolute;top:1.1rem;right:1.1rem;width:44px;height:44px;background:none;border:0;color:#f5f5dc;font-size:2rem;line-height:1;cursor:pointer}
 body.gs-menu-open{overflow:hidden}
+
+/* Background videos: hide the native play button phones show when autoplay is blocked (e.g. iPhone Low Power Mode) */
+video[autoplay]::-webkit-media-controls,
+video[autoplay]::-webkit-media-controls-start-playback-button,
+video[autoplay]::-webkit-media-controls-overlay-play-button,
+video[autoplay]::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; opacity: 0 !important; }
+video[autoplay] { pointer-events: none; background: #1b4a1b; }
+
+/* Mobile polish */
+@media (max-width: 900px) {
+  .job-tag { font-size: 0.75rem !important; }
+  .whatsapp-float { width: 50px !important; height: 50px !important; bottom: 1.25rem !important; right: 1.25rem !important; }
+  .whatsapp-float svg { width: 26px !important; height: 26px !important; }
+  .job-card { padding-bottom: 2.2rem; }
+}
