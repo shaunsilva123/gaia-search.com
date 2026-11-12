@@ -573,6 +573,9 @@
   @media (max-width: 900px) {
     .hamburger { display: flex; }
   }
+  /* Hide iOS/Android native play overlay on background videos (e.g. Low Power Mode) */
+  video::-webkit-media-controls, video::-webkit-media-controls-start-playback-button, video::-webkit-media-controls-overlay-play-button, video::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; opacity: 0 !important; }
+  .video-scene video { pointer-events: none; }
 </style>
   <script type="application/ld+json">
   {
@@ -637,9 +640,25 @@
 
 <section class="hero" id="home">
   <div class="video-scene">
-    <video autoplay muted loop playsinline poster="">
+    <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="hero-poster.jpg" disablepictureinpicture aria-hidden="true">
+      <source src="hero-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
       <source src="hero-video.mp4" type="video/mp4">
     </video>
+    <script>
+      (function () {
+        function playAll() {
+          document.querySelectorAll('video[autoplay]').forEach(function (v) {
+            v.muted = true; v.setAttribute('muted', '');
+            if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+          });
+        }
+        playAll();
+        document.addEventListener('DOMContentLoaded', playAll);
+        ['touchstart', 'scroll', 'click'].forEach(function (e) {
+          window.addEventListener(e, function once() { playAll(); window.removeEventListener(e, once); }, { passive: true });
+        });
+      })();
+    </script>
   </div>
 
   <div class="hero-bg"></div>
