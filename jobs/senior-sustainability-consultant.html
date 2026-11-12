@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,7 +90,7 @@
   .whatsapp-float{position:fixed;bottom:2rem;right:2rem;z-index:999;background:#25D366;color:white;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,0.4);text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;overflow:hidden;}
   .whatsapp-float:hover{transform:scale(1.1);}
   .whatsapp-float svg{width:30px;height:30px;min-width:30px;max-width:30px;}
-  footer{background:var(--forest-dark);color:rgba(245,245,220,0.65);padding:2rem 4rem;}
+  footer{background:var(--forest-dark);color:rgba(245,245,220,0.8);padding:2rem 4rem;}
   .footer-bottom{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;flex-wrap:wrap;gap:1rem;}
   .footer-logo img{height:36px;width:auto;}
   @media(max-width:900px){nav{padding:1rem 1.5rem;}.nav-links{display:none;}.job-hero{padding:8rem 1.5rem 3rem;}.job-body{padding:0 1.5rem 4rem;margin:2rem auto;}footer{padding:2rem 1.5rem;}}
@@ -135,8 +135,11 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="../a11y.css">
+<script src="../a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 <nav>
   <a href="../index.html" class="nav-logo"><img src="../logo.png" alt="Gaia Search"></a>
   <ul class="nav-links">
@@ -147,6 +150,7 @@
     <li><a href="../jobs.html#register" class="nav-cta">Register CV</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <div class="job-hero">
   <div class="job-hero-inner">
@@ -182,10 +186,11 @@
   </div>
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="../index.html" class="footer-logo"><img src="../logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; <a href="../privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:underline;">Privacy Policy</a></span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. &nbsp;·&nbsp; shaun.silva@gaia-search.com &nbsp;·&nbsp; <a href="../privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:underline;">Privacy Policy</a></span>
   </div>
 </footer>
 

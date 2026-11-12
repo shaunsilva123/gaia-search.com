@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -157,7 +157,7 @@
   .contact-box a { color: var(--leaf-light); }
 
   footer {
-    background: var(--forest-dark); color: rgba(245,245,220,0.65);
+    background: var(--forest-dark); color: rgba(245,245,220,0.8);
     padding: 2rem 4rem;
   }
   .footer-bottom {
@@ -191,8 +191,11 @@
 <meta name="twitter:title" content="Data Retention Policy | Gaia Search">
 <meta name="twitter:description" content="Gaia Search data retention policy — how long we keep personal data and how it is securely deleted, in line with UK GDPR and the Data Protection Act 2018.">
 <meta name="twitter:image" content="https://gaia-search.com/og-image.jpg">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
@@ -204,6 +207,7 @@
     <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <div class="hero">
   <span class="hero-label">Legal · Internal Policy</span>
@@ -252,7 +256,7 @@
     <h2>2. Retention schedule — summary</h2>
     <p>The table below summarises our standard retention periods by data category. Full detail is in Sections 3–6.</p>
 
-    <div class="summary-table-wrap">
+    <div class="summary-table-wrap" tabindex="0" role="region" aria-label="Scrollable table" data-a11y-scroll>
       <table class="summary-table">
         <thead>
           <tr>
@@ -426,7 +430,7 @@
     <p>Any individual has the right to request deletion of their personal data at any time, regardless of the retention periods set out in this policy. We will process such requests within <strong>30 days</strong> of receipt.</p>
 
     <h3>How to make a request</h3>
-    <p>Email <a href="mailto:hello@gaia-search.com" style="color: var(--forest);"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a> with the subject line <strong>"Data Deletion Request"</strong> or <strong>"Data Access Request"</strong>. We may need to verify your identity before processing the request.</p>
+    <p>Email <a href="mailto:hello@gaia-search.com" style="color: var(--forest);">hello@gaia-search.com</a> with the subject line <strong>"Data Deletion Request"</strong> or <strong>"Data Access Request"</strong>. We may need to verify your identity before processing the request.</p>
 
     <h3>Exceptions</h3>
     <p>We may decline a deletion request in limited circumstances — for example, where we have a legal obligation to retain the data (such as a financial record required by HMRC). In such cases, we will explain why and delete all other data relating to the individual.</p>
@@ -463,7 +467,7 @@
     <p>For questions about this policy, to make a data access or deletion request, or to raise a concern about how your data has been handled:</p>
     <div class="contact-box">
       <p><strong style="color:white;">Gaia Search Ltd</strong></p>
-      <p>Email: <a href="mailto:hello@gaia-search.com"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a></p>
+      <p>Email: <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a></p>
       <p>Subject line: "Data Request" or "Data Retention Query"</p>
       <p>Company Registration No: 15162203</p>
       <p>London, UK</p>
@@ -473,10 +477,11 @@
 
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
+    <span>© 2026 Gaia Search Ltd · <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a> · Company Registration Number: 15162203</span>
   </div>
 </footer>
 
@@ -511,13 +516,13 @@
   }
   .cookie-btn-accept:hover { background: #7ccc66; }
   .cookie-btn-decline {
-    background: transparent; color: rgba(245,245,220,0.6);
+    background: transparent; color: rgba(245,245,220,0.8);
     border: 1px solid rgba(245,245,220,0.25);
     padding: 0.6rem 1.4rem; border-radius: 2px;
     font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
     font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
   }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">

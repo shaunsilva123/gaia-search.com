@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,7 +107,7 @@
   .form-success p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.7; }
 
   /* FOOTER */
-  footer { background: var(--forest-dark); color: rgba(245,245,220,0.65); padding: 2rem 4rem; }
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 2rem 4rem; }
   .footer-bottom { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
   .footer-logo img { height: 32px; width: auto; }
 
@@ -140,8 +140,11 @@
 <meta name="twitter:title" content="Work With Us | Gaia Search">
 <meta name="twitter:description" content="Want to work in specialist recruitment? Gaia Search is a growing environmental and clean energy recruitment agency. Register your interest in future roles with us.">
 <meta name="twitter:image" content="https://gaia-search.com/og-image.jpg">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
@@ -156,6 +159,7 @@
     <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <div class="hero">
   <span class="hero-label">Join the team</span>
@@ -248,15 +252,16 @@
 
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
     <div style="display:flex;flex-direction:column;gap:0.4rem;">
-      <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;">hello@gaia-search.com</a> · Company Registration Number: 15162203</span>
+      <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;">hello@gaia-search.com</a> · Company Registration Number: 15162203</span>
       <span style="font-size:0.72rem;">
-        <a href="privacy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Privacy Policy</a> ·
-        <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Cookie Policy</a> ·
-        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Data Retention Policy</a>
+        <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> ·
+        <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> ·
+        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a>
       </span>
     </div>
   </div>
@@ -291,8 +296,8 @@ function submitInterest(e) {
   .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; }
   .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
   .cookie-btn-accept:hover { background: #7ccc66; }
-  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.6); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.8); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">
   <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>

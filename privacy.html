@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -135,7 +135,7 @@
   .divider { border: none; border-top: 1px solid #d8d6b8; margin: 2rem 0; }
 
   footer {
-    background: var(--forest-dark); color: rgba(245,245,220,0.65);
+    background: var(--forest-dark); color: rgba(245,245,220,0.8);
     padding: 2rem 4rem;
   }
   .footer-bottom {
@@ -168,8 +168,11 @@
 <meta name="twitter:title" content="Privacy Policy | Gaia Search">
 <meta name="twitter:description" content="Gaia Search privacy policy — how we collect, use and protect your personal data in line with UK GDPR and the Data Protection Act 2018.">
 <meta name="twitter:image" content="https://gaia-search.com/og-image.jpg">
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 
 <nav>
   <a href="index.html" class="nav-logo"><img src="logo.png" alt="Gaia Search"></a>
@@ -181,6 +184,7 @@
     <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <div class="hero">
   <span class="hero-label">Legal</span>
@@ -215,7 +219,7 @@
     <p>Gaia Search Ltd is a specialist recruitment agency placing professionals in the UK's environmental consulting and clean energy sectors. We are the data controller for the personal data we collect through this website and in the course of our recruitment activity.</p>
     <p><strong>Registered address:</strong> Gaia Search Ltd, London, UK<br>
     <strong>Company Registration:</strong> 15162203<br>
-    <strong>Email:</strong> <a href="mailto:hello@gaia-search.com" style="color: var(--forest);"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a></p>
+    <strong>Email:</strong> <a href="mailto:hello@gaia-search.com" style="color: var(--forest);">hello@gaia-search.com</a></p>
   </div>
 
   <hr class="divider">
@@ -336,7 +340,7 @@
 
   <div class="policy-section" id="s8">
     <h2>8. Your rights</h2>
-    <p>Under UK GDPR, you have the following rights in relation to your personal data. You can exercise any of these by contacting us at <a href="mailto:hello@gaia-search.com" style="color: var(--forest);"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a>. We will respond within 30 days.</p>
+    <p>Under UK GDPR, you have the following rights in relation to your personal data. You can exercise any of these by contacting us at <a href="mailto:hello@gaia-search.com" style="color: var(--forest);">hello@gaia-search.com</a>. We will respond within 30 days.</p>
     <ul>
       <li><strong>Right of access:</strong> You can request a copy of the personal data we hold about you</li>
       <li><strong>Right to rectification:</strong> You can ask us to correct any inaccurate or incomplete data</li>
@@ -348,7 +352,7 @@
     </ul>
 
     <div class="highlight-box">
-      <p><strong>To make a request:</strong> Email <a href="mailto:hello@gaia-search.com" style="color: var(--forest);"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a> with the subject line "Data Request". We may need to verify your identity before processing the request.</p>
+      <p><strong>To make a request:</strong> Email <a href="mailto:hello@gaia-search.com" style="color: var(--forest);">hello@gaia-search.com</a> with the subject line "Data Request". We may need to verify your identity before processing the request.</p>
     </div>
 
     <h3>Right to complain</h3>
@@ -367,7 +371,7 @@
     <p>For any questions about this privacy policy, to exercise your data rights, or to request deletion of your data:</p>
     <div class="contact-box">
       <p><strong style="color:white;">Gaia Search Ltd</strong></p>
-      <p>Email: <a href="mailto:hello@gaia-search.com"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a></p>
+      <p>Email: <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a></p>
       <p>Company Registration No: 15162203</p>
       <p>London, UK</p>
     </div>
@@ -383,10 +387,11 @@
 
 </div>
 
+</main>
 <footer>
   <div class="footer-bottom">
     <a href="index.html" class="footer-logo"><img src="logo.png" alt="Gaia Search"></a>
-    <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="privacy.html" style="color:rgba(245,245,220,0.6);text-decoration:none;">Privacy Policy</a> · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.65);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.65)'"><a href="mailto:hello@gaia-search.com" style="color:inherit;text-decoration:none;">hello@gaia-search.com</a></a> · Company Registration Number: 15162203</span>
+    <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#5bb544'" onmouseout="this.style.color='rgba(245,245,220,0.8)'">hello@gaia-search.com</a> · Company Registration Number: 15162203</span>
   </div>
 </footer>
 
@@ -421,13 +426,13 @@
   }
   .cookie-btn-accept:hover { background: #7ccc66; }
   .cookie-btn-decline {
-    background: transparent; color: rgba(245,245,220,0.6);
+    background: transparent; color: rgba(245,245,220,0.8);
     border: 1px solid rgba(245,245,220,0.25);
     padding: 0.6rem 1.4rem; border-radius: 2px;
     font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
     font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
   }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,11 +96,11 @@
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.75);
     margin-bottom: 20px;
     position: relative;
   }
-  .breadcrumb a { color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a { color: rgba(255,255,255,0.75); text-decoration: none; transition: color 0.2s; }
   .breadcrumb a:hover { color: var(--leaf-light); }
   .breadcrumb span { margin: 0 8px; }
 
@@ -148,7 +148,7 @@
   }
   .meta-item {
     font-size: 0.78rem;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.75);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -498,7 +498,7 @@
   /* FOOTER */
   footer {
     background: var(--forest-dark);
-    color: rgba(245,245,220,0.65);
+    color: rgba(245,245,220,0.8);
     padding: 4rem 4rem 2rem;
     margin-top: 40px;
   }
@@ -509,7 +509,7 @@
     gap: 3rem;
     margin-bottom: 3rem;
   }
-  .footer-tagline { font-size: 0.85rem; line-height: 1.7; color: rgba(245,245,220,0.6); font-weight: 400; margin-top: 14px; }
+  .footer-tagline { font-size: 0.85rem; line-height: 1.7; color: rgba(245,245,220,0.8); font-weight: 400; margin-top: 14px; }
   .footer-col h4 {
     font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
     color: var(--leaf); margin-bottom: 1.2rem; font-weight: 700;
@@ -517,7 +517,7 @@
   .footer-col ul { list-style: none; }
   .footer-col li { margin-bottom: 0.6rem; }
   .footer-col a {
-    color: rgba(245,245,220,0.65); text-decoration: none;
+    color: rgba(245,245,220,0.8); text-decoration: none;
     font-size: 0.85rem; transition: color 0.2s; font-weight: 500;
   }
   .footer-col a:hover { color: var(--leaf); }
@@ -581,8 +581,11 @@
   "inLanguage": "en-GB"
 }
 </script>
+<link rel="stylesheet" href="a11y.css">
+<script src="a11y.js" defer></script>
 </head>
 <body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
 
 <!-- NAV -->
 <nav>
@@ -595,6 +598,7 @@
     <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
+<main id="main">
 
 <!-- HERO -->
 <div class="guide-hero">
@@ -869,6 +873,7 @@
 </div>
 
 <!-- FOOTER -->
+</main>
 <footer>
   <div class="footer-inner">
     <div class="footer-top">
@@ -905,8 +910,8 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Gaia Search Ltd. All rights reserved. · hello@gaia-search.com · London, UK · Company Registration Number: 15162203 · <a href="privacy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.5);text-decoration:none;">Data Retention Policy</a></span>
-      <a href="https://www.linkedin.com/in/shaun-s-48372b211/" target="_blank" style="color:rgba(245,245,220,0.5);text-decoration:none;font-size:0.75rem;">LinkedIn</a>
+      <span>© 2026 Gaia Search Ltd. All rights reserved. · hello@gaia-search.com · London, UK · Company Registration Number: 15162203 · <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> · <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> · <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a></span>
+      <a href="https://www.linkedin.com/in/shaun-s-48372b211/" target="_blank" style="color:rgba(245,245,220,0.8);text-decoration:none;font-size:0.75rem;">LinkedIn</a>
     </div>
   </div>
 </footer>
@@ -942,13 +947,13 @@
   }
   .cookie-btn-accept:hover { background: #7ccc66; }
   .cookie-btn-decline {
-    background: transparent; color: rgba(245,245,220,0.6);
+    background: transparent; color: rgba(245,245,220,0.8);
     border: 1px solid rgba(245,245,220,0.25);
     padding: 0.6rem 1.4rem; border-radius: 2px;
     font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
     font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;
   }
-  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.6); color: rgba(245,245,220,0.9); }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
 </style>
 
 <div id="cookie-banner" role="dialog" aria-label="Cookie consent">
