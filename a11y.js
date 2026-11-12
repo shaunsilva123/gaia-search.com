@@ -70,3 +70,17 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init); else init();
 })();
+
+/* Background videos: force muted autoplay, retry on first touch/scroll if the phone blocked it */
+(function () {
+  function playAll() {
+    document.querySelectorAll('video[autoplay]').forEach(function (v) {
+      v.muted = true; v.setAttribute('muted', '');
+      if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', playAll); else playAll();
+  ['touchstart', 'scroll', 'click'].forEach(function (e) {
+    window.addEventListener(e, function once() { playAll(); window.removeEventListener(e, once); }, { passive: true });
+  });
+})();

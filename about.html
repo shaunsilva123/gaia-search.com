@@ -224,8 +224,9 @@
 
 <div class="page-hero">
   <div class="page-hero-video">
-    <video autoplay muted loop playsinline>
-      <source src="about-video.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline preload="auto" poster="about-video-poster.jpg" disablepictureinpicture aria-hidden="true">
+        <source src="about-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
+        <source src="about-video.mp4" type="video/mp4">
     </video>
   </div>
   <div class="page-hero-overlay"></div>

@@ -637,7 +637,8 @@
 
 <section class="hero" id="home">
   <div class="video-scene">
-    <video autoplay muted loop playsinline poster="">
+    <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="hero-poster.jpg" disablepictureinpicture aria-hidden="true">
+      <source src="hero-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
       <source src="hero-video.mp4" type="video/mp4">
     </video>
   </div>
@@ -707,8 +708,9 @@
 
 <section class="intro" id="about">
   <div class="intro-video-bg">
-    <video autoplay muted loop playsinline>
-      <source src="about-section-video.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline preload="auto" poster="about-section-video-poster.jpg" disablepictureinpicture aria-hidden="true">
+        <source src="about-section-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
+        <source src="about-section-video.mp4" type="video/mp4">
     </video>
   </div>
   <div class="intro-video-overlay"></div>
@@ -784,8 +786,9 @@
 
 <section class="why-gaia">
   <div class="why-video-bg">
-    <video autoplay muted loop playsinline>
-      <source src="services-video.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline preload="auto" poster="services-video-poster.jpg" disablepictureinpicture aria-hidden="true">
+        <source src="services-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
+        <source src="services-video.mp4" type="video/mp4">
     </video>
   </div>
   <div class="why-video-overlay"></div>
