@@ -43,3 +43,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .specialisms-inner .section-label{color:#8fd872!important}
 /* Policy page hero meta line */
 .hero > p{color:rgba(245,245,220,.85)!important}
+
+/* Transparent logo (logo-light.png) – sized for the wider, boxless wordmark */
+.nav-logo img,nav .logo img{height:34px!important;width:auto}
+.footer-logo img,.footer-brand .logo img{height:30px!important;width:auto}
+@media (max-width:600px){.nav-logo img,nav .logo img{height:28px!important}}
