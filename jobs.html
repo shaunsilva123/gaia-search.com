@@ -358,26 +358,31 @@
   <aside class="sidebar">
     <div class="sidebar-section">
       <h3>Sector</h3>
-      <div class="sidebar-option"><input type="checkbox" id="s1" onchange="updateSidebarActions(); filterJobs()"><label for="s1">Offshore Wind <span>(1)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="s2" onchange="updateSidebarActions(); filterJobs()"><label for="s2">Environmental Consulting <span>(12)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()"><label for="s3">Infrastructure &amp; Net Zero <span>(6)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s1" onchange="updateSidebarActions(); filterJobs()"><label for="s1">Offshore Wind <span>(9)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s2" onchange="updateSidebarActions(); filterJobs()"><label for="s2">Environmental Consulting <span>(19)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()"><label for="s3">Infrastructure &amp; Net Zero <span>(9)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s4" onchange="updateSidebarActions(); filterJobs()"><label for="s4">Sustainability <span>(2)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s5" onchange="updateSidebarActions(); filterJobs()"><label for="s5">Marine &amp; Coastal <span>(2)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s6" onchange="updateSidebarActions(); filterJobs()"><label for="s6">Solar, Onshore Wind &amp; Storage <span>(18)</span></label></div>
     </div>
     <div class="sidebar-section">
       <h3>Location</h3>
-      <div class="sidebar-option"><input type="checkbox" id="l1" onchange="updateSidebarActions(); filterJobs()"><label for="l1">London <span>(6)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l2" onchange="updateSidebarActions(); filterJobs()"><label for="l2">Scotland <span>(4)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l3" onchange="updateSidebarActions(); filterJobs()"><label for="l3">South East <span>(1)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l4" onchange="updateSidebarActions(); filterJobs()"><label for="l4">Remote / Hybrid <span>(13)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l5" onchange="updateSidebarActions(); filterJobs()"><label for="l5">Nationwide <span>(1)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l1" onchange="updateSidebarActions(); filterJobs()"><label for="l1">London <span>(17)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l2" onchange="updateSidebarActions(); filterJobs()"><label for="l2">Scotland <span>(21)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l3" onchange="updateSidebarActions(); filterJobs()"><label for="l3">South East <span>(3)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l4" onchange="updateSidebarActions(); filterJobs()"><label for="l4">Remote / Hybrid <span>(40)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l5" onchange="updateSidebarActions(); filterJobs()"><label for="l5">Nationwide <span>(6)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l6" onchange="updateSidebarActions(); filterJobs()"><label for="l6">South West <span>(7)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l7" onchange="updateSidebarActions(); filterJobs()"><label for="l7">Wales <span>(4)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l8" onchange="updateSidebarActions(); filterJobs()"><label for="l8">North of England <span>(3)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l9" onchange="updateSidebarActions(); filterJobs()"><label for="l9">Midlands <span>(1)</span></label></div>
     </div>
     <div class="sidebar-section">
       <h3>Salary</h3>
       <div class="sidebar-option"><input type="checkbox" id="p1" disabled style="opacity:0.35;cursor:not-allowed"><label for="p1" style="color:#aaa;cursor:not-allowed">Up to £40k <span>(0)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="p2" onchange="updateSidebarActions(); filterJobs()"><label for="p2">£40k – £60k <span>(7)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="p3" onchange="updateSidebarActions(); filterJobs()"><label for="p3">£60k – £80k <span>(1)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="p4" onchange="updateSidebarActions(); filterJobs()"><label for="p4">£80k+ <span>(2)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p2" onchange="updateSidebarActions(); filterJobs()"><label for="p2">£40k – £60k <span>(15)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p3" onchange="updateSidebarActions(); filterJobs()"><label for="p3">£60k – £80k <span>(6)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p4" onchange="updateSidebarActions(); filterJobs()"><label for="p4">£80k+ <span>(7)</span></label></div>
     </div>
     <div class="sidebar-actions" id="sidebarActions">
       <div class="active-tags" id="activeTags"></div>
@@ -388,6 +393,402 @@
 
   <div>
     <div class="jobs-list" id="jobsList">
+
+      <div class="job-card" data-href="jobs/offshore-consent-manager-southern-north-sea.html" data-sector="offshore-wind" data-location="london" data-salary="competitive" data-type="permanent" data-title="offshore consent manager – southern north sea london" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Offshore Consent Manager – Southern North Sea</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A major international offshore wind developer is looking for an Offshore Consent Manager to discharge DCO requirements and Marine Licence conditions on a portfolio of large southern North Sea wind farms ahead of survey and construction.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Marine Licence</span><span class="job-tag">MMO</span></div><a href="jobs/offshore-consent-manager-southern-north-sea.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/transmission-lead-consent-manager-offshore-wind.html" data-sector="offshore-wind" data-location="london|hybrid" data-salary="competitive" data-type="permanent" data-title="transmission lead consent manager – offshore wind london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Transmission Lead Consent Manager – Offshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A major offshore wind developer is looking for a Transmission Lead Consent Manager to lead consenting for the onshore and offshore transmission works of a large wind project through DCO examination.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Onshore Transmission</span><span class="job-tag">DCO Examination</span><span class="job-tag">EIA</span></div><a href="jobs/transmission-lead-consent-manager-offshore-wind.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/offshore-consents-manager-edinburgh.html" data-sector="offshore-wind" data-location="scotland" data-salary="competitive" data-type="permanent" data-title="offshore consents manager edinburgh" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Offshore Consents Manager</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">An offshore wind developer is adding an experienced Offshore Consents Manager to its Edinburgh team to deliver offshore consents and licences across assessment, development and execution. 10+ years' consenting experience.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Offshore Consenting</span><span class="job-tag">HRA</span><span class="job-tag">Fisheries Liaison</span></div><a href="jobs/offshore-consents-manager-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/head-of-consent-compliance-offshore-wind.html" data-sector="offshore-wind" data-location="scotland|london|hybrid" data-salary="80plus" data-type="permanent" data-title="head of consent compliance – offshore wind glasgow or london / flexible" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Head of Consent Compliance – Offshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow or London / Flexible</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> c. £80,000 + benefits</span>
+        </div>
+        <p class="job-desc">A major UK energy company is looking for a Head of Consent Compliance to lead consenting and consent obligations on offshore wind farms and grid connections in England, from early development to operations.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Consent Compliance</span><span class="job-tag">Offshore Wind</span><span class="job-tag">Leadership</span></div><a href="jobs/head-of-consent-compliance-offshore-wind.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/lead-offshore-consents-manager-contract.html" data-sector="offshore-wind" data-location="scotland|hybrid" data-salary="80plus" data-type="contract" data-title="lead offshore consents manager (contract) glasgow / remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Lead Offshore Consents Manager (Contract)</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow / Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 750 – £850 per day (inside IR35)</span>
+        </div>
+        <p class="job-desc">An offshore wind developer needs a Lead Offshore Consents Manager on a 12-month rolling contract to run the offshore consent strategy for a major project and lead the offshore consents team. Mostly remote.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">NSIP/DCO</span><span class="job-tag">Marine Licensing</span><span class="job-tag">Team Leadership</span></div><a href="jobs/lead-offshore-consents-manager-contract.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/planning-consents-manager-renewables-leeds.html" data-sector="onshore-renewables" data-location="north" data-salary="40-60|60-80" data-type="permanent" data-title="planning &amp; consents manager – renewable energy leeds" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Planning &amp; Consents Manager – Renewable Energy</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Leeds</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 55,000 – £70,000 + bonus</span>
+        </div>
+        <p class="job-desc">A UK renewable energy developer is looking for a Planning & Consents Manager to screen sites and lead solar and renewables planning applications from site finding to determination.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Planning</span><span class="job-tag">EIA</span><span class="job-tag">Solar</span></div><a href="jobs/planning-consents-manager-renewables-leeds.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/project-development-manager-solar-bess-remote.html" data-sector="onshore-renewables" data-location="hybrid|nationwide" data-salary="60-80" data-type="permanent" data-title="project development manager – solar &amp; bess (remote) uk remote / field-based" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Project Development Manager – Solar &amp; BESS (Remote)</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Remote / Field-based</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 70,000 – £80,000 + uncapped bonus</span>
+        </div>
+        <p class="job-desc">A fast-growing renewables developer is hiring a Project Development Manager to take utility-scale solar and battery storage projects from origination to ready-to-build. Remote, with a 4-day working week.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Origination</span><span class="job-tag">Grid</span><span class="job-tag">Ready-to-Build</span></div><a href="jobs/project-development-manager-solar-bess-remote.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/project-manager-rooftop-solar-ci.html" data-sector="onshore-renewables" data-location="midlands|hybrid" data-salary="40-60" data-type="permanent" data-title="project manager – rooftop solar pv (c&amp;i) birmingham / remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Project Manager – Rooftop Solar PV (C&amp;I)</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Birmingham / Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 50,000 – £60,000 + car allowance</span>
+        </div>
+        <p class="job-desc">A renewable energy engineering company is looking for a Project Manager to deliver commercial, industrial and large residential rooftop solar projects from kick-off to handover. Remote with national site travel.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Solar PV</span><span class="job-tag">G99</span><span class="job-tag">CDM</span></div><a href="jobs/project-manager-rooftop-solar-ci.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-project-developer-solar-ftc.html" data-sector="onshore-renewables" data-location="london|hybrid" data-salary="competitive" data-type="contract" data-title="senior project developer – solar (12-month ftc) london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Project Developer – Solar (12-Month FTC)</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A large European renewables generator is looking for a Senior Project Developer to manage planning and consenting for its UK ground-mounted solar and co-located storage portfolio, including NSIP projects. 12-month fixed-term.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Solar NSIP</span><span class="job-tag">Consenting</span><span class="job-tag">Co-located BESS</span></div><a href="jobs/senior-project-developer-solar-ftc.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/bess-project-manager-contract-manchester.html" data-sector="onshore-renewables" data-location="north" data-salary="80plus" data-type="contract" data-title="bess project manager (contract) manchester" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">BESS Project Manager (Contract)</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Manchester</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 550 – £650 per day</span>
+        </div>
+        <p class="job-desc">A contractor delivering large-scale battery storage projects needs a BESS Project Manager to run projects from design through commissioning, as part of a full site team.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">BESS</span><span class="job-tag">Commissioning</span><span class="job-tag">HSE</span></div><a href="jobs/bess-project-manager-contract-manchester.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/environmental-manager-hvdc-renewables-contract.html" data-sector="infrastructure" data-location="scotland|hybrid" data-salary="competitive" data-type="contract" data-title="environmental manager – hvdc &amp; renewables (contract) scotland / remote with site visits" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Environmental Manager – HVDC &amp; Renewables (Contract)</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Scotland / Remote with site visits</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive day rate (outside IR35)</span>
+        </div>
+        <p class="job-desc">A major grid infrastructure project needs a long-term contract Environmental Manager to implement the CEMP, manage consents compliance and lead a small site environmental team. Outside IR35.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">HVDC</span><span class="job-tag">CEMP</span><span class="job-tag">Consents</span></div><a href="jobs/environmental-manager-hvdc-renewables-contract.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/environmental-clerk-of-works-scottish-islands.html" data-sector="environmental-consulting" data-location="scotland" data-salary="competitive" data-type="permanent" data-title="environmental clerk of works / environmental manager scottish islands / site-based" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Environmental Clerk of Works / Environmental Manager</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Scottish Islands / Site-based</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">An environmental services company is looking for an Environmental Clerk of Works to oversee environmental compliance on construction sites across a Scottish island, with peatland and watercourse work. Relocation support possible.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">EnvCoW</span><span class="job-tag">Peatland</span><span class="job-tag">Pollution Prevention</span></div><a href="jobs/environmental-clerk-of-works-scottish-islands.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/lead-asset-manager-utility-scale-solar.html" data-sector="onshore-renewables" data-location="south-east|hybrid" data-salary="competitive" data-type="permanent" data-title="lead asset manager – utility-scale solar milton keynes / flexible" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Lead Asset Manager – Utility-Scale Solar</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Milton Keynes / Flexible</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + bonus</span>
+        </div>
+        <p class="job-desc">An international renewables services business is looking for a Lead Asset Manager to manage a utility-scale solar portfolio for a key client and lead a team of asset managers and analysts.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Asset Management</span><span class="job-tag">Solar</span><span class="job-tag">SCADA</span></div><a href="jobs/lead-asset-manager-utility-scale-solar.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/consultant-ecologist-renewables-bats-bng.html" data-sector="environmental-consulting" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="consultant ecologist – renewables (bats &amp; bng) edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Consultant Ecologist – Renewables (Bats &amp; BNG)</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / UK Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A renewable energy consultancy is looking for a Consultant Ecologist with bat and BNG experience to deliver surveys, EcIAs and consenting inputs on wind and solar projects. Fully remote in the UK, England-based candidates welcome.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Bats</span><span class="job-tag">BNG</span><span class="job-tag">EcIA</span></div><a href="jobs/consultant-ecologist-renewables-bats-bng.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-planning-manager-solar-ftc-london.html" data-sector="onshore-renewables" data-location="london" data-salary="competitive" data-type="contract" data-title="senior planning manager – solar (12-month ftc) london / uk &amp; ireland travel" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Planning Manager – Solar (12-Month FTC)</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / UK &amp; Ireland travel</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A UK and Irish solar developer is looking for a Senior Planning Manager on a 12-month fixed-term contract to lead planning, conditions and appeals across its portfolio.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Planning Appeals</span><span class="job-tag">Conditions Discharge</span><span class="job-tag">Solar</span></div><a href="jobs/senior-planning-manager-solar-ftc-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/grid-connections-engineer-solar-london.html" data-sector="onshore-renewables" data-location="london|hybrid" data-salary="40-60" data-type="permanent" data-title="grid connections engineer – solar london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Grid Connections Engineer – Solar</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Up to £60,000</span>
+        </div>
+        <p class="job-desc">A renewable energy developer is looking for a Grid Connections Engineer to lead grid applications, studies and DNO negotiations for its growing solar pipeline.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">G99</span><span class="job-tag">DNO</span><span class="job-tag">Grid Studies</span></div><a href="jobs/grid-connections-engineer-solar-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/environmental-manager-operational-offshore-wind.html" data-sector="offshore-wind" data-location="scotland|hybrid" data-salary="40-60" data-type="contract" data-title="environmental manager – operational offshore wind east scotland / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Environmental Manager – Operational Offshore Wind</div><span class="job-type">Contract</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> East Scotland / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 44,000 – £65,900 + car allowance + bonus</span>
+        </div>
+        <p class="job-desc">A major UK renewables operator is looking for an Environmental Manager to be the environmental lead on one of Scotland's largest operational offshore wind farms. You'll own licence and consent compliance, post-construction monitoring and Marine Licence variations. 12-month fixed-term, with secondment also considered.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Marine Licence</span><span class="job-tag">Post-Consent Monitoring</span><span class="job-tag">Offshore Wind</span></div><a href="jobs/environmental-manager-operational-offshore-wind.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/environmental-advisor-onshore-wind-scotland.html" data-sector="onshore-renewables" data-location="scotland|hybrid" data-salary="40-60" data-type="permanent" data-title="environmental advisor – onshore wind glasgow or perth / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Environmental Advisor – Onshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow or Perth / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 49,000 – £57,700 + car allowance + bonus</span>
+        </div>
+        <p class="job-desc">A major UK renewables owner-operator is hiring an Environmental Advisor to look after consent compliance across its Scottish onshore wind sites, including Habitat Management Plans, BNG, peatland restoration and contractor management.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Habitat Management</span><span class="job-tag">BNG</span><span class="job-tag">Peatland Restoration</span></div><a href="jobs/environmental-advisor-onshore-wind-scotland.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-ecologist-habitats-ecow-renewables.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="competitive" data-type="permanent" data-title="principal ecologist – habitats &amp; ecow, renewables scotland or north east england / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Principal Ecologist – Habitats &amp; ECoW, Renewables</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Scotland or North East England / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A renewable energy consultancy is looking for a Principal Ecologist to lead complex wind and renewables projects, write and review EIA, HRA and habitat management plans, and line-manage a growing team. ECoW experience essential.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">EIA</span><span class="job-tag">HRA</span><span class="job-tag">ECoW</span></div><a href="jobs/principal-ecologist-habitats-ecow-renewables.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/project-development-manager-solar-bess.html" data-sector="onshore-renewables" data-location="london|hybrid" data-salary="competitive" data-type="permanent" data-title="project development manager – solar &amp; bess midlands or london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Project Development Manager – Solar &amp; BESS</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Midlands or London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">An international energy company is looking for a Project Development Manager to take utility-scale solar and battery storage projects from origination to Final Investment Decision across the UK and Ireland.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Solar PV</span><span class="job-tag">Battery Storage</span><span class="job-tag">Planning</span></div><a href="jobs/project-development-manager-solar-bess.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/project-leader-bess-manchester.html" data-sector="infrastructure" data-location="hybrid|north" data-salary="competitive" data-type="permanent" data-title="project leader – battery energy storage manchester / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Project Leader – Battery Energy Storage</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Manchester / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + bonus</span>
+        </div>
+        <p class="job-desc">A major engineering design-and-build business is looking for a Project Leader to steer battery energy storage projects from outline design through construction, commissioning and handover.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">BESS</span><span class="job-tag">HV/LV Design</span><span class="job-tag">Design &amp; Build</span></div><a href="jobs/project-leader-bess-manchester.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/environmental-manager-ecow-scotland.html" data-sector="environmental-consulting" data-location="scotland" data-salary="competitive" data-type="permanent" data-title="environmental manager / ecow inverness or edinburgh / site-based" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Environmental Manager / ECoW</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Inverness or Edinburgh / Site-based</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + bonus</span>
+        </div>
+        <p class="job-desc">An environmental consultancy is looking for an Environmental Manager / ECoW to be the on-site environmental adviser on renewable energy construction projects across Scotland. Full CIEEM membership and a CSCS card required.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">ECoW</span><span class="job-tag">CEMP</span><span class="job-tag">Protected Species</span></div><a href="jobs/environmental-manager-ecow-scotland.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-grid-connection-engineer-bess.html" data-sector="onshore-renewables" data-location="london|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="senior grid connection engineer – battery storage uk remote / london hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Grid Connection Engineer – Battery Storage</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Remote / London Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + equity + bonus</span>
+        </div>
+        <p class="job-desc">A fast-growing battery storage developer is hiring a Senior Grid Connection Engineer to lead grid applications, DNO/TO/NESO engagement and technical reviews on its UK BESS pipeline. Remote with an optional London office.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">G99</span><span class="job-tag">Grid Code</span><span class="job-tag">BESS</span></div><a href="jobs/senior-grid-connection-engineer-bess.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/onshore-consenting-manager-offshore-wind-edinburgh.html" data-sector="offshore-wind" data-location="scotland" data-salary="competitive" data-type="permanent" data-title="onshore consenting manager – offshore wind edinburgh" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Onshore Consenting Manager – Offshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">An international offshore wind developer is looking for an Onshore Consenting Manager to lead the onshore consents for a major Scottish offshore wind project, managing the EIA contract and a small team.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Scottish Planning</span><span class="job-tag">EIA</span><span class="job-tag">Grid Infrastructure</span></div><a href="jobs/onshore-consenting-manager-offshore-wind-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-project-manager-onshore-wind-development.html" data-sector="onshore-renewables" data-location="south-west|london|hybrid" data-salary="competitive" data-type="permanent" data-title="senior project manager – onshore wind development somerset or london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Project Manager – Onshore Wind Development</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Somerset or London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive + bonus</span>
+        </div>
+        <p class="job-desc">An established solar and storage developer moving into onshore wind is looking for a Senior Project Manager to lead projects from site identification through consent to construction readiness.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Onshore Wind</span><span class="job-tag">Planning Consent</span><span class="job-tag">APM</span></div><a href="jobs/senior-project-manager-onshore-wind-development.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-ecologist-eia-lead-renewables-edinburgh.html" data-sector="environmental-consulting" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="principal ecologist – eia lead, renewable energy edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Principal Ecologist – EIA Lead, Renewable Energy</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / UK Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A renewable energy consultancy is looking for a Principal Ecologist to be technical lead for ecology on wind and renewables projects, leading EIA, HRA and EcIA work and mentoring a small team. Fully remote in the UK or hybrid in Edinburgh.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">EcIA</span><span class="job-tag">BNG</span><span class="job-tag">Protected Species Licensing</span></div><a href="jobs/principal-ecologist-eia-lead-renewables-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/planning-manager-solar-bess-london.html" data-sector="onshore-renewables" data-location="london|hybrid" data-salary="40-60" data-type="permanent" data-title="planning manager – solar &amp; bess london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Planning Manager – Solar &amp; BESS</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 40,000 – £50,000</span>
+        </div>
+        <p class="job-desc">An independent power producer is looking for a Planning Manager to take solar and battery storage projects through planning, from application to post-consent and appeals. 2–4 years' developer-side planning experience.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Planning Applications</span><span class="job-tag">EIA</span><span class="job-tag">Solar PV</span></div><a href="jobs/planning-manager-solar-bess-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-ornithologist-offshore-wind-glasgow.html" data-sector="offshore-wind" data-location="scotland|hybrid" data-salary="40-60" data-type="permanent" data-title="principal ornithologist – offshore wind glasgow / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Principal Ornithologist – Offshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Offshore Wind</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 50,000 – £60,000+</span>
+        </div>
+        <p class="job-desc">An ecological consultancy is looking for a Principal Ecologist / Ornithologist to lead ornithological survey design, analysis and impact assessment on offshore wind and renewables projects.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Ornithology</span><span class="job-tag">HRA</span><span class="job-tag">DCO</span></div><a href="jobs/principal-ornithologist-offshore-wind-glasgow.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-development-manager-utility-scale-renewables.html" data-sector="onshore-renewables" data-location="london|hybrid" data-salary="60-80" data-type="permanent" data-title="senior development manager – utility-scale renewables london / remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Development Manager – Utility-Scale Renewables</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 75,000 – £85,000</span>
+        </div>
+        <p class="job-desc">A utility-scale renewables developer is looking for a Senior Development Manager with a planning background to lead applications, consultation and consultants across its UK pipeline. NSIP exposure on offer.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">NSIP</span><span class="job-tag">Planning</span><span class="job-tag">Utility-Scale Solar</span></div><a href="jobs/senior-development-manager-utility-scale-renewables.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/grid-operations-manager-south-west.html" data-sector="onshore-renewables" data-location="south-west|hybrid" data-salary="80plus" data-type="permanent" data-title="grid operations manager – renewables wiltshire / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Grid Operations Manager – Renewables</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Wiltshire / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Up to £90,000 + benefits</span>
+        </div>
+        <p class="job-desc">A renewable energy developer is looking for a Grid Operations Manager to negotiate grid offers, manage network operator relationships and review technical grid designs. DNO background preferred.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Grid Connections</span><span class="job-tag">DNO</span><span class="job-tag">iDNO</span></div><a href="jobs/grid-operations-manager-south-west.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-planner-solar-bess-scotland.html" data-sector="onshore-renewables" data-location="scotland|hybrid|nationwide" data-salary="60-80" data-type="permanent" data-title="senior planner – solar &amp; bess, scotland edinburgh / fully remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Planner – Solar &amp; BESS, Scotland</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / Fully Remote</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 70,000 – £80,000</span>
+        </div>
+        <p class="job-desc">A renewables developer is looking for a Senior Planner to secure consent for solar and battery storage projects in Scotland, including Section 36 applications, and mentor junior planners. Fully remote.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Section 36</span><span class="job-tag">Scottish Planning</span><span class="job-tag">BESS</span></div><a href="jobs/senior-planner-solar-bess-scotland.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/principal-landscape-planner-lvia-wind.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="competitive" data-type="permanent" data-title="principal landscape planner – lvia, wind energy edinburgh or glasgow / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Principal Landscape Planner – LVIA, Wind Energy</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh or Glasgow / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">A global engineering and environmental consultancy is looking for a Chartered Principal Landscape Planner to lead LVIA workstreams, with wind farm experience highly desirable.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">LVIA</span><span class="job-tag">Landscape Planning</span><span class="job-tag">Wind Farms</span></div><a href="jobs/principal-landscape-planner-lvia-wind.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/asset-manager-onshore-wind-bristol.html" data-sector="onshore-renewables" data-location="south-west|hybrid" data-salary="40-60" data-type="permanent" data-title="asset manager – onshore wind bristol / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Asset Manager – Onshore Wind</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bristol / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 45,000 – £55,000 + bonus</span>
+        </div>
+        <p class="job-desc">A UK renewable energy business is looking for an Asset Manager to look after a portfolio of operational onshore wind farms, managing O&M contractors, compliance, KPIs and reporting.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Asset Management</span><span class="job-tag">O&amp;M</span><span class="job-tag">Wind Turbines</span></div><a href="jobs/asset-manager-onshore-wind-bristol.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-peatland-hydrology-consultant-glasgow.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="competitive" data-type="permanent" data-title="senior peatland hydrology consultant glasgow / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Peatland Hydrology Consultant</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow / Hybrid</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Environmental Consulting</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> Competitive</span>
+        </div>
+        <p class="job-desc">An environmental consultancy is looking for a Senior Peatland Hydrology Consultant to lead peat surveys, Peat Management Plans and EIAR chapters for wind farms and other projects across Scotland.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Peat Management Plans</span><span class="job-tag">Hydrology</span><span class="job-tag">EIAR</span></div><a href="jobs/senior-peatland-hydrology-consultant-glasgow.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/project-development-manager-hydrogen.html" data-sector="infrastructure" data-location="south-east" data-salary="60-80" data-type="permanent" data-title="project development manager – hydrogen oxfordshire" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Project Development Manager – Hydrogen</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Oxfordshire</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Infrastructure &amp; Net Zero</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 70,000 – £80,000 + package</span>
+        </div>
+        <p class="job-desc">A well-funded clean energy group is looking for a Project Development Manager to take green hydrogen projects from development to ready-to-build. Solar, BESS or onshore wind development backgrounds welcome.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Green Hydrogen</span><span class="job-tag">Consenting</span><span class="job-tag">Grid Applications</span></div><a href="jobs/project-development-manager-hydrogen.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
+
+      <div class="job-card" data-href="jobs/senior-project-manager-bess-delivery-glasgow.html" data-sector="onshore-renewables" data-location="scotland" data-salary="80plus" data-type="permanent" data-title="senior project manager – bess delivery glasgow" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+        <div class="job-card-top"><div class="job-title">Senior Project Manager – BESS Delivery</div><span class="job-type">Permanent</span></div>
+        <div class="job-meta">
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow</span>
+          <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Solar, Onshore Wind &amp; Storage</span>
+          <span class="job-meta-item"><span style="font-size:0.85rem;font-weight:700;color:currentColor;">£</span> 85,000 – £105,000 + bonus</span>
+        </div>
+        <p class="job-desc">A renewable energy business is looking for a Senior Project Manager to deliver utility-scale battery storage projects from pre-construction through commissioning and handover.</p>
+        <div class="job-card-footer"><div class="job-tags"><span class="job-tag">BESS</span><span class="job-tag">EPC</span><span class="job-tag">Construction</span></div><a href="jobs/senior-project-manager-bess-delivery-glasgow.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
+      </div>
 
       <div class="job-card" data-href="jobs/project-hydrographic-surveyor-marine-renewables.html" data-sector="marine" data-location="south-west|hybrid" data-salary="competitive" data-type="permanent" data-title="project hydrographic surveyor marine renewables cornwall / hybrid &amp; offshore" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Project Hydrographic Surveyor – Marine Renewables</div><span class="job-type">Permanent</span></div>
@@ -842,11 +1243,11 @@
     const query = document.getElementById('searchInput').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.job-card');
     let visible = 0;
-    const checkedSectors = Array.from(document.querySelectorAll('#s1:checked,#s2:checked,#s3:checked,#s4:checked,#s5:checked')).map(c => c.id);
-    const checkedLocations = Array.from(document.querySelectorAll('#l1:checked,#l2:checked,#l3:checked,#l4:checked,#l5:checked')).map(c => c.id);
+    const checkedSectors = Array.from(document.querySelectorAll('#s1:checked,#s2:checked,#s3:checked,#s4:checked,#s5:checked,#s6:checked')).map(c => c.id);
+    const checkedLocations = Array.from(document.querySelectorAll('#l1:checked,#l2:checked,#l3:checked,#l4:checked,#l5:checked,#l6:checked,#l7:checked,#l8:checked,#l9:checked')).map(c => c.id);
     const checkedSalaries = Array.from(document.querySelectorAll('#p1:checked,#p2:checked,#p3:checked,#p4:checked')).map(c => c.id);
-    const sectorMap = { s1: ['offshore-wind'], s2: ['environmental-consulting'], s3: ['infrastructure'], s4: ['sustainability'], s5: ['marine'] };
-    const locationMap = { l1: 'london', l2: 'scotland', l3: 'south-east', l4: 'hybrid', l5: 'nationwide' };
+    const sectorMap = { s1: ['offshore-wind'], s2: ['environmental-consulting'], s3: ['infrastructure'], s4: ['sustainability'], s5: ['marine'], s6: ['onshore-renewables'] };
+    const locationMap = { l1: 'london', l2: 'scotland', l3: 'south-east', l4: 'hybrid', l5: 'nationwide', l6: 'south-west', l7: 'wales', l8: 'north', l9: 'midlands' };
     const salaryMap = { p1: 'up-to-40k', p2: '40-60', p3: '60-80', p4: '80plus' };
     const anySectors = checkedSectors.length > 0, anyLocations = checkedLocations.length > 0, anySalaries = checkedSalaries.length > 0;
     const anyFilters = anySectors || anyLocations || anySalaries;
