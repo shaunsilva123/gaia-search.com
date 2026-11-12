@@ -1,0 +1,33 @@
+/* Gaia Search – typography aligned with the light logo.
+   Serif (Cormorant Garamond) for display, DM Sans for UI. Loaded after a11y.css on every page. */
+
+/* Display headings: medium, never heavy */
+h1, h2, .section-title { font-weight: 500 !important; }
+h1 em, h2 em, .section-title em, .hero-title em { font-weight: 500 !important; }
+
+/* Sub-headings and small headings: semibold for readability */
+h3, h4, h5 { font-weight: 600 !important; }
+
+/* Large decorative numbers */
+.stat-num, .stat-number, .service-num, .value-num, .data-card-num, .list-num { font-weight: 500 !important; }
+
+/* Card names (serif) */
+.service-name, .spec-name { font-weight: 600 !important; }
+.testi-quote { font-weight: 500 !important; }
+
+/* Navigation */
+.nav-links a { font-weight: 500 !important; }
+
+/* Buttons and calls to action */
+.nav-cta, .btn-primary, .btn-outline, .btn-outline-white, .btn-green, .btn-earth, .btn-full,
+.btn-whatsapp, .whatsapp-btn, .apply-btn-hero, .apply-btn-sidebar, .callout-btn, .job-apply,
+.cookie-btn-accept, .btn-manage, .form-submit, .filter-drawer-apply, .sidebar-search-btn,
+.search-bar button, .mobile-cta, .gs-menu a { font-weight: 500 !important; }
+
+/* Small uppercase labels: semibold so they stay crisp at 10–11px */
+.section-label, .values-label, .section-eyebrow, .hero-label, .page-hero-label, .article-hero-label,
+.register-label, .guide-tag, .toc-num, .tag, .sidebar-detail-label, .badge, .salary-badge { font-weight: 600 !important; }
+
+/* Emphasis inside body copy and data */
+strong, b { font-weight: 600; }
+.job-title, .trend-pct, .trend-name, td.salary-range, td.period { font-weight: 600 !important; }
