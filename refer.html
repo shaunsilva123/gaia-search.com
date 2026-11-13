@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refer a Friend – £500 Referral Reward | Gaia Search</title>
+<meta name="description" content="Know an ecologist, flood risk specialist or clean energy professional looking for their next role? Refer them to Gaia Search and receive £500 when we place them.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://gaia-search.com/refer.html">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+  :root {
+    --leaf: #5bb544; --leaf-light: #7ccc66;
+    --forest: #2a6b2a; --forest-dark: #1b4a1b;
+    --cream: #f5f5dc; --cream-mid: #eceacc; --cream-pale: #fafaed;
+    --text-dark: #1a1a1a; --text-mid: #383838; --text-light: #686868;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); }
+
+  nav {
+    background: var(--forest-dark); padding: 0 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-logo img { height: 42px; width: auto; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--leaf-light); }
+  .nav-cta { background: var(--leaf); color: #fff !important; padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 600 !important; }
+  .nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; position: relative; z-index: 160; }
+  .nav-hamburger span { display: block; width: 24px; height: 2px; background: rgba(255,255,255,0.85); border-radius: 2px; transition: all 0.3s; }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu { display: none; position: fixed; inset: 0; background: rgba(27,74,27,0.98); z-index: 150; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: white; text-decoration: none; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .mobile-menu a:hover { color: var(--leaf-light); }
+  .mobile-menu .mobile-cta { background: var(--leaf); padding: 0.8rem 2rem; border-radius: 2px; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest) 100%);
+    padding: 7rem 4rem 5rem; text-align: center;
+  }
+  .hero-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--leaf-light); font-weight: 600; display: block; margin-bottom: 1rem; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); color: white; font-weight: 700; line-height: 1.2; margin-bottom: 1.2rem; }
+  .hero h1 em { font-style: italic; color: var(--leaf-light); font-weight: 600; }
+  .hero p { color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: 300; max-width: 580px; margin: 0 auto 2rem; line-height: 1.8; }
+  .hero-btn { display: inline-block; background: var(--leaf); color: white; text-decoration: none; padding: 0.9rem 2rem; border-radius: 2px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; transition: background 0.2s; }
+  .hero-btn:hover { background: var(--leaf-light); }
+
+  /* REWARD BANNER */
+  .reward-banner {
+    background: var(--cream-mid); border-bottom: 1px solid #d0cea8;
+    padding: 1.2rem 4rem; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+  }
+  .reward-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf); flex-shrink: 0; }
+  .reward-banner p { font-size: 0.85rem; color: var(--text-mid); }
+  .reward-banner strong { color: var(--text-dark); }
+
+  /* CONTENT */
+  .content-wrap { max-width: 1000px; margin: 0 auto; padding: 5rem 4rem 6rem; }
+  .section { margin-bottom: 4.5rem; }
+  .section h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--forest-dark); margin-bottom: 1.2rem; line-height: 1.2; }
+  .section h2 em { font-style: italic; color: var(--forest); }
+  .section > p { font-size: 0.95rem; color: var(--text-mid); line-height: 1.85; font-weight: 300; margin-bottom: 1.2rem; max-width: 680px; }
+
+  /* STEPS */
+  .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
+  .step-card { background: var(--cream-pale); border: 1px solid #d8d6b8; border-radius: 3px; padding: 1.8rem 1.5rem; border-top: 3px solid var(--leaf); }
+  .step-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 700; color: var(--leaf); line-height: 1; margin-bottom: 0.6rem; display: block; }
+  .step-card h3 { font-size: 0.9rem; font-weight: 700; color: var(--forest-dark); margin-bottom: 0.5rem; }
+  .step-card p { font-size: 0.84rem; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
+
+  /* WHO */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.5rem; max-width: 760px; }
+  .tag { background: var(--cream-pale); border: 1px solid #d0cea8; border-radius: 30px; padding: 0.45rem 1rem; font-size: 0.82rem; color: var(--forest-dark); }
+
+  /* CHARITY CALLOUT */
+  .callout { background: var(--forest-dark); color: rgba(245,245,220,0.85); border-radius: 3px; padding: 2rem 2.2rem; display: flex; gap: 1.2rem; align-items: flex-start; max-width: 760px; }
+  .callout svg { flex-shrink: 0; color: var(--leaf-light); margin-top: 2px; }
+  .callout h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: white; font-weight: 600; margin-bottom: 0.4rem; }
+  .callout p { font-size: 0.88rem; line-height: 1.75; font-weight: 300; }
+
+  .divider { border: none; border-top: 1px solid #d8d6b8; margin: 0 0 4rem; }
+
+  /* FORM */
+  .refer-form { background: var(--cream-pale); border: 1px solid #d8d6b8; border-radius: 3px; padding: 2.5rem; max-width: 680px; }
+  .form-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--forest); margin: 0.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e0c4; }
+  .form-heading:not(:first-child) { margin-top: 1.8rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+  .form-group label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-mid); }
+  .form-group input, .form-group select, .form-group textarea { padding: 0.75rem 1rem; border: 1px solid #d0cea8; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-dark); background: white; transition: border-color 0.2s; outline: none; width: 100%; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--leaf); }
+  .form-group textarea { resize: vertical; }
+  .form-check { display: flex; gap: 0.7rem; align-items: flex-start; margin-bottom: 1rem; }
+  .form-check input { accent-color: var(--leaf); margin-top: 3px; flex-shrink: 0; }
+  .form-check label { font-size: 0.8rem; color: var(--text-mid); line-height: 1.55; }
+  .form-check label a { color: var(--forest); }
+  .form-submit { background: var(--forest); color: white; border: none; padding: 0.9rem 2rem; border-radius: 2px; width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+  .form-submit:hover { background: var(--leaf); }
+  .form-success { display: none; text-align: center; background: var(--cream-pale); padding: 3rem 2rem; border: 1px solid #b8d6a8; border-radius: 3px; max-width: 680px; }
+  .success-icon { width: 56px; height: 56px; background: var(--leaf); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin: 0 auto 1rem; }
+  .form-success h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--forest); margin-bottom: 0.8rem; }
+  .form-success p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.7; }
+
+  /* TERMS */
+  .terms { max-width: 760px; }
+  .terms ol { padding-left: 1.2rem; }
+  .terms li { font-size: 0.84rem; color: var(--text-mid); line-height: 1.75; font-weight: 300; margin-bottom: 0.6rem; padding-left: 0.3rem; }
+  .terms li::marker { color: var(--forest); font-weight: 600; }
+
+  /* FOOTER */
+  footer { background: var(--forest-dark); color: rgba(245,245,220,0.8); padding: 2rem 4rem; }
+  .footer-bottom { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+  .footer-logo img { height: 32px; width: auto; }
+
+  /* WHATSAPP FLOAT */
+  .whatsapp-float { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; background: #25D366; color: white; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(37,211,102,0.4); text-decoration: none; transition: transform 0.2s; flex-shrink: 0; }
+  .whatsapp-float:hover { transform: scale(1.1); }
+  .whatsapp-float svg { width: 30px; height: 30px; }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; } .nav-links { display: none; } .nav-hamburger { display: flex; }
+    .hero { padding: 5rem 1.5rem 4rem; }
+    .reward-banner { padding: 1rem 1.5rem; }
+    .content-wrap { padding: 3rem 1.5rem 4rem; }
+    .steps-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+    .refer-form { padding: 1.6rem 1.2rem; }
+    .callout { padding: 1.6rem 1.4rem; }
+    footer { padding: 2rem 1.5rem; } .footer-bottom { flex-direction: column; text-align: center; }
+  }
+</style>
+<meta property="og:title" content="Refer a Friend – £500 Referral Reward | Gaia Search">
+<meta property="og:description" content="Know an environmental or clean energy professional looking for their next role? Refer them to Gaia Search and receive £500 when we place them.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gaia-search.com/refer.html">
+<meta property="og:site_name" content="Gaia Search">
+<meta property="og:image" content="https://gaia-search.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Gaia Search – specialist environmental and clean energy recruitment">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Refer a Friend – £500 Referral Reward | Gaia Search">
+<meta name="twitter:description" content="Know an environmental or clean energy professional looking for their next role? Refer them to Gaia Search and receive £500 when we place them.">
+<meta name="twitter:image" content="https://gaia-search.com/og-image.jpg">
+<link rel="stylesheet" href="a11y.css">
+<link rel="stylesheet" href="type.css">
+<script src="a11y.js" defer></script>
+</head>
+<body>
+<a href="#main" class="a11y-skip">Skip to main content</a>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-light.png" alt="Gaia Search"></a>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Open navigation" aria-expanded="false" id="hamburgerBtn">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links">
+    <li><a href="about.html">About</a></li>
+    <li><a href="index.html#specialisms">Specialisms</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="jobs.html">Jobs</a></li>
+    <li><a href="index.html#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="about.html" onclick="closeMobileMenu()">About</a>
+  <a href="index.html#specialisms" onclick="closeMobileMenu()">Specialisms</a>
+  <a href="index.html#services" onclick="closeMobileMenu()">Services</a>
+  <a href="jobs.html" onclick="closeMobileMenu()">Jobs</a>
+  <a href="index.html#contact" class="mobile-cta" onclick="closeMobileMenu()">Contact Us</a>
+</div>
+
+<main id="main">
+
+<div class="hero">
+  <span class="hero-label">Refer a friend</span>
+  <h1>Know someone great?<br><em>Introduce them.</em></h1>
+  <p>The best people in our sector usually come through someone who knows their work. If you know an ecologist, consultant or clean energy professional who's ready for their next move, put us in touch. If we place them, we'll thank you with £500.</p>
+  <a href="#refer" class="hero-btn">Make a referral →</a>
+</div>
+
+<div class="reward-banner">
+  <div class="dot"></div>
+  <p><strong>£500 for every successful referral.</strong> You can have it paid to you, or we'll donate it to an environmental charity of your choice.</p>
+</div>
+
+<div class="content-wrap">
+
+  <div class="section">
+    <h2>How it <em>works</em></h2>
+    <p>It's simple. Your contact gets the same careful, specialist support every Gaia Search candidate gets, with no pressure and no spam. You get a thank-you if it works out.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <span class="step-num">1</span>
+        <h3>Check they're happy</h3>
+        <p>Ask your contact if they're open to a conversation and happy for you to share their details with us.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">2</span>
+        <h3>Send us their details</h3>
+        <p>Fill in the short form below. We'll get in touch with them personally and let you know we've made contact.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">3</span>
+        <h3>Get £500</h3>
+        <p>If we place them in a permanent role, we'll pay you £500 once they've completed 12 weeks in post, or donate it on your behalf.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Who to <em>refer</em></h2>
+    <p>Anyone working in, or moving into, the UK's environmental consulting and clean energy sectors. That includes:</p>
+    <div class="tag-list">
+      <span class="tag">Ecologists &amp; bat specialists</span>
+      <span class="tag">Biodiversity Net Gain</span>
+      <span class="tag">Landscape architects</span>
+      <span class="tag">Flood risk &amp; hydrology</span>
+      <span class="tag">EIA &amp; consenting</span>
+      <span class="tag">Offshore wind &amp; renewables</span>
+      <span class="tag">GIS &amp; environmental data</span>
+      <span class="tag">Health, safety &amp; environment</span>
+      <span class="tag">Sustainability &amp; ESG</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="callout">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <div>
+        <h3>Prefer to give it away?</h3>
+        <p>Just tick the box on the form and we'll donate the full £500 to an environmental or conservation charity you choose, such as your local Wildlife Trust, the Bat Conservation Trust or Rewilding Britain.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section" id="refer">
+    <h2>Make a <em>referral</em></h2>
+    <p>This takes about two minutes. We'll treat your contact's details in confidence and only use them to discuss opportunities with them.</p>
+
+    <form class="refer-form" id="referForm" onsubmit="submitReferral(event)">
+      <div class="form-heading">Your details</div>
+      <div class="form-row">
+        <div class="form-group"><label for="yourName">Your name *</label><input type="text" id="yourName" autocomplete="name" required></div>
+        <div class="form-group"><label for="yourEmail">Your email *</label><input type="email" id="yourEmail" autocomplete="email" required></div>
+      </div>
+      <div class="form-group"><label for="yourPhone">Your phone</label><input type="tel" id="yourPhone" autocomplete="tel" placeholder="+44 7700 000000"></div>
+
+      <div class="form-heading">Who you're referring</div>
+      <div class="form-row">
+        <div class="form-group"><label for="refName">Their name *</label><input type="text" id="refName" required></div>
+        <div class="form-group"><label for="refEmail">Their email *</label><input type="email" id="refEmail" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label for="refPhone">Their phone</label><input type="tel" id="refPhone"></div>
+        <div class="form-group"><label for="refLinkedIn">Their LinkedIn</label><input type="url" id="refLinkedIn" placeholder="https://linkedin.com/in/…"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label for="refRole">Current role / specialism *</label><input type="text" id="refRole" placeholder="e.g. Senior Ecologist" required></div>
+        <div class="form-group">
+          <label for="relationship">How do you know them? *</label>
+          <select id="relationship" required>
+            <option value="" disabled selected>Select</option>
+            <option>Current colleague</option>
+            <option>Former colleague</option>
+            <option>Friend</option>
+            <option>Studied together</option>
+            <option>Professional network</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="notes">Anything we should know?</label>
+        <textarea id="notes" rows="4" placeholder="What kind of role they're after, location, why you think they'd be great…"></textarea>
+      </div>
+
+      <div class="form-check">
+        <input type="checkbox" id="donate">
+        <label for="donate">If this referral is successful, please donate my £500 to an environmental charity instead.</label>
+      </div>
+      <div class="form-group" id="charityGroup" style="display:none;">
+        <label for="charity">Which charity?</label>
+        <input type="text" id="charity" placeholder="e.g. Bat Conservation Trust">
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="permission" required>
+        <label for="permission">I confirm the person I'm referring has agreed to me sharing their details with Gaia Search. *</label>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" id="terms" required>
+        <label for="terms">I've read the <a href="#terms">referral terms</a> and the <a href="privacy.html">Privacy Policy</a>. *</label>
+      </div>
+      <button type="submit" class="form-submit">Send referral →</button>
+    </form>
+
+    <div class="form-success" id="formSuccess">
+      <div class="success-icon">✓</div>
+      <h3>Thank you for the introduction</h3>
+      <p>Your email app should have opened with the referral ready to send. Once it's sent, we'll reach out to your contact and keep you posted.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section terms" id="terms">
+    <h2>Referral <em>terms</em></h2>
+    <ol>
+      <li>A £500 referral reward is payable when a candidate you refer is placed in a permanent role by Gaia Search and completes 12 weeks of continuous employment with the hiring organisation.</li>
+      <li>The placement must start within 12 months of your referral. Contract and interim placements may qualify at Gaia Search's discretion.</li>
+      <li>The person you refer must be new to us, meaning they are not already registered with Gaia Search or in active contact with us. Where the same person is referred more than once, the first referral received counts.</li>
+      <li>One reward is paid per placed candidate. You can't refer yourself.</li>
+      <li>To avoid any conflict of interest, no reward is payable to anyone involved in the hiring decision for the role the candidate is placed in, or to employees of the hiring organisation where its own policies prohibit them from accepting such payments.</li>
+      <li>Rewards are paid by bank transfer within 30 days of the 12-week milestone, or donated in full to a registered UK charity of your choice. You are responsible for any tax due on a reward paid to you.</li>
+      <li>Please only refer someone who has agreed to you passing their details to us. We will handle their data in line with our <a href="privacy.html" style="color:var(--forest);">Privacy Policy</a>.</li>
+      <li>Gaia Search may change or end this scheme at any time. Referrals already received before any change will be honoured on the terms in place when they were made.</li>
+    </ol>
+  </div>
+
+</div>
+
+</main>
+<footer>
+  <div class="footer-bottom">
+    <a href="index.html" class="footer-logo"><img src="logo-light.png" alt="Gaia Search"></a>
+    <div style="display:flex;flex-direction:column;gap:0.4rem;">
+      <span>© 2026 Gaia Search Ltd. All rights reserved. · <a href="mailto:hello@gaia-search.com" style="color:rgba(245,245,220,0.8);text-decoration:none;">hello@gaia-search.com</a> · Company Registration Number: 15162203</span>
+      <span style="font-size:0.72rem;">
+        <a href="privacy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Privacy Policy</a> ·
+        <a href="cookies.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Cookie Policy</a> ·
+        <a href="data-retention-policy.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Data Retention Policy</a> ·
+        <a href="refer.html" style="color:rgba(245,245,220,0.8);text-decoration:none;">Refer a Friend</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/447484855801" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.030-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+function toggleMobileMenu() {
+  const btn = document.getElementById('hamburgerBtn');
+  const menu = document.getElementById('mobileMenu');
+  const isOpen = menu.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  const btn = document.getElementById('hamburgerBtn');
+  btn.classList.remove('open');
+  btn.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+document.getElementById('donate').addEventListener('change', function () {
+  document.getElementById('charityGroup').style.display = this.checked ? 'flex' : 'none';
+});
+function submitReferral(e) {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const donate = document.getElementById('donate').checked;
+  const reward = donate ? `Donate to charity: ${v('charity') || 'Not specified yet'}` : 'Pay to referrer';
+  const subject = encodeURIComponent(`Referral: ${v('refName')} (from ${v('yourName')})`);
+  const body = encodeURIComponent(
+`New referral from the Gaia Search website
+
+REFERRER
+Name: ${v('yourName')}
+Email: ${v('yourEmail')}
+Phone: ${v('yourPhone') || 'Not provided'}
+
+REFERRED PERSON
+Name: ${v('refName')}
+Email: ${v('refEmail')}
+Phone: ${v('refPhone') || 'Not provided'}
+LinkedIn: ${v('refLinkedIn') || 'Not provided'}
+Role / specialism: ${v('refRole')}
+Relationship: ${v('relationship')}
+
+Notes:
+${v('notes') || 'None'}
+
+Reward preference: ${reward}
+Referrer confirms the candidate agreed to share their details: Yes
+Referrer accepted referral terms: Yes`);
+  window.location.href = `mailto:hello@gaia-search.com?subject=${subject}&body=${body}`;
+  document.getElementById('referForm').style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+}
+</script>
+
+<!-- COOKIE CONSENT BANNER -->
+<style>
+  #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #0f200f; color: rgba(245,245,220,0.9); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; border-top: 2px solid #5bb544; box-shadow: 0 -4px 24px rgba(0,0,0,0.3); font-family: 'DM Sans', sans-serif; transform: translateY(100%); transition: transform 0.4s ease; }
+  #cookie-banner.visible { transform: translateY(0); }
+  #cookie-banner p { font-size: 0.85rem; line-height: 1.6; flex: 1; min-width: 200px; margin: 0; color: rgba(245,245,220,0.85); }
+  #cookie-banner a { color: #7ccc66; }
+  .cookie-btns { display: flex; gap: 0.75rem; flex-shrink: 0; }
+  .cookie-btn-accept { background: #5bb544; color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+  .cookie-btn-accept:hover { background: #7ccc66; }
+  .cookie-btn-decline { background: transparent; color: rgba(245,245,220,0.8); border: 1px solid rgba(245,245,220,0.25); padding: 0.6rem 1.4rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .cookie-btn-decline:hover { border-color: rgba(245,245,220,0.8); color: rgba(245,245,220,0.9); }
+</style>
+<div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to understand how visitors use our site. Analytics cookies are only set with your consent. See our <a href="cookies.html">Cookie Policy</a> for details.</p>
+  <div class="cookie-btns">
+    <button class="cookie-btn-decline" onclick="setCookieConsent(false)">Decline</button>
+    <button class="cookie-btn-accept" onclick="setCookieConsent(true)">Accept Cookies</button>
+  </div>
+</div>
+<script>
+  var GA_ID = "G-ETWYEH3Q3N";
+  function loadGA() { if (document.getElementById("ga-script")) return; var s = document.createElement("script"); s.id = "ga-script"; s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID; document.head.appendChild(s); window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} window.gtag = gtag; gtag("js", new Date()); gtag("config", GA_ID, { anonymize_ip: true }); }
+  function setCookieConsent(accepted) { localStorage.setItem("gaia_cookie_consent", accepted ? "accepted" : "declined"); document.getElementById("cookie-banner").style.transform = "translateY(100%)"; if (accepted) loadGA(); }
+  (function() { var consent = localStorage.getItem("gaia_cookie_consent"); if (consent === "accepted") { loadGA(); } else if (!consent) { setTimeout(function() { document.getElementById("cookie-banner").classList.add("visible"); }, 800); } })();
+</script>
+
+</body>
+</html>
