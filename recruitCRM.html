@@ -4530,6 +4530,16 @@ function JobPipelinePage({job, onBack}){
 // ── Task helpers ───────────────────────────────────────────────────────────
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function tomorrowStr(){const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+function outlookLink(t){
+  // Opens a prefilled Outlook (web) event for a task. Untimed tasks default to 8:00am.
+  const d=t.due_date||todayStr();
+  const [h,m]=(t.due_time||"08:00").split(":");
+  const start=new Date(`${d}T${String(h).padStart(2,"0")}:${String(m||"00").padStart(2,"0")}:00`);
+  const end=new Date(start.getTime()+15*60000);
+  const body=[t.candidate_name?`Candidate: ${t.candidate_name}`:"","Open in Recruit CRM: https://gaia-search.com/recruitCRM.html"].filter(Boolean).join("\n");
+  const q=new URLSearchParams({path:"/calendar/action/compose",rru:"addevent",subject:t.title||"Task",startdt:start.toISOString(),enddt:end.toISOString(),body});
+  return "https://outlook.office.com/calendar/deeplink/compose?"+q.toString();
+}
 function dueLabel(due_date,due_time){
   if(!due_date)return null;
   const today=todayStr(),tom=tomorrowStr();
@@ -4701,6 +4711,7 @@ function TasksPage(){
       </div>
       <div style={{display:"flex",gap:4,flexShrink:0}}>
         {!t.done&&!selMode&&<button className="btn-o" title="Contact later — pick a new date" style={{padding:"3px 8px",fontSize:11,whiteSpace:"nowrap"}} onClick={e=>{e.stopPropagation();openLater(t);}}>📅 Contact later</button>}
+        {!t.done&&!selMode&&t.due_date&&<button className="btn-o" title="Add to Outlook calendar (untimed tasks go in at 8:00am)" style={{padding:"3px 8px",fontSize:11,whiteSpace:"nowrap"}} onClick={e=>{e.stopPropagation();window.open(outlookLink(t),"_blank","noopener");}}>📆 Outlook</button>}
         {!t.done&&<button className="btn-o" title="Snooze for a few minutes" style={{padding:"3px 7px",fontSize:11}} onClick={()=>setSnoozeId(snoozeId===t.id?null:t.id)}>⏰</button>}
         <button className="btn-d" style={{padding:"3px 8px"}} onClick={()=>del(t.id)}>×</button>
       </div>
