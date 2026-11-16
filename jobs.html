@@ -358,10 +358,11 @@
   <aside class="sidebar">
     <div class="sidebar-section">
       <h3>Sector</h3>
+      <div class="sidebar-option"><input type="checkbox" id="s8" onchange="updateSidebarActions(); filterJobs()"><label for="s8">Ecology <span>(18)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s1" onchange="updateSidebarActions(); filterJobs()"><label for="s1">Offshore Wind <span>(10)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s2" onchange="updateSidebarActions(); filterJobs()"><label for="s2">Environmental Consulting <span>(32)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()"><label for="s3">Infrastructure &amp; Net Zero <span>(18)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="s4" onchange="updateSidebarActions(); filterJobs()"><label for="s4">Sustainability <span>(2)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s3" onchange="updateSidebarActions(); filterJobs()"><label for="s3">Infrastructure &amp; Net Zero <span>(19)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="s4" onchange="updateSidebarActions(); filterJobs()"><label for="s4">Sustainability <span>(3)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s5" onchange="updateSidebarActions(); filterJobs()"><label for="s5">Marine &amp; Coastal <span>(8)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s6" onchange="updateSidebarActions(); filterJobs()"><label for="s6">Solar, Onshore Wind &amp; Storage <span>(27)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="s7" onchange="updateSidebarActions(); filterJobs()"><label for="s7">Water, Flood &amp; Drainage <span>(13)</span></label></div>
@@ -371,18 +372,18 @@
       <div class="sidebar-option"><input type="checkbox" id="l1" onchange="updateSidebarActions(); filterJobs()"><label for="l1">London <span>(23)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="l2" onchange="updateSidebarActions(); filterJobs()"><label for="l2">Scotland <span>(22)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="l3" onchange="updateSidebarActions(); filterJobs()"><label for="l3">South East <span>(8)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l4" onchange="updateSidebarActions(); filterJobs()"><label for="l4">Remote / Hybrid <span>(53)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l5" onchange="updateSidebarActions(); filterJobs()"><label for="l5">Nationwide <span>(9)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="l6" onchange="updateSidebarActions(); filterJobs()"><label for="l6">South West <span>(11)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l4" onchange="updateSidebarActions(); filterJobs()"><label for="l4">Remote / Hybrid <span>(55)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l5" onchange="updateSidebarActions(); filterJobs()"><label for="l5">Nationwide <span>(10)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="l6" onchange="updateSidebarActions(); filterJobs()"><label for="l6">South West <span>(12)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="l7" onchange="updateSidebarActions(); filterJobs()"><label for="l7">Wales <span>(5)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="l8" onchange="updateSidebarActions(); filterJobs()"><label for="l8">North of England <span>(8)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="l9" onchange="updateSidebarActions(); filterJobs()"><label for="l9">Midlands <span>(1)</span></label></div>
     </div>
     <div class="sidebar-section">
       <h3>Salary</h3>
-      <div class="sidebar-option"><input type="checkbox" id="p1" onchange="updateSidebarActions(); filterJobs()"><label for="p1">Up to £40k <span>(1)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="p2" onchange="updateSidebarActions(); filterJobs()"><label for="p2">£40k – £60k <span>(23)</span></label></div>
-      <div class="sidebar-option"><input type="checkbox" id="p3" onchange="updateSidebarActions(); filterJobs()"><label for="p3">£60k – £80k <span>(8)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p1" onchange="updateSidebarActions(); filterJobs()"><label for="p1">Up to £40k <span>(4)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p2" onchange="updateSidebarActions(); filterJobs()"><label for="p2">£40k – £60k <span>(36)</span></label></div>
+      <div class="sidebar-option"><input type="checkbox" id="p3" onchange="updateSidebarActions(); filterJobs()"><label for="p3">£60k – £80k <span>(16)</span></label></div>
       <div class="sidebar-option"><input type="checkbox" id="p4" onchange="updateSidebarActions(); filterJobs()"><label for="p4">£80k+ <span>(8)</span></label></div>
     </div>
     <div class="sidebar-actions" id="sidebarActions">
@@ -395,7 +396,7 @@
   <div>
     <div class="jobs-list" id="jobsList">
 
-      <div class="job-card" data-href="jobs/senior-ecologist-bng-london.html" data-sector="environmental-consulting" data-location="london|hybrid" data-salary="40-60" data-type="permanent" data-title="senior ecologist – bng &amp; protected species london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-ecologist-bng-london.html" data-sector="ecology|environmental-consulting" data-location="london|hybrid" data-salary="40-60" data-type="permanent" data-title="senior ecologist – bng &amp; protected species london / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior Ecologist – BNG &amp; Protected Species</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> London / Hybrid</span>
@@ -406,7 +407,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">BNG</span><span class="job-tag">UKHab</span><span class="job-tag">BREEAM Ecology</span></div><a href="jobs/senior-ecologist-bng-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-oxfordshire.html" data-sector="environmental-consulting" data-location="south-east|hybrid" data-salary="40-60" data-type="permanent" data-title="principal ecologist – oxfordshire oxfordshire / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-oxfordshire.html" data-sector="ecology|environmental-consulting" data-location="south-east|hybrid" data-salary="40-60" data-type="permanent" data-title="principal ecologist – oxfordshire oxfordshire / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist – Oxfordshire</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Oxfordshire / Hybrid</span>
@@ -417,7 +418,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Mitigation Design</span><span class="job-tag">Team Leadership</span><span class="job-tag">Protected Species</span></div><a href="jobs/principal-ecologist-oxfordshire.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-bats-southern-england.html" data-sector="environmental-consulting" data-location="south-west|south-east|hybrid" data-salary="competitive" data-type="permanent" data-title="principal ecologist – bats southern england (flexible office)" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-bats-southern-england.html" data-sector="ecology|environmental-consulting" data-location="south-west|south-east|hybrid" data-salary="competitive" data-type="permanent" data-title="principal ecologist – bats southern england (flexible office)" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist – Bats</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Southern England (flexible office)</span>
@@ -428,7 +429,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Bat Licensing</span><span class="job-tag">Bat Mitigation</span><span class="job-tag">Line Management</span></div><a href="jobs/principal-ecologist-bats-southern-england.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-principal-ecologist-sussex-hampshire.html" data-sector="environmental-consulting|marine" data-location="south-east|hybrid" data-salary="competitive" data-type="permanent" data-title="senior / principal ecologist – sussex or hampshire sussex or hampshire / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-principal-ecologist-sussex-hampshire.html" data-sector="ecology|environmental-consulting|marine" data-location="south-east|hybrid" data-salary="competitive" data-type="permanent" data-title="senior / principal ecologist – sussex or hampshire sussex or hampshire / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior / Principal Ecologist – Sussex or Hampshire</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Sussex or Hampshire / Hybrid</span>
@@ -439,7 +440,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Mitigation</span><span class="job-tag">Water Vole</span><span class="job-tag">Coastal Ecology</span></div><a href="jobs/senior-principal-ecologist-sussex-hampshire.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-ecologist-habitat-banking-remote.html" data-sector="environmental-consulting" data-location="hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="senior ecologist – habitat banking &amp; bng uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-ecologist-habitat-banking-remote.html" data-sector="ecology|environmental-consulting" data-location="hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="senior ecologist – habitat banking &amp; bng uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior Ecologist – Habitat Banking &amp; BNG</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Remote</span>
@@ -450,7 +451,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Habitat Banks</span><span class="job-tag">Statutory Metric</span><span class="job-tag">FISC</span></div><a href="jobs/senior-ecologist-habitat-banking-remote.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-principal-ecologist-london-home-based.html" data-sector="environmental-consulting" data-location="london|south-east|hybrid" data-salary="40-60" data-type="permanent" data-title="senior / principal ecologist – london &amp; south east home-based / london office" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-principal-ecologist-london-home-based.html" data-sector="ecology|environmental-consulting" data-location="london|south-east|hybrid" data-salary="40-60" data-type="permanent" data-title="senior / principal ecologist – london &amp; south east home-based / london office" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior / Principal Ecologist – London &amp; South East</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Home-based / London office</span>
@@ -461,7 +462,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Bat Licence</span><span class="job-tag">UKHab</span><span class="job-tag">Project Management</span></div><a href="jobs/senior-principal-ecologist-london-home-based.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-principal-aquatic-ecologist-bristol.html" data-sector="environmental-consulting|marine" data-location="south-west|nationwide" data-salary="40-60" data-type="permanent" data-title="senior / principal aquatic ecologist bristol / uk-wide considered" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-principal-aquatic-ecologist-bristol.html" data-sector="ecology|environmental-consulting|marine" data-location="south-west|nationwide" data-salary="40-60" data-type="permanent" data-title="senior / principal aquatic ecologist bristol / uk-wide considered" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior / Principal Aquatic Ecologist</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bristol / UK-wide considered</span>
@@ -714,7 +715,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Asset Management</span><span class="job-tag">Solar</span><span class="job-tag">SCADA</span></div><a href="jobs/lead-asset-manager-utility-scale-solar.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/consultant-ecologist-renewables-bats-bng.html" data-sector="environmental-consulting|onshore-renewables" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="consultant ecologist – renewables (bats &amp; bng) edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/consultant-ecologist-renewables-bats-bng.html" data-sector="ecology|environmental-consulting|onshore-renewables" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="consultant ecologist – renewables (bats &amp; bng) edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Consultant Ecologist – Renewables (Bats &amp; BNG)</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / UK Remote</span>
@@ -769,7 +770,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Habitat Management</span><span class="job-tag">BNG</span><span class="job-tag">Peatland Restoration</span></div><a href="jobs/environmental-advisor-onshore-wind-scotland.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-habitats-ecow-renewables.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="competitive" data-type="permanent" data-title="principal ecologist – habitats &amp; ecow, renewables scotland or north east england / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-habitats-ecow-renewables.html" data-sector="ecology|environmental-consulting" data-location="scotland|hybrid" data-salary="competitive" data-type="permanent" data-title="principal ecologist – habitats &amp; ecow, renewables scotland or north east england / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist – Habitats &amp; ECoW, Renewables</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Scotland or North East England / Hybrid</span>
@@ -846,7 +847,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Onshore Wind</span><span class="job-tag">Planning Consent</span><span class="job-tag">APM</span></div><a href="jobs/senior-project-manager-onshore-wind-development.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-eia-lead-renewables-edinburgh.html" data-sector="environmental-consulting" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="principal ecologist – eia lead, renewable energy edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-eia-lead-renewables-edinburgh.html" data-sector="ecology|environmental-consulting" data-location="scotland|hybrid|nationwide" data-salary="competitive" data-type="permanent" data-title="principal ecologist – eia lead, renewable energy edinburgh / uk remote" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist – EIA Lead, Renewable Energy</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / UK Remote</span>
@@ -1077,7 +1078,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Marine Licence</span><span class="job-tag">Offshore Wind</span></div><a href="jobs/offshore-consents-environment-manager.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-edinburgh.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="40-60|60-80" data-type="permanent" data-title="principal ecologist edinburgh / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-edinburgh.html" data-sector="ecology|environmental-consulting" data-location="scotland|hybrid" data-salary="40-60|60-80" data-type="permanent" data-title="principal ecologist edinburgh / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Edinburgh / Hybrid</span>
@@ -1088,7 +1089,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">BNG</span><span class="job-tag">Water Utilities</span></div><a href="jobs/principal-ecologist-edinburgh.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-ecologist-uk.html" data-sector="environmental-consulting" data-location="hybrid" data-salary="up-to-40k|40-60" data-type="permanent" data-title="senior ecologist uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-ecologist-uk.html" data-sector="ecology|environmental-consulting" data-location="hybrid" data-salary="up-to-40k|40-60" data-type="permanent" data-title="senior ecologist uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior Ecologist</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
@@ -1099,7 +1100,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Protected Species</span><span class="job-tag">EIA</span></div><a href="jobs/senior-ecologist-uk.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/principal-ecologist-infrastructure-renewables.html" data-sector="environmental-consulting" data-location="hybrid" data-salary="40-60|60-80" data-type="permanent" data-title="principal ecologist infrastructure & renewables uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/principal-ecologist-infrastructure-renewables.html" data-sector="ecology|environmental-consulting" data-location="hybrid" data-salary="40-60|60-80" data-type="permanent" data-title="principal ecologist infrastructure & renewables uk wide / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Principal Ecologist — Infrastructure &amp; Renewables</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> UK Wide / Hybrid</span>
@@ -1110,7 +1111,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">EPS Licences</span><span class="job-tag">BNG</span><span class="job-tag">Leadership</span></div><a href="jobs/principal-ecologist-infrastructure-renewables.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/associate-director-ecology.html" data-sector="environmental-consulting" data-location="london|scotland" data-salary="60-80|80plus" data-type="permanent" data-title="associate director ecology manchester / leeds / london / glasgow" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/associate-director-ecology.html" data-sector="ecology|environmental-consulting" data-location="london|scotland" data-salary="60-80|80plus" data-type="permanent" data-title="associate director ecology manchester / leeds / london / glasgow" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Associate Director — Ecology</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Manchester / Leeds / London / Glasgow</span>
@@ -1121,7 +1122,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">DCO</span><span class="job-tag">Major Projects</span><span class="job-tag">Director Level</span></div><a href="jobs/associate-director-ecology.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-ecologist-bristol.html" data-sector="environmental-consulting" data-location="south-west" data-salary="up-to-40k|40-60" data-type="permanent" data-title="senior ecologist bristol / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-ecologist-bristol.html" data-sector="ecology|environmental-consulting" data-location="south-west" data-salary="up-to-40k|40-60" data-type="permanent" data-title="senior ecologist bristol / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior Ecologist — Bristol</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bristol / Hybrid</span>
@@ -1154,7 +1155,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Geotechnical</span><span class="job-tag">Infrastructure</span><span class="job-tag">London</span></div><a href="jobs/senior-geotechnical-engineer-london.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/associate-ecologist-wales.html" data-sector="environmental-consulting" data-location="wales" data-salary="40-60|60-80" data-type="permanent" data-title="associate ecologist wales team lead cardiff / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/associate-ecologist-wales.html" data-sector="ecology|environmental-consulting" data-location="wales" data-salary="40-60|60-80" data-type="permanent" data-title="associate ecologist wales team lead cardiff / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Associate Ecologist — Wales Team Lead</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Cardiff / Hybrid</span>
@@ -1165,7 +1166,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">Ecology</span><span class="job-tag">Wales</span><span class="job-tag">4-Day Week</span></div><a href="jobs/associate-ecologist-wales.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/ecologist-south-west-midlands-wales.html" data-sector="environmental-consulting" data-location="south-west|wales" data-salary="up-to-40k|40-60" data-type="permanent" data-title="ecologists multiple levels south west midlands wales" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/ecologist-south-west-midlands-wales.html" data-sector="ecology|environmental-consulting" data-location="south-west|wales" data-salary="up-to-40k|40-60" data-type="permanent" data-title="ecologists multiple levels south west midlands wales" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Ecologists — Multiple Levels (South West, Midlands &amp; Wales)</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> South West / Midlands / Wales</span>
@@ -1187,7 +1188,7 @@
         <div class="job-card-footer"><div class="job-tags"><span class="job-tag">LVIA</span><span class="job-tag">NSIP</span><span class="job-tag">Energy Transition</span></div><a href="jobs/senior-landscape-architect.html" class="job-apply" onclick="event.stopPropagation()">View role →</a></div>
       </div>
 
-      <div class="job-card" data-href="jobs/senior-ecologist-glasgow.html" data-sector="environmental-consulting" data-location="scotland|hybrid" data-salary="40-60" data-type="permanent" data-title="senior ecologist glasgow / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
+      <div class="job-card" data-href="jobs/senior-ecologist-glasgow.html" data-sector="ecology|environmental-consulting" data-location="scotland|hybrid" data-salary="40-60" data-type="permanent" data-title="senior ecologist glasgow / hybrid" onclick="window.location.href=this.dataset.href" style="cursor:pointer">
         <div class="job-card-top"><div class="job-title">Senior Ecologist</div><span class="job-type">Permanent</span></div>
         <div class="job-meta">
           <span class="job-meta-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Glasgow / Hybrid</span>
@@ -1414,7 +1415,7 @@
 
   document.addEventListener('click', e => { if (!e.target.closest('.search-bar-outer')) { document.getElementById('suggestions').classList.remove('open'); highlightedIndex = -1; } });
 
-  const checkboxLabels = { s1: 'Offshore Wind', s2: 'Environmental Consulting', s3: 'Infrastructure & Net Zero', s4: 'Sustainability', s5: 'Marine & Coastal', l1: 'London', l2: 'Scotland', l3: 'South East', l4: 'Remote / Hybrid', l5: 'Nationwide', p1: 'Up to £40k', p2: '£40k – £60k', p3: '£60k – £80k', p4: '£80k+' };
+  const checkboxLabels = { s8: 'Ecology', s1: 'Offshore Wind', s2: 'Environmental Consulting', s3: 'Infrastructure & Net Zero', s4: 'Sustainability', s5: 'Marine & Coastal', s6: 'Solar, Onshore Wind & Storage', s7: 'Water, Flood & Drainage', l1: 'London', l2: 'Scotland', l3: 'South East', l4: 'Remote / Hybrid', l5: 'Nationwide', l6: 'South West', l7: 'Wales', l8: 'North of England', l9: 'Midlands', p1: 'Up to £40k', p2: '£40k – £60k', p3: '£60k – £80k', p4: '£80k+' };
 
   function updateSidebarActions() {
     const checked = Array.from(document.querySelectorAll('.sidebar input[type="checkbox"]:checked'));
@@ -1440,10 +1441,10 @@
     const query = document.getElementById('searchInput').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.job-card');
     let visible = 0;
-    const checkedSectors = Array.from(document.querySelectorAll('#s1:checked,#s2:checked,#s3:checked,#s4:checked,#s5:checked,#s6:checked,#s7:checked')).map(c => c.id);
+    const checkedSectors = Array.from(document.querySelectorAll('#s1:checked,#s2:checked,#s3:checked,#s4:checked,#s5:checked,#s6:checked,#s7:checked,#s8:checked')).map(c => c.id);
     const checkedLocations = Array.from(document.querySelectorAll('#l1:checked,#l2:checked,#l3:checked,#l4:checked,#l5:checked,#l6:checked,#l7:checked,#l8:checked,#l9:checked')).map(c => c.id);
     const checkedSalaries = Array.from(document.querySelectorAll('#p1:checked,#p2:checked,#p3:checked,#p4:checked')).map(c => c.id);
-    const sectorMap = { s1: ['offshore-wind'], s2: ['environmental-consulting'], s3: ['infrastructure'], s4: ['sustainability'], s5: ['marine'], s6: ['onshore-renewables'], s7: ['water'] };
+    const sectorMap = { s1: ['offshore-wind'], s2: ['environmental-consulting'], s3: ['infrastructure'], s4: ['sustainability'], s5: ['marine'], s6: ['onshore-renewables'], s7: ['water'], s8: ['ecology'] };
     const locationMap = { l1: 'london', l2: 'scotland', l3: 'south-east', l4: 'hybrid', l5: 'nationwide', l6: 'south-west', l7: 'wales', l8: 'north', l9: 'midlands' };
     const salaryMap = { p1: 'up-to-40k', p2: '40-60', p3: '60-80', p4: '80plus' };
     const anySectors = checkedSectors.length > 0, anyLocations = checkedLocations.length > 0, anySalaries = checkedSalaries.length > 0;
@@ -1586,11 +1587,14 @@
 
   <div class="sidebar-section">
     <h3>Sector</h3>
+    <div class="sidebar-option"><input type="checkbox" id="ds8" onchange="syncFromDrawer('ds8','s8')"><label for="ds8">Ecology</label></div>
     <div class="sidebar-option"><input type="checkbox" id="ds1" onchange="syncFromDrawer('ds1','s1')"><label for="ds1">Offshore Wind</label></div>
     <div class="sidebar-option"><input type="checkbox" id="ds2" onchange="syncFromDrawer('ds2','s2')"><label for="ds2">Environmental Consulting</label></div>
     <div class="sidebar-option"><input type="checkbox" id="ds3" onchange="syncFromDrawer('ds3','s3')"><label for="ds3">Infrastructure &amp; Net Zero</label></div>
     <div class="sidebar-option"><input type="checkbox" id="ds4" onchange="syncFromDrawer('ds4','s4')"><label for="ds4">Sustainability</label></div>
     <div class="sidebar-option"><input type="checkbox" id="ds5" onchange="syncFromDrawer('ds5','s5')"><label for="ds5">Marine &amp; Coastal</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="ds6" onchange="syncFromDrawer('ds6','s6')"><label for="ds6">Solar, Onshore Wind &amp; Storage</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="ds7" onchange="syncFromDrawer('ds7','s7')"><label for="ds7">Water, Flood &amp; Drainage</label></div>
   </div>
 
   <div class="sidebar-section">
@@ -1600,10 +1604,15 @@
     <div class="sidebar-option"><input type="checkbox" id="dl3" onchange="syncFromDrawer('dl3','l3')"><label for="dl3">South East</label></div>
     <div class="sidebar-option"><input type="checkbox" id="dl4" onchange="syncFromDrawer('dl4','l4')"><label for="dl4">Remote / Hybrid</label></div>
     <div class="sidebar-option"><input type="checkbox" id="dl5" onchange="syncFromDrawer('dl5','l5')"><label for="dl5">Nationwide</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl6" onchange="syncFromDrawer('dl6','l6')"><label for="dl6">South West</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl7" onchange="syncFromDrawer('dl7','l7')"><label for="dl7">Wales</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl8" onchange="syncFromDrawer('dl8','l8')"><label for="dl8">North of England</label></div>
+    <div class="sidebar-option"><input type="checkbox" id="dl9" onchange="syncFromDrawer('dl9','l9')"><label for="dl9">Midlands</label></div>
   </div>
 
   <div class="sidebar-section">
     <h3>Salary</h3>
+    <div class="sidebar-option"><input type="checkbox" id="dp1" onchange="syncFromDrawer('dp1','p1')"><label for="dp1">Up to £40k</label></div>
     <div class="sidebar-option"><input type="checkbox" id="dp2" onchange="syncFromDrawer('dp2','p2')"><label for="dp2">£40k – £60k</label></div>
     <div class="sidebar-option"><input type="checkbox" id="dp3" onchange="syncFromDrawer('dp3','p3')"><label for="dp3">£60k – £80k</label></div>
     <div class="sidebar-option"><input type="checkbox" id="dp4" onchange="syncFromDrawer('dp4','p4')"><label for="dp4">£80k+</label></div>
@@ -1618,9 +1627,7 @@
 <script>
   function openFilterDrawer() {
     // Sync drawer checkboxes from sidebar state
-    var pairs = [['ds1','s1'],['ds2','s2'],['ds3','s3'],['ds4','s4'],['ds5','s5'],
-                 ['dl1','l1'],['dl2','l2'],['dl3','l3'],['dl4','l4'],['dl5','l5'],
-                 ['dp2','p2'],['dp3','p3'],['dp4','p4']];
+    var pairs = [['ds8','s8'],['ds1','s1'],['ds2','s2'],['ds3','s3'],['ds4','s4'],['ds5','s5'],['ds6','s6'],['ds7','s7'],['dl1','l1'],['dl2','l2'],['dl3','l3'],['dl4','l4'],['dl5','l5'],['dl6','l6'],['dl7','l7'],['dl8','l8'],['dl9','l9'],['dp1','p1'],['dp2','p2'],['dp3','p3'],['dp4','p4']];
     pairs.forEach(function(p) {
       var s = document.getElementById(p[1]);
       var d = document.getElementById(p[0]);
@@ -1651,7 +1658,7 @@
   }
 
   function clearDrawerFilters() {
-    ['ds1','ds2','ds3','ds4','ds5','dl1','dl2','dl3','dl4','dl5','dp2','dp3','dp4'].forEach(function(id) {
+    ['ds8','ds1','ds2','ds3','ds4','ds5','ds6','ds7','dl1','dl2','dl3','dl4','dl5','dl6','dl7','dl8','dl9','dp1','dp2','dp3','dp4'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.checked = false;
     });
     clearFilters();
