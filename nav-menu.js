@@ -3,7 +3,7 @@
 (function () {
   var ITEMS = [
     { label: 'Ecology recruitment', href: '/ecology-recruitment.html' },
-    { label: 'Offshore wind recruitment', href: '/offshore-wind-recruitment.html' }
+    { label: 'Offshore Wind recruitment', href: '/offshore-wind-recruitment.html' }
   ];
   var ALL = { label: 'All specialisms', href: '/index.html#specialisms' };
 
