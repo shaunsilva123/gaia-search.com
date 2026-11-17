@@ -10,7 +10,7 @@
 <meta property="og:description" content="We recruit ecologists at every stage of their careers, from Graduate to Technical Director.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://gaia-search.com/ecology-recruitment.html">
-<meta property="og:image" content="https://gaia-search.com/og-image.jpg">
+<meta property="og:image" content="https://gaia-search.com/ecology-og.jpg">
 <meta property="og:locale" content="en_GB">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
@@ -493,7 +493,8 @@
   .lvl p { font-size:0.96rem; }
 
   .specs { margin-top:4.5rem; background:#fff; border:1px solid var(--line); border-radius:44px 8px 44px 8px; padding:2.6rem 2.8rem; display:grid; grid-template-columns:0.8fr 2fr; gap:2.5rem; }
-  .specs ul { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:0.2rem 2rem; }
+  .specs ul { list-style:none; margin:0; padding:0; columns:2; column-gap:2.5rem; }
+  .specs li { break-inside:avoid; }
   .specs li { display:flex; gap:0.7rem; align-items:flex-start; padding:0.55rem 0; font-size:1rem; color:var(--ink); }
   .specs li svg { width:16px; height:16px; color:var(--leaf); flex-shrink:0; margin-top:0.25rem; }
   .specs li:nth-child(3n+2) svg { color:var(--moss-2); }
@@ -560,7 +561,7 @@
     .growth { grid-template-columns:1fr 1fr; gap:2rem 1.4rem; }
     .growth::before { display:none; }
     .specs { padding:2rem 1.6rem; }
-    .specs ul { grid-template-columns:1fr; }
+    .specs ul { columns:1; }
     .g-row { grid-template-columns:1fr auto; gap:0.35rem 1rem; }
     .g-bar { grid-column:1 / -1; grid-row:2; }
     .panel, .close-card { padding:2rem 1.6rem; }
@@ -574,7 +575,7 @@
   @media (prefers-reduced-motion:reduce){ .g-bar span { animation:none; } }
 
   .hero, .close { background:#1f2a22; }
-  video.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  video.bg, img.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .hero .shade { position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,28,18,0.78) 0%, rgba(14,28,18,0.5) 50%, rgba(14,28,18,0.12) 100%); }
   .close .shade { position:absolute; inset:0; background:rgba(14,28,18,0.55); }
   .hero { padding-bottom:9.5rem; }
@@ -613,7 +614,7 @@
 <main id="main" class="eco">
 
 <section class="hero">
-  <video class="bg" autoplay muted loop playsinline preload="metadata" poster="ecology-hero-sky-poster.jpg" data-src="ecology-hero-sky.mp4" data-mobile="ecology-hero-sky-mobile.mp4" disablepictureinpicture aria-hidden="true"></video><div class="shade"></div>
+  <picture><source media="(max-width: 768px)" srcset="ecology-hero-canopy-mobile.jpg"><img class="bg" src="ecology-hero-canopy.jpg" alt="" fetchpriority="high"></picture><div class="shade"></div>
   <div class="wrap">
     <div class="crumbs" role="navigation" aria-label="Breadcrumb"><a href="index.html">Home</a> / <a href="index.html#specialisms">Specialisms</a> / Ecology</div>
     <h1>Specialist Ecology Recruitment</h1>
