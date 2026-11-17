@@ -8,7 +8,7 @@
     url: 'https://wnzpeyrdtdxcodeezqxb.supabase.co',
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduenBleXJkdGR4Y29kZWV6cXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjkyNzksImV4cCI6MjA5NDAwNTI3OX0.zd1AdzDm7S2qzA2xsXZatE1nJynAT3j2tN-tp2g6xlA',
     bucket: 'candidate-cvs',
-    emailjs: { service: 'service_09b4hfs', template: 'template_dlc5054', publicKey: 'MadIajEVnrBSCAMNb' },
+    emailjs: { service: 'service_09b4hfs', template: 'template_dlc5054', confirmTemplate: 'template_fi1iwm8', publicKey: 'MadIajEVnrBSCAMNb' },
     alertTo: 'shaun.silva@gaia-search.com',
     crmUrl: 'https://gaia-search.com/recruitCRM.html',
     maxMB: 10
@@ -54,22 +54,28 @@
     if (!r.ok) throw new Error('Saving failed (' + r.status + ')');
   }
 
-  function sendAlert(subject, lines, replyTo) {
-    var t = CFG.emailjs.template;
-    if (!t || t.indexOf('__') === 0) return Promise.resolve();
-    var body = lines.filter(function (l) { return l !== null; }).join('\n') +
-      '\n\nOpen recruitCRM: ' + CFG.crmUrl;
+  function emailjsSend(templateId, params) {
     return fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: CFG.emailjs.service,
-        template_id: t,
-        user_id: CFG.emailjs.publicKey,
-        template_params: { subject: subject, message: body, reply_to: replyTo || CFG.alertTo, to_email: CFG.alertTo }
-      })
+      body: JSON.stringify({ service_id: CFG.emailjs.service, template_id: templateId, user_id: CFG.emailjs.publicKey, template_params: params })
     }).catch(function () {});
   }
+
+  // Alert to Shaun, then a confirmation with his signature to the person who filled in the form
+  function sendAlert(subject, lines, replyTo, ack) {
+    var body = lines.filter(function (l) { return l !== null; }).join('\n') +
+      '\n\nOpen recruitCRM: ' + CFG.crmUrl;
+    var alert = emailjsSend(CFG.emailjs.template, { subject: subject, message: body, reply_to: replyTo || CFG.alertTo });
+    if (!ack || !replyTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) return alert;
+    var confirm = emailjsSend(CFG.emailjs.confirmTemplate, {
+      to_email: replyTo, first_name: ack.firstName || 'there', ack_subject: ack.subject, ack_message: ack.message
+    });
+    return Promise.all([alert, confirm]);
+  }
+
+
+  function firstName(n) { return (String(n || '').trim().split(/\s+/)[0] || 'there').slice(0, 40); }
 
   function track(name, params) {
     try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) {}
@@ -106,7 +112,15 @@
       'CV: ' + (d.file ? d.file.name + ' (in your recruitCRM CV inbox)' : 'Not attached'),
       '',
       d.message ? 'Message:\n' + d.message : null
-    ], d.email);
+    ], d.email, d.formType === 'apply' ? {
+      firstName: firstName(d.name),
+      subject: 'Your application for ' + clip(d.jobTitle, 120),
+      message: 'Thanks for applying for the ' + clip(d.jobTitle, 120) + ' role. Your CV has reached me and I\'ll be in touch soon to talk it through.'
+    } : {
+      firstName: firstName(d.name),
+      subject: 'Thanks for registering your CV',
+      message: 'Thanks for registering your CV with Gaia Search. I\'ll be in touch when a role comes up that fits your experience.'
+    });
     track(d.formType === 'apply' ? 'job_application' : 'cv_registration', { job_title: d.jobTitle || '' });
   }
 
@@ -124,7 +138,16 @@
     lines.push('Phone: ' + (d.phone || 'Not provided'));
     lines.push('');
     Object.keys(d.details || {}).forEach(function (k) { lines.push(k + ': ' + (d.details[k] === '' ? '—' : d.details[k])); });
-    await sendAlert((d.formType === 'refer' ? 'Referral' : 'Work With Us') + ' — ' + d.name, lines, d.email);
+    var referred = d.details && d.details['Referred person'] ? clip(d.details['Referred person'], 80) : 'your contact';
+    await sendAlert((d.formType === 'refer' ? 'Referral' : 'Work With Us') + ' — ' + d.name, lines, d.email, d.formType === 'refer' ? {
+      firstName: firstName(d.name),
+      subject: 'Thanks for your referral',
+      message: 'Thanks for referring ' + referred + '. I\'ll reach out to them shortly and keep you posted. If they\'re placed in a permanent role, you\'ll receive your £500 reward once they\'ve completed 4 weeks in post.'
+    } : {
+      firstName: firstName(d.name),
+      subject: 'Thanks for getting in touch',
+      message: 'Thanks for your interest in working with Gaia Search. I\'ll keep your details on file and be in touch if a suitable opportunity opens up.'
+    });
     track(d.formType === 'refer' ? 'referral' : 'work_with_us_enquiry');
   }
 
