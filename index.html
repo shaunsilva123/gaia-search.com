@@ -754,7 +754,7 @@
 
 <section class="intro" id="about">
   <div class="intro-video-bg">
-    <video autoplay muted loop playsinline preload="auto" poster="about-section-video-poster.jpg" disablepictureinpicture aria-hidden="true">
+    <video data-lazy-video muted loop playsinline preload="none" poster="about-section-video-poster.jpg" disablepictureinpicture aria-hidden="true">
         <source src="about-section-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
         <source src="about-section-video.mp4" type="video/mp4">
     </video>
@@ -832,7 +832,7 @@
 
 <section class="why-gaia">
   <div class="why-video-bg">
-    <video autoplay muted loop playsinline preload="auto" poster="services-video-poster.jpg" disablepictureinpicture aria-hidden="true">
+    <video data-lazy-video muted loop playsinline preload="none" poster="services-video-poster.jpg" disablepictureinpicture aria-hidden="true">
         <source src="services-video-mobile.mp4" type="video/mp4" media="(max-width: 900px)">
         <source src="services-video.mp4" type="video/mp4">
     </video>
@@ -1142,5 +1142,19 @@
     banner.style.display = 'none';
   }
 })();
-</script></body>
+</script><script>
+/* Lazy background videos: only download and play when scrolled near */
+(function(){
+  var vids=document.querySelectorAll('video[data-lazy-video]');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||!vids.length) return;
+  function start(v){ v.muted=true; v.preload='auto'; var p=v.play(); if(p&&p.catch)p.catch(function(){}); }
+  if(!('IntersectionObserver' in window)){ vids.forEach(start); return; }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ start(e.target); io.unobserve(e.target); } });
+  },{rootMargin:'300px 0px'});
+  vids.forEach(function(v){ io.observe(v); });
+})();
+</script>
+</body>
 </html>
