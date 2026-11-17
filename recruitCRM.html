@@ -3737,7 +3737,7 @@ function WebEnquiriesPage(){
                 </div>
                 <div style={{fontSize:11,color:"var(--t2)",marginTop:3}}><a href={"mailto:"+r.email} style={{color:"var(--t2)"}}>{r.email}</a>{r.phone?" · "+r.phone:""}</div>
                 <div style={{fontSize:12,color:"var(--t1)",marginTop:8,lineHeight:1.6}}>
-                  {Object.keys(d).filter(k=>d[k]!==""&&d[k]!=null).map(k=><div key={k}><span style={{color:"var(--t3)"}}>{k}:</span> {/^https?:\/\//.test(String(d[k]))?<a href={d[k]} target="_blank" rel="noopener" style={{color:ACCENT}}>{d[k]}</a>:<span style={{whiteSpace:"pre-wrap"}}>{String(d[k])}</span>}</div>)}
+                  {Object.keys(d).filter(k=>d[k]!==""&&d[k]!=null).sort((a,b)=>{const O=["Referred person","Role / specialism","Their email","Their phone","Their LinkedIn","Relationship","Notes","Reward preference","Background","About them"];const ia=O.indexOf(a),ib=O.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);}).map(k=><div key={k}><span style={{color:"var(--t3)"}}>{k}:</span> {/^https?:\/\//.test(String(d[k]))?<a href={d[k]} target="_blank" rel="noopener" style={{color:ACCENT}}>{d[k]}</a>:<span style={{whiteSpace:"pre-wrap"}}>{String(d[k])}</span>}</div>)}
                 </div>
               </div>
               <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
