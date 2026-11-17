@@ -160,6 +160,7 @@
 <link rel="stylesheet" href="a11y.css">
 <link rel="stylesheet" href="type.css">
 <script src="a11y.js" defer></script>
+<script src="gaia-forms.js?v=1" defer></script>
 </head>
 <body>
 <a href="#main" class="a11y-skip">Skip to main content</a>
@@ -257,6 +258,8 @@
     <p>This takes about two minutes. We'll treat your contact's details in confidence and only use them to discuss opportunities with them.</p>
 
     <form class="refer-form" id="referForm" onsubmit="submitReferral(event)">
+      <div id="referError" role="alert" style="display:none;background:#fdecea;color:#8a1f11;border-left:3px solid #c0392b;padding:0.7rem 0.9rem;font-size:0.85rem;margin-bottom:1rem;line-height:1.5;"></div>
+
       <div class="form-heading">Your details</div>
       <div class="form-row">
         <div class="form-group"><label for="yourName">Your name *</label><input type="text" id="yourName" autocomplete="name" required></div>
@@ -315,7 +318,7 @@
     <div class="form-success" id="formSuccess">
       <div class="success-icon">✓</div>
       <h3>Thank you for the introduction</h3>
-      <p>Your email app should have opened with the referral ready to send. Once it's sent, we'll reach out to your contact and keep you posted.</p>
+      <p>Your referral is with Shaun. We'll reach out to your contact and keep you posted.</p>
     </div>
   </div>
 
@@ -376,37 +379,40 @@ function closeMobileMenu() {
 document.getElementById('donate').addEventListener('change', function () {
   document.getElementById('charityGroup').style.display = this.checked ? 'flex' : 'none';
 });
-function submitReferral(e) {
+async function submitReferral(e) {
   e.preventDefault();
   const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById('referError');
+  const showErr = m => { errBox.innerHTML = m; errBox.style.display = 'block'; errBox.scrollIntoView({block:'nearest'}); };
+  errBox.style.display = 'none';
+  if (!window.GaiaForms) return showErr('Sorry, the form didn\'t load properly. Please refresh the page, or email <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
   const donate = document.getElementById('donate').checked;
-  const reward = donate ? `Donate to charity: ${v('charity') || 'Not specified yet'}` : 'Pay to referrer';
-  const subject = encodeURIComponent(`Referral: ${v('refName')} (from ${v('yourName')})`);
-  const body = encodeURIComponent(
-`New referral from the Gaia Search website
-
-REFERRER
-Name: ${v('yourName')}
-Email: ${v('yourEmail')}
-Phone: ${v('yourPhone') || 'Not provided'}
-
-REFERRED PERSON
-Name: ${v('refName')}
-Email: ${v('refEmail')}
-Phone: ${v('refPhone') || 'Not provided'}
-LinkedIn: ${v('refLinkedIn') || 'Not provided'}
-Role / specialism: ${v('refRole')}
-Relationship: ${v('relationship')}
-
-Notes:
-${v('notes') || 'None'}
-
-Reward preference: ${reward}
-Referrer confirms the candidate agreed to share their details: Yes
-Referrer accepted referral terms: Yes`);
-  window.location.href = `mailto:hello@gaia-search.com?subject=${subject}&body=${body}`;
-  document.getElementById('referForm').style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
+  const btn = document.querySelector('#referForm .form-submit');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await GaiaForms.submitEnquiry({
+      formType: 'refer',
+      name: v('yourName'), email: v('yourEmail'), phone: v('yourPhone'),
+      details: {
+        'Referred person': v('refName'),
+        'Their email': v('refEmail'),
+        'Their phone': v('refPhone'),
+        'Their LinkedIn': v('refLinkedIn'),
+        'Role / specialism': v('refRole'),
+        'Relationship': v('relationship'),
+        'Notes': v('notes'),
+        'Reward preference': donate ? 'Donate to charity: ' + (v('charity') || 'Not specified yet') : 'Pay to referrer',
+        'Candidate agreed to share details': 'Yes',
+        'Referral terms accepted': 'Yes'
+      }
+    });
+    document.getElementById('referForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  } catch (x) {
+    showErr('Sorry, something went wrong sending your referral. Please try again, or email the details to <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send referral →';
+  }
 }
 </script>
 

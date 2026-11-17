@@ -143,6 +143,7 @@
 <link rel="stylesheet" href="a11y.css">
 <link rel="stylesheet" href="type.css">
 <script src="a11y.js" defer></script>
+<script src="gaia-forms.js?v=1" defer></script>
 </head>
 <body>
 <a href="#main" class="a11y-skip">Skip to main content</a>
@@ -216,6 +217,8 @@
     <p>We don't have any open roles right now, but we're always keen to hear from people who share our values and know the environmental or clean energy sector well. Fill in the form below and we'll reach out when something opens up.</p>
 
     <form class="interest-form" id="interestForm" onsubmit="submitInterest(event)">
+      <div id="interestError" role="alert" style="display:none;background:#fdecea;color:#8a1f11;border-left:3px solid #c0392b;padding:0.7rem 0.9rem;font-size:0.85rem;margin-bottom:1rem;line-height:1.5;"></div>
+
       <div class="form-row">
         <div class="form-group"><label for="firstName">First Name *</label><input type="text" id="firstName" placeholder="Jane" required></div>
         <div class="form-group"><label for="lastName">Last Name *</label><input type="text" id="lastName" placeholder="Smith" required></div>
@@ -273,18 +276,28 @@
 </a>
 
 <script>
-function submitInterest(e) {
+async function submitInterest(e) {
   e.preventDefault();
-  const name = document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
-  const email = document.getElementById('email').value;
-  const phone = document.getElementById('phone').value || 'Not provided';
-  const background = document.getElementById('background').value;
-  const message = document.getElementById('message').value || 'No additional message';
-  const subject = encodeURIComponent(`Work With Us — Interest Registration: ${name}`);
-  const body = encodeURIComponent(`New Interest Registration from Gaia Search Website\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nBackground: ${background}\n\nAbout them:\n${message}`);
-  window.location.href = `mailto:hello@gaia-search.com?subject=${subject}&body=${body}`;
-  document.getElementById('interestForm').style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
+  const v = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById('interestError');
+  const showErr = m => { errBox.innerHTML = m; errBox.style.display = 'block'; errBox.scrollIntoView({block:'nearest'}); };
+  errBox.style.display = 'none';
+  if (!window.GaiaForms) return showErr('Sorry, the form didn\'t load properly. Please refresh the page, or email <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
+  const btn = document.querySelector('#interestForm .form-submit');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await GaiaForms.submitEnquiry({
+      formType: 'work-with-us',
+      name: v('firstName') + ' ' + v('lastName'), email: v('email'), phone: v('phone'),
+      details: { 'Background': v('background'), 'About them': v('message') }
+    });
+    document.getElementById('interestForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  } catch (x) {
+    showErr('Sorry, something went wrong. Please try again, or email <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Register interest →';
+  }
 }
 </script>
 

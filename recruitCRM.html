@@ -3466,6 +3466,7 @@ async function storeInInbox(file,knownText){
 
 // Move an inbox CV onto a candidate's record (replacing any CV they already have)
 async function attachInboxCv(item,candId){
+  if(!item.file_path){await db.from("cv_inbox").delete().eq("id",item.id);return;}
   const{data:c}=await db.from("candidates").select("id,cv_path,cv_url").eq("id",candId).single();
   const oldPath=cvStoragePath(c);
   const{error}=await db.from("candidates").update({cv_path:item.file_path,cv_url:null,cv_filename:item.file_name,cv_text:item.cv_text||null}).eq("id",candId);
@@ -3492,7 +3493,7 @@ function CvInboxPage(){
   const load=useCallback(async()=>{
     setLoading(true);
     const[{data,error},{data:c}]=await Promise.all([
-      db.from("cv_inbox").select("id,created_at,file_path,file_name,guess_name,cv_text").order("created_at",{ascending:false}),
+      db.from("cv_inbox").select("id,created_at,file_path,file_name,guess_name,cv_text,source,form_type,email,phone,job_title,job_url,message").order("created_at",{ascending:false}),
       db.from("candidates").select("id,name,role,location,cv_path,cv_url").order("name"),
     ]);
     if(error)setErr(/cv_inbox/.test(error.message)?"The CV inbox isn't set up yet"+INBOX_HINT:error.message);
@@ -3533,15 +3534,30 @@ function CvInboxPage(){
   };
 
   const remove=async it=>{
-    if(!confirm(`Delete "${it.file_name}" from the inbox? The file is removed for good.`))return;
-    await db.storage.from("candidate-cvs").remove([it.file_path]);
+    if(!confirm(`Delete "${it.guess_name||it.file_name}" from the inbox?${it.file_path?" The CV file is removed for good.":""}`))return;
+    if(it.file_path)await db.storage.from("candidate-cvs").remove([it.file_path]);
     await db.from("cv_inbox").delete().eq("id",it.id);
     load();
   };
 
   // Read the CV with AI (if a key is set) to pre-fill the new candidate form
+  // Website CVs arrive without extracted text: read the file once and keep the text
+  const ensureText=async it=>{
+    if(it.cv_text||!it.file_path)return it.cv_text;
+    try{
+      const{data}=await db.storage.from("candidate-cvs").download(it.file_path);
+      if(!data)return null;
+      const t=await extractFileText(new File([data],it.file_name||"cv.pdf",{type:data.type}),it.file_name||"cv.pdf");
+      if(t){it.cv_text=t;await db.from("cv_inbox").update({cv_text:t}).eq("id",it.id);}
+      return t;
+    }catch(e){return null;}
+  };
+
   const startCreate=async it=>{
-    let initial={name:it.guess_name||"",notes:`CV: ${it.file_name}`};
+    const web=it.source==="website";
+    const webNote=web?[it.form_type==="apply"?`Applied via website for: ${it.job_title||"a role"}`:"Registered CV via website",it.message?`Message: ${it.message}`:null].filter(Boolean).join("\n"):null;
+    let initial={name:it.guess_name||"",email:it.email||"",phone:it.phone||"",source:web?"Website":"",notes:[webNote,it.file_name?`CV: ${it.file_name}`:null].filter(Boolean).join("\n")};
+    if(web&&!it.cv_text&&it.file_path){setParsing(it.id);await ensureText(it);setParsing(null);}
     if(getKey()&&it.cv_text){
       setParsing(it.id);
       try{
@@ -3550,7 +3566,7 @@ function CvInboxPage(){
           "CV FILENAME: "+it.file_name+"\n\nCV TEXT:\n"+it.cv_text.slice(0,6000),c=>{raw+=c;});
         const m=raw.match(/\{[\s\S]*\}/);const o=m?JSON.parse(m[0]):{};
         Object.keys(o).forEach(k=>{if(o[k]===null)delete o[k];});
-        initial={...initial,...o,skills:Array.isArray(o.skills)?o.skills.join(", "):(o.skills||""),notes:[o.notes,`CV: ${it.file_name}`].filter(Boolean).join("\n")};
+        initial={...initial,...o,email:it.email||o.email||"",phone:it.phone||o.phone||"",name:it.guess_name||o.name||"",skills:Array.isArray(o.skills)?o.skills.join(", "):(o.skills||""),notes:[webNote,o.notes,it.file_name?`CV: ${it.file_name}`:null].filter(Boolean).join("\n")};
       }catch(e){/* fall back to the guessed name */}
       setParsing(null);
     }
@@ -3563,7 +3579,8 @@ function CvInboxPage(){
   };
 
   const ql=q.trim().toLowerCase();
-  const shown=items.filter(it=>!ql||[it.file_name,it.guess_name,it.cv_text].some(v=>(v||"").toLowerCase().includes(ql)));
+  const shown=items.filter(it=>!ql||[it.file_name,it.guess_name,it.cv_text,it.email,it.job_title,it.message].some(v=>(v||"").toLowerCase().includes(ql)));
+  const webCount=items.filter(it=>it.source==="website").length;
 
   return <div>
     {creating&&<CandModal initial={creating.initial} onClose={()=>setCreating(null)}
@@ -3587,19 +3604,25 @@ function CvInboxPage(){
     {preview&&<div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setPreview(null);}}>
       <div className="modal" style={{maxWidth:640}}>
         <h3>{preview.guess_name||preview.file_name}</h3>
-        <div style={{fontSize:12,color:"var(--t3)",marginBottom:8}}>📄 {preview.file_name}</div>
+        <div style={{fontSize:12,color:"var(--t3)",marginBottom:8}}>📄 {preview.file_name||"No CV attached"}</div>
+        {preview.source==="website"&&<div style={{fontSize:12,color:"var(--t1)",lineHeight:1.6,marginBottom:8}}>
+          {preview.job_title&&<div><strong>Applied for:</strong> {preview.job_title}</div>}
+          {preview.email&&<div><strong>Email:</strong> {preview.email}</div>}
+          {preview.phone&&<div><strong>Phone:</strong> {preview.phone}</div>}
+          {preview.message&&<div style={{whiteSpace:"pre-wrap"}}><strong>Message:</strong> {preview.message}</div>}
+        </div>}
         <div style={{fontSize:12,color:"var(--t1)",lineHeight:1.6,whiteSpace:"pre-wrap",background:"var(--bg2)",borderRadius:8,padding:"10px 12px",maxHeight:"55vh",overflowY:"auto"}}>
           {preview.cv_text?preview.cv_text.slice(0,4000)+(preview.cv_text.length>4000?"…":""):"No readable text — this may be a scanned CV. Use Open to view it."}
         </div>
         <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
-          <button className="btn-o" onClick={()=>open(preview)}>Open file ↗</button>
+          {preview.file_path&&<button className="btn-o" onClick={()=>open(preview)}>Open file ↗</button>}
           <button className="btn-a" onClick={()=>setPreview(null)}>Close</button>
         </div>
       </div>
     </div>}
 
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
-      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>CV inbox ({items.length})</span>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>CV inbox ({items.length}){webCount>0&&<span style={{fontSize:11,fontWeight:600,background:"#e6f2dd",color:"#3b6d11",borderRadius:4,padding:"2px 7px",marginLeft:8}}>🌐 {webCount} from website</span>}</span>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
         <input type="text" placeholder="Search names, files and CV text…" value={q} onChange={e=>setQ(e.target.value)} style={{width:240}}/>
         <button className="btn-a" onClick={()=>fileRef.current.click()} disabled={!!upload}>⬆ Upload CVs</button>
@@ -3607,7 +3630,7 @@ function CvInboxPage(){
       </div>
     </div>
     <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
-      CVs waiting for a candidate record. Upload them here, or use <strong>📎 Bulk CV match</strong> on Candidates and store the unmatched ones.
+      CVs waiting for a candidate record. Applications and CV registrations from gaia-search.com arrive here automatically (marked 🌐). Upload CVs here, or use <strong>📎 Bulk CV match</strong> on Candidates and store the unmatched ones.
       When you're ready, <strong>Create candidate</strong> reads the CV and fills in the form for you.
     </div>
     {upload&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}><span className="spin"></span>Uploading {upload.done} of {upload.total}…</div>}
@@ -3626,7 +3649,13 @@ function CvInboxPage(){
             <div style={{width:38,height:38,borderRadius:9,background:"#fbeaf0",color:"#993556",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📄</div>
             <div style={{flex:1,minWidth:200}}>
               <div style={{fontWeight:600,fontSize:13,color:"var(--t1)"}}>{it.guess_name||<span style={{color:"var(--t3)",fontWeight:400}}>Name not found</span>}</div>
-              <div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.file_name} · added {fmtDate(it.created_at)}{!it.cv_text?" · no readable text":""}</div>
+              {it.source==="website"&&<div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",margin:"3px 0"}}>
+                <span style={{fontSize:10,fontWeight:600,background:"#e6f2dd",color:"#3b6d11",borderRadius:4,padding:"2px 6px"}}>🌐 {it.form_type==="apply"?"Website application":"Website CV registration"}</span>
+                {it.job_title&&<span style={{fontSize:11,color:"var(--t1)"}}>for {it.job_url?<a href={it.job_url} target="_blank" rel="noopener" style={{color:ACCENT}}>{it.job_title}</a>:it.job_title}</span>}
+              </div>}
+              {(it.email||it.phone)&&<div style={{fontSize:11,color:"var(--t2)"}}>{it.email&&<a href={"mailto:"+it.email} style={{color:"var(--t2)"}}>{it.email}</a>}{it.email&&it.phone?" · ":""}{it.phone}</div>}
+              {it.message&&<div style={{fontSize:11,color:"var(--t2)",marginTop:2,whiteSpace:"pre-wrap",maxHeight:48,overflow:"hidden"}}>💬 {it.message}</div>}
+              <div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.file_name||"No CV attached"} · added {fmtDate(it.created_at)}{it.file_path&&!it.cv_text&&it.source!=="website"?" · no readable text":""}</div>
               {match&&<div style={{fontSize:11,color:"#185fa5",marginTop:3}}>Possible match: <strong>{match.name}</strong>{match.role?` · ${match.role}`:""}{hasCv(match)?" (already has a CV)":""}</div>}
             </div>
             <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
@@ -3636,14 +3665,89 @@ function CvInboxPage(){
               </button>
               <button className="btn-o" style={{fontSize:12}} onClick={()=>{setAttachFor(it);setAttachPick(match?.id||"");}}>Attach to…</button>
               <span className="acts">
-                <button className="act" onClick={()=>setPreview(it)} title="Preview CV text"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                <button className="act" onClick={()=>open(it)} title="Open file"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+                <button className="act" onClick={async()=>{if(it.source==="website"&&!it.cv_text&&it.file_path){setParsing(it.id);await ensureText(it);setParsing(null);}setPreview({...it});}} title="Preview CV text"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                {it.file_path&&<button className="act" onClick={()=>open(it)} title="Open file"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>}
                 <button className="act danger" onClick={()=>remove(it)} title="Delete from inbox"><IconTrash/></button>
               </span>
             </div>
           </div>;
         })}
         {shown.length===0&&items.length>0&&<div style={{padding:"24px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>Nothing in the inbox matches "{q}".</div>}
+      </div>}
+  </div>;
+}
+
+// ── Website enquiries (referrals and Work With Us from gaia-search.com) ─────
+function WebEnquiriesPage(){
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [err,setErr]=useState("");
+  const [msg,setMsg]=useState("");
+  const [show,setShow]=useState("open");
+  const [creating,setCreating]=useState(null);
+  const load=useCallback(async()=>{
+    setLoading(true);
+    const{data,error}=await db.from("web_enquiries").select("*").order("created_at",{ascending:false});
+    if(error)setErr(/web_enquiries/.test(error.message)?"Website enquiries aren't set up yet — run website-forms-setup.sql in Supabase first.":error.message);
+    else{setErr("");setRows(data||[]);}
+    setLoading(false);
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const flash=m=>{setMsg(m);setTimeout(()=>setMsg(""),3500);};
+  const setHandled=async(r,v)=>{const{error}=await db.from("web_enquiries").update({handled:v}).eq("id",r.id);if(error)setErr(error.message);else load();};
+  const remove=async r=>{if(!confirm(`Delete this ${r.form_type==="refer"?"referral":"enquiry"} from ${r.name}?`))return;await db.from("web_enquiries").delete().eq("id",r.id);load();};
+  const createFromReferral=r=>{
+    const d=r.details||{};
+    setCreating({row:r,initial:{name:d["Referred person"]||"",email:d["Their email"]||"",phone:d["Their phone"]||"",linkedin:d["Their LinkedIn"]||"",role:d["Role / specialism"]||"",source:"Referral",
+      notes:[`Referred by ${r.name} (${r.email}${r.phone?", "+r.phone:""}) via website`,d["Relationship"]?`Relationship: ${d["Relationship"]}`:null,d["Notes"]?`Notes: ${d["Notes"]}`:null,d["Reward preference"]?`Referral reward: ${d["Reward preference"]}`:null].filter(Boolean).join("\n")}});
+  };
+  const openCount=rows.filter(r=>!r.handled).length;
+  const shown=rows.filter(r=>show==="all"||(show==="open"?!r.handled:r.handled));
+  const label=t=>t==="refer"?"Referral":t==="work-with-us"?"Work With Us":t;
+  return <div>
+    {creating&&<CandModal initial={creating.initial} onClose={()=>setCreating(null)}
+      onSaved={async row=>{if(row?.id){await db.from("web_enquiries").update({handled:true}).eq("id",creating.row.id);flash(`Created ${row.name} and marked the referral as handled`);}setCreating(null);load();}}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+      <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>Website enquiries ({openCount} open)</span>
+      <div style={{display:"flex",gap:6}}>
+        {[["open","Open"],["handled","Handled"],["all","All"]].map(([k,l])=>
+          <button key={k} className={show===k?"btn-a":"btn-o"} style={{fontSize:12,padding:"5px 12px"}} onClick={()=>setShow(k)}>{l}</button>)}
+      </div>
+    </div>
+    <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
+      Referrals and Work With Us enquiries sent from gaia-search.com. Job applications and CV registrations go to the <span style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}} onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"cvinbox"}))}>CV inbox</span>.
+    </div>
+    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+    <Err msg={err}/>
+    {loading?<Spin/>:shown.length===0&&!err
+      ?<div style={{textAlign:"center",padding:"50px 20px",color:"var(--t2)",fontSize:13,background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:12}}>
+        <div style={{fontSize:30,marginBottom:8}}>🌐</div>{show==="open"?"No open website enquiries.":"Nothing here yet."}
+      </div>
+      :<div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {shown.map(r=>{
+          const d=r.details||{};
+          return <div key={r.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 14px",opacity:r.handled?0.65:1}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:220}}>
+                <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                  <span style={{fontSize:10,fontWeight:600,background:r.form_type==="refer"?"#fbeaf0":"#e6eefb",color:r.form_type==="refer"?"#993556":"#185fa5",borderRadius:4,padding:"2px 6px"}}>{label(r.form_type)}</span>
+                  <span style={{fontWeight:600,fontSize:13,color:"var(--t1)"}}>{r.name}</span>
+                  <span style={{fontSize:11,color:"var(--t3)"}}>{fmtDate(r.created_at)}</span>
+                  {r.handled&&<span style={{fontSize:10,color:"#3b6d11"}}>✓ handled</span>}
+                </div>
+                <div style={{fontSize:11,color:"var(--t2)",marginTop:3}}><a href={"mailto:"+r.email} style={{color:"var(--t2)"}}>{r.email}</a>{r.phone?" · "+r.phone:""}</div>
+                <div style={{fontSize:12,color:"var(--t1)",marginTop:8,lineHeight:1.6}}>
+                  {Object.keys(d).filter(k=>d[k]!==""&&d[k]!=null).map(k=><div key={k}><span style={{color:"var(--t3)"}}>{k}:</span> {/^https?:\/\//.test(String(d[k]))?<a href={d[k]} target="_blank" rel="noopener" style={{color:ACCENT}}>{d[k]}</a>:<span style={{whiteSpace:"pre-wrap"}}>{String(d[k])}</span>}</div>)}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                {r.form_type==="refer"&&!r.handled&&<button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} onClick={()=>createFromReferral(r)}>✦ Create candidate</button>}
+                <button className="btn-o" style={{fontSize:12}} onClick={()=>setHandled(r,!r.handled)}>{r.handled?"Reopen":"Mark handled"}</button>
+                <span className="acts"><button className="act danger" onClick={()=>remove(r)} title="Delete"><IconTrash/></button></span>
+              </div>
+            </div>
+          </div>;
+        })}
       </div>}
   </div>;
 }
@@ -6198,6 +6302,7 @@ const NAV=[
   {k:"reporting",l:"Reporting",i:"📊",s:"main"},
   {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
   {k:"cvinbox",l:"CV inbox",i:"📥",s:"recruit"},
+  {k:"enquiries",l:"Website enquiries",i:"🌐",s:"recruit"},
   {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
   {k:"jds",l:"Job descriptions",i:"📑",s:"recruit"},
   {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
@@ -6325,6 +6430,7 @@ function AuthedApp(){
     hotlists:<HotlistsPage/>,
     jds:<JDLibraryPage/>,
     cvinbox:<CvInboxPage/>,
+    enquiries:<WebEnquiriesPage/>,
     search:<SearchResultsPage query={searchQ.q} cvFlag={searchQ.cv} nonce={searchQ.n} setPage={setPage}/>,
   };
   let lastS=null;

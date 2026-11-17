@@ -290,6 +290,7 @@
 <link rel="stylesheet" href="a11y.css">
 <link rel="stylesheet" href="type.css">
 <script src="a11y.js" defer></script>
+<script src="gaia-forms.js?v=1" defer></script>
 </head>
 <body>
 <a href="#jobsList" class="skip-link">Skip to job listings</a>
@@ -1277,12 +1278,14 @@
     </div>
     <div class="register-form-wrap">
       <form class="register-form" id="cvForm" onsubmit="submitForm(event)">
+        <div id="cvFormError" role="alert" style="display:none;background:#fdecea;color:#8a1f11;border-left:3px solid #c0392b;padding:0.7rem 0.9rem;font-size:0.85rem;margin-bottom:1rem;line-height:1.5;"></div>
         <div class="form-row">
           <div class="form-group"><label for="firstName">First Name *</label><input type="text" id="firstName" placeholder="Jane" required></div>
           <div class="form-group"><label for="lastName">Last Name *</label><input type="text" id="lastName" placeholder="Smith" required></div>
         </div>
         <div class="form-group"><label for="email">Email Address *</label><input type="email" id="email" placeholder="jane.smith@email.com" required></div>
         <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" placeholder="+44 7700 000000"></div>
+        <div class="form-group"><label for="cvFile">Your CV *</label><input type="file" id="cvFile" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required style="padding:0.6rem;"><span style="font-size:0.75rem;color:var(--text-light);">PDF or Word, up to 10MB</span></div>
         <div class="form-group">
           <label for="sector">Sector *</label>
           <select id="sector" required>
@@ -1308,9 +1311,8 @@
       </form>
       <div class="form-success" id="formSuccess">
         <div class="success-icon">✓</div>
-        <h3>Nearly there!</h3>
-        <p>Your email app should have opened with your details filled in. Please attach your CV and press send.</p>
-        <p style="margin-top:0.75rem;font-size:0.85rem;">Nothing opened? Email your CV to <a href="mailto:hello@gaia-search.com" style="color:var(--forest);">hello@gaia-search.com</a> and we'll be in touch personally.</p>
+        <h3>CV received</h3>
+        <p id="formSuccessText">Thanks for registering. Your CV is with Shaun, who will be in touch when a suitable role comes up.</p>
       </div>
     </div>
   </div>
@@ -1482,19 +1484,35 @@
     updateSidebarActions(); filterJobs();
   }
 
-  function submitForm(e) {
+  async function submitForm(e) {
     e.preventDefault();
-    const name = document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value || 'Not provided';
-    const sector = document.getElementById('sector').value;
-    const experience = document.getElementById('experience').value;
-    const message = document.getElementById('message').value || 'No additional message';
-    const subject = encodeURIComponent(`CV Registration: ${name} — ${sector}`);
-    const body = encodeURIComponent(`New CV Registration from Gaia Search Website\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nSector: ${sector}\nExperience: ${experience}\n\nAbout them:\n${message}`);
-    window.location.href = `mailto:hello@gaia-search.com?subject=${subject}&body=${body}`;
-    document.getElementById('cvForm').style.display = 'none';
-    document.getElementById('formSuccess').style.display = 'block';
+    const val = id => document.getElementById(id).value.trim();
+    const errBox = document.getElementById('cvFormError');
+    const showErr = m => { errBox.innerHTML = m; errBox.style.display = 'block'; errBox.scrollIntoView({block:'nearest'}); };
+    errBox.style.display = 'none';
+    const file = document.getElementById('cvFile').files[0];
+    if (!file) return showErr('Please attach your CV.');
+    if (!window.GaiaForms) return showErr('Sorry, the form didn\'t load properly. Please refresh the page, or email your CV to <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
+    const bad = GaiaForms.checkCv(file); if (bad) return showErr(bad);
+    const btn = document.querySelector('#cvForm .form-submit');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      await GaiaForms.submitCv({
+        formType: 'register',
+        name: val('firstName') + ' ' + val('lastName'),
+        email: val('email'),
+        phone: val('phone'),
+        message: 'Sector: ' + val('sector') + '\nExperience: ' + val('experience') + (val('message') ? '\n\n' + val('message') : ''),
+        file: file
+      });
+      document.getElementById('formSuccessText').textContent = 'Thanks, ' + val('firstName') + '. Your CV is with Shaun, who will be in touch when a suitable role comes up.';
+      document.getElementById('cvForm').style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    } catch (x) {
+      showErr('Sorry, something went wrong sending your CV. Please try again, or email it to <a href="mailto:hello@gaia-search.com">hello@gaia-search.com</a>.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send my CV →';
+    }
   }
 </script>
 
