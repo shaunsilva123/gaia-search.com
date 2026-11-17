@@ -2,7 +2,8 @@
    To add a new specialism page, add a line to ITEMS below; every page picks it up. */
 (function () {
   var ITEMS = [
-    { label: 'Ecology recruitment', href: '/ecology-recruitment.html' }
+    { label: 'Ecology recruitment', href: '/ecology-recruitment.html' },
+    { label: 'Offshore wind recruitment', href: '/offshore-wind-recruitment.html' }
   ];
   var ALL = { label: 'All specialisms', href: '/index.html#specialisms' };
 
