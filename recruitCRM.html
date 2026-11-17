@@ -4701,7 +4701,7 @@ function TasksPage(){
           sendNotif(t.title,"Due at "+t.due_time);
           showToast(t);
           // Send email reminder via EmailJS
-          emailjs.send("service_09b4hfs","template_34xvbwa",{
+          emailjs.send("service_09b4hfs","template_fi1iwm8",{
             task_title: t.title,
             due_date: t.due_date,
             priority: t.priority||"normal"
