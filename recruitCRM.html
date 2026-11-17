@@ -4701,10 +4701,10 @@ function TasksPage(){
           sendNotif(t.title,"Due at "+t.due_time);
           showToast(t);
           // Send email reminder via EmailJS
-          emailjs.send("service_09b4hfs","template_fi1iwm8",{
-            task_title: t.title,
-            due_date: t.due_date,
-            priority: t.priority||"normal"
+          emailjs.send("service_09b4hfs","template_dlc5054",{
+            subject: "Task due: "+t.title,
+            message: t.title+"\n\nDue: "+t.due_date+(t.due_time?" at "+t.due_time:"")+"\nPriority: "+(t.priority||"normal")+"\n\nOpen recruitCRM: https://gaia-search.com/recruitCRM.html",
+            reply_to: "shaun.silva@gaia-search.com"
           },"MadIajEVnrBSCAMNb").catch(err=>console.error("EmailJS error:",err));
         }
       });
