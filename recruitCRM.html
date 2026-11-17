@@ -3630,7 +3630,7 @@ function CvInboxPage(){
       </div>
     </div>
     <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
-      CVs waiting for a candidate record. Applications and CV registrations from gaia-search.com arrive here automatically (marked 🌐). Upload CVs here, or use <strong>📎 Bulk CV match</strong> on Candidates and store the unmatched ones.
+      CVs waiting for a candidate record. Applications and CV registrations from gaia-search.com now go straight into Candidates (source: Website). Upload CVs here, or use <strong>📎 Bulk CV match</strong> on Candidates and store the unmatched ones.
       When you're ready, <strong>Create candidate</strong> reads the CV and fills in the form for you.
     </div>
     {upload&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}><span className="spin"></span>Uploading {upload.done} of {upload.total}…</div>}
@@ -6393,6 +6393,25 @@ function AuthedApp(){
   const [activeJob,setActiveJob]=useState(null);
   const [searchQ,setSearchQ]=useState({q:"",cv:false,n:0});
   const [navOpen,setNavOpen]=useState(false); // phone menu
+  // Website applicants are created as candidates by the database; read their CVs here
+  // (once, in the background) so they show up in "search inside CVs"
+  useEffect(()=>{
+    let stop=false;
+    (async()=>{
+      try{
+        const{data}=await db.from("candidates").select("id,cv_path,cv_filename").eq("source","Website").is("cv_text",null).not("cv_path","is",null).limit(20);
+        for(const c of data||[]){
+          if(stop)return;
+          const{data:blob}=await db.storage.from("candidate-cvs").download(c.cv_path);
+          if(!blob)continue;
+          const name=c.cv_filename||"cv.pdf";
+          const t=await extractFileText(new File([blob],name,{type:blob.type}),name);
+          if(t)await db.from("candidates").update({cv_text:t}).eq("id",c.id);
+        }
+      }catch(e){console.warn("Website CV text:",e);}
+    })();
+    return()=>{stop=true;};
+  },[]);
   useEffect(()=>{
     const h=e=>{
       const d=typeof e.detail==="string"?{q:e.detail,cv:false}:e.detail;
