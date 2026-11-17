@@ -604,6 +604,8 @@
   @media (max-width:900px){ .g-row { grid-template-columns:1fr auto; } .c-rate { margin-left:0; } }
   .hero h1 { max-width:14ch; }
   .noq-text { font-family:'Cormorant Garamond',serif; font-size:1.45rem !important; line-height:1.45 !important; color:var(--moss) !important; margin:0 !important; }
+  .hero .hero-note { display:inline-flex; align-items:center; gap:0.8rem; margin:2.6rem 0 0; max-width:none; padding:0.7rem 1.2rem 0.7rem 1rem; border-radius:999px; background:rgba(10,24,14,0.45); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); font-size:0.98rem; line-height:1.4; color:#e4eedd; }
+  @media (max-width:600px){ .hero .hero-note { border-radius:16px; align-items:flex-start; } .hero .hero-note .pin { margin-top:0.35rem; } }
   .draft-banner { position:fixed; bottom:0; left:0; right:0; z-index:9998; background:#a8322a; color:#fff; text-align:center; font:600 0.78rem 'DM Sans',sans-serif; padding:0.35rem; }
 </style>
 </head>
@@ -768,7 +770,7 @@
 </section>
 
 <section class="close">
-  <img class="bg" src="offshore-wind-close.jpg" alt="" loading="lazy"><div class="shade"></div>
+  <video class="bg" autoplay muted loop playsinline preload="metadata" poster="offshore-wind-close.jpg" data-src="offshore-wind-close.mp4" data-mobile="about-video-mobile.mp4" disablepictureinpicture aria-hidden="true"></video><div class="shade"></div>
   <div class="edge-top"><svg class="edge" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0,0 L1440,0 L1440,30 C1200,0 1010,62 740,38 C470,14 250,66 0,26 Z" fill="currentColor"/></svg></div>
   <div class="wrap">
     <div class="close-card">
