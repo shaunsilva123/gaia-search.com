@@ -305,7 +305,7 @@
             message: v('#gf-msg'), jobTitle: jobTitle, jobUrl: jobUrl, file: file
           });
           form.reset(); drop._file = null; setFile(null);
-          o.querySelector('.gf-done-text').textContent = 'Thanks, ' + first + '. Your application for ' + jobTitle + ' is with Gaia Search. We'll be in touch soon.';
+          o.querySelector('.gf-done-text').textContent = 'Thanks, ' + first + '. Your application for ' + jobTitle + ' is with Gaia Search. We\'ll be in touch soon.';
           form.style.display = 'none'; o.querySelector('.gf-done').style.display = 'block';
         } catch (x) {
           showErr('Sorry, something went wrong sending your application. Please try again, or email your CV to <a href="mailto:shaun.silva@gaia-search.com?subject=' + encodeURIComponent('Application: ' + jobTitle) + '">shaun.silva@gaia-search.com</a>.');
