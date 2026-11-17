@@ -594,6 +594,14 @@
   .promise.alt { background:var(--lichen); }
   @media (max-width:900px){ .hero .shade { background:rgba(14,28,18,0.62); } .close { padding:7rem 0 5rem; } }
   .quote.noq::before { content:none; }
+  .grow { max-width:900px; gap:1rem; margin-top:2rem; }
+  .g-row { grid-template-columns:300px 1fr 170px; }
+  .contract { display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem 1.2rem; max-width:900px; margin:0.4rem 0 1.6rem; padding:1rem 1.3rem; background:#fff; border:1px solid var(--line); border-radius:16px; }
+  .c-tag { font-size:0.8rem; font-weight:600; color:var(--moss); background:var(--sage); padding:0.25rem 0.7rem; border-radius:999px; }
+  .c-role { color:var(--ink); }
+  .c-rate { margin-left:auto; font-weight:600; color:var(--moss); }
+  .intro p + p { margin-top:0.2rem; }
+  @media (max-width:900px){ .g-row { grid-template-columns:1fr auto; } .c-rate { margin-left:0; } }
   .hero h1 { max-width:14ch; }
   .noq-text { font-family:'Cormorant Garamond',serif; font-size:1.45rem !important; line-height:1.45 !important; color:var(--moss) !important; margin:0 !important; }
   .draft-banner { position:fixed; bottom:0; left:0; right:0; z-index:9998; background:#a8322a; color:#fff; text-align:center; font:600 0.78rem 'DM Sans',sans-serif; padding:0.35rem; }
@@ -713,8 +721,8 @@
         <div class="g-row"><span class="g-lvl">Principal Ornithologist</span><span class="g-bar"><span style="width:75%;--d:1"></span></span><span class="g-val">£50,000–£60,000+</span></div>
         <div class="g-row"><span class="g-lvl">Environmental Manager – Operations</span><span class="g-bar"><span style="width:82%;--d:2"></span></span><span class="g-val">£44,000–£65,900</span></div>
         <div class="g-row"><span class="g-lvl">Head of Consent Compliance</span><span class="g-bar"><span style="width:100%;--d:3"></span></span><span class="g-val">Around £80,000</span></div>
-        <div class="g-row"><span class="g-lvl">Lead Offshore Consents Manager (Contract)</span><span class="g-bar" style="background:none;"></span><span class="g-val">£750–£850 per day, inside IR35</span></div>
     </div>
+    <div class="contract"><span class="c-tag">Contract</span><span class="c-role">Lead Offshore Consents Manager</span><span class="c-rate">£750–£850 per day, inside IR35</span></div>
     <p class="small">These are advertised salaries for specific vacancies rather than salary ranges for the sector as a whole. Pay will depend on experience, location and the nature of the role.</p>
   </div>
 </section>
