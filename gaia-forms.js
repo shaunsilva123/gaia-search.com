@@ -8,7 +8,7 @@
     url: 'https://wnzpeyrdtdxcodeezqxb.supabase.co',
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduenBleXJkdGR4Y29kZWV6cXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjkyNzksImV4cCI6MjA5NDAwNTI3OX0.zd1AdzDm7S2qzA2xsXZatE1nJynAT3j2tN-tp2g6xlA',
     bucket: 'candidate-cvs',
-    emailjs: { service: 'service_09b4hfs', template: '__EMAILJS_TEMPLATE__', publicKey: 'MadIajEVnrBSCAMNb' },
+    emailjs: { service: 'service_09b4hfs', template: 'template_dlc5054', publicKey: 'MadIajEVnrBSCAMNb' },
     alertTo: 'shaun.silva@gaia-search.com',
     crmUrl: 'https://gaia-search.com/recruitCRM.html',
     maxMB: 10
