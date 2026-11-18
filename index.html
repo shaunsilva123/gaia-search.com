@@ -326,14 +326,6 @@
     border: none;
   }
   .spec-card:hover { background: var(--forest); }
-  .spec-card.spec-wide { grid-column: 1 / -1; display: grid !important; grid-template-columns: auto 1fr auto; align-items: center; column-gap: 1.6rem; }
-  .spec-card.spec-wide .spec-icon { margin: 0; }
-  .spec-card.spec-wide .spec-name { margin: 0; }
-  .spec-card.spec-wide .spec-desc { grid-column: 2; margin: 0.3rem 0 0 !important; }
-  .spec-card.spec-wide .spec-name { grid-column: 2; }
-  .spec-card.spec-wide .spec-icon { grid-row: 1 / span 3; }
-  .spec-card.spec-wide .spec-desc:last-child { grid-column: 3; grid-row: 1 / span 3; margin: 0 !important; white-space: nowrap; }
-  @media (max-width: 700px) { .spec-card.spec-wide { display: block !important; } .spec-card.spec-wide .spec-icon { margin-bottom: 1rem; } .spec-card.spec-wide .spec-desc:last-child { margin-top: 0.7rem !important; white-space: normal; } }
   .spec-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; filter: grayscale(0.3); }
   .spec-name {
     font-family: 'Cormorant Garamond', serif;
@@ -828,22 +820,17 @@
         <div class="spec-desc">Marine ecology, hydrography, coastal engineering and environmental impact.</div>
         <div class="spec-desc" style="margin-top:0.7rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Marine &amp; Coastal recruitment</div>
       </a>
-      <div class="spec-card">
-        <span class="spec-icon">🏗️</span>
-        <div class="spec-name">Infrastructure & Net Zero</div>
-        <div class="spec-desc">Decarbonisation, transport, energy networks and green infrastructure.</div>
-      </div>
-      <div class="spec-card">
-        <span class="spec-icon">📋</span>
-        <div class="spec-name">Sustainability & Policy</div>
-        <div class="spec-desc">ESG strategy, corporate sustainability, climate policy and reporting.</div>
-      </div>
-      <a class="spec-card spec-wide" href="flood-risk-water-recruitment.html" style="display:block;color:inherit;text-decoration:none;cursor:pointer;">
+      <a class="spec-card" href="flood-risk-water-recruitment.html" style="display:block;color:inherit;text-decoration:none;cursor:pointer;">
         <span class="spec-icon">💧</span>
         <div class="spec-name">Flood Risk & Water</div>
         <div class="spec-desc">Flood risk assessment, drainage, hydrology and water and wastewater network modelling.</div>
         <div class="spec-desc" style="margin-top:0.7rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Flood Risk &amp; Water recruitment</div>
       </a>
+      <div class="spec-card">
+        <span class="spec-icon">📋</span>
+        <div class="spec-name">Sustainability, Policy & Net Zero</div>
+        <div class="spec-desc">Net zero and decarbonisation strategy, ESG, corporate sustainability, climate policy and reporting.</div>
+      </div>
     </div>
   </div>
 </section>
