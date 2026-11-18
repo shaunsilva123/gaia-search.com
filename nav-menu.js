@@ -20,6 +20,17 @@
     '.nav-drop li.all{border-top:1px solid #e3ecd9;margin-top:.35rem;padding-top:.35rem}' +
     '.nav-drop li.all a{font-weight:500;color:#4f5e52 !important}' +
     '.mobile-menu a.mm-sub{font-size:1rem;letter-spacing:.02em;text-transform:none;font-weight:500;color:#c9e4b8;margin-top:-1.3rem}' +
+    '@media (max-width:900px){' +
+      '.nav-links.open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:#1b4a1b;padding:.4rem 1.5rem 1.6rem;box-shadow:0 14px 28px rgba(0,0,0,.28);max-height:calc(100vh - 70px);overflow-y:auto}' +
+      '.nav-links.open>li>a{display:block;padding:.95rem 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:1rem}' +
+      '.nav-links.open>li>a.nav-cta{display:inline-block;margin-top:1.2rem;padding:.8rem 1.5rem;border-bottom:0}' +
+      '.nav-links.open li.has-drop>a::after{display:none}' +
+      '.nav-links.open .nav-drop{position:static;opacity:1;visibility:visible;transform:none;padding:.2rem 0 .4rem;min-width:0}' +
+      '.nav-links.open .nav-drop ul{background:transparent;box-shadow:none;padding:0 0 0 1rem;border-radius:0}' +
+      '.nav-links.open .nav-drop li a{color:#c9e4b8 !important;padding:.6rem 0;font-weight:500}' +
+      '.nav-links.open .nav-drop li a:hover{background:transparent}' +
+      '.nav-links.open .nav-drop li.all{border-top:0;margin:0;padding:0}' +
+    '}' +
     '@media (prefers-reduced-motion:reduce){.nav-drop{transition:none}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
@@ -41,10 +52,15 @@
     li.addEventListener('mouseleave', function () { set(false); });
     // Touch screens: first tap opens the menu, second tap follows the link
     a.addEventListener('click', function (e) {
-      if (window.matchMedia('(hover: none)').matches && !li.classList.contains('open')) { e.preventDefault(); set(true); }
+      if (window.matchMedia('(hover: none)').matches && window.innerWidth > 900 && !li.classList.contains('open')) { e.preventDefault(); set(true); }
     });
     document.addEventListener('click', function (e) { if (!li.contains(e.target)) set(false); });
     li.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); a.focus(); } });
+  });
+
+  // Close the phone menu after choosing a link
+  document.querySelectorAll('.nav-links').forEach(function (ul) {
+    ul.addEventListener('click', function (e) { if (e.target.closest('a') && ul.classList.contains('open')) ul.classList.remove('open'); });
   });
 
   document.querySelectorAll('.mobile-menu').forEach(function (m) {

@@ -810,7 +810,9 @@ document.querySelectorAll('video.bg').forEach(function(v){if(r){v.removeAttribut
 <script>
   function toggleNav() {
     const links = document.querySelector('.nav-links');
-    links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+    const open = links.classList.toggle('open');
+    const b = document.querySelector('.nav-hamburger');
+    if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 </script>
 
@@ -896,6 +898,6 @@ document.querySelectorAll('video.bg').forEach(function(v){if(r){v.removeAttribut
     }
   })();
 </script>
-<script src="/nav-menu.js?v=4" defer></script>
+<script src="/nav-menu.js?v=5" defer></script>
 </body>
 </html>
