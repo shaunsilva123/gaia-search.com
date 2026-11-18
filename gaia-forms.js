@@ -115,7 +115,7 @@
     ], d.email, d.formType === 'apply' ? {
       firstName: firstName(d.name),
       subject: 'Your application for ' + clip(d.jobTitle, 120),
-      message: 'Thanks for applying for the ' + clip(d.jobTitle, 120) + ' role. Your CV has reached me and I\'ll be in touch soon to talk it through.'
+      message: 'Thanks for applying for the ' + clip(d.jobTitle, 120) + ' role. ' + (d.file ? 'Your CV has reached me and I\'ll be in touch soon to talk it through.' : 'Your application has reached me and I\'ll give you a call soon to talk it through. No need to worry about a CV for now, we can sort that together.')
     } : {
       firstName: firstName(d.name),
       subject: 'Thanks for registering your CV',
@@ -210,15 +210,15 @@
       '</div>' +
       '<div class="gf-row">' +
       '<div class="gf-field"><label for="gf-email">Email *</label><input type="email" id="gf-email" autocomplete="email" required maxlength="200"></div>' +
-      '<div class="gf-field"><label for="gf-phone">Phone</label><input type="tel" id="gf-phone" autocomplete="tel" maxlength="50"></div>' +
+      '<div class="gf-field"><label for="gf-phone">Phone <span class="gf-phone-req" style="font-weight:400;color:#686868">(needed if no CV)</span></label><input type="tel" id="gf-phone" autocomplete="tel" maxlength="50"></div>' +
       '</div>' +
-      '<div class="gf-field"><label for="gf-cv">Your CV *</label>' +
-      '<label class="gf-file" id="gf-drop"><input type="file" id="gf-cv" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>' +
+      '<div class="gf-field"><label for="gf-cv">Your CV <span style="font-weight:400;color:#686868">(optional)</span></label>' +
+      '<label class="gf-file" id="gf-drop"><input type="file" id="gf-cv" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">' +
       '<span class="gf-file-text"><strong>Choose a file</strong> or drag it here</span></label>' +
-      '<div class="gf-hint">PDF or Word, up to 10MB</div></div>' +
+      '<div class="gf-hint">PDF or Word, up to 10MB. No CV? No problem. Just add your phone number and I\'ll give you a call.</div></div>' +
       '<div class="gf-field"><label for="gf-msg">Anything you\'d like to add? <span style="font-weight:400;color:#686868">(optional)</span></label><textarea id="gf-msg" rows="3" maxlength="3000" placeholder="Notice period, salary expectations, location preferences…"></textarea></div>' +
       '<div class="gf-hp" aria-hidden="true"><label>Leave this empty<input type="text" id="gf-website" tabindex="-1" autocomplete="off"></label></div>' +
-      '<label class="gf-check"><input type="checkbox" id="gf-consent" required><span>I agree to Gaia Search storing my details and CV to consider me for this and similar roles. See our <a href="' + base + 'privacy.html" target="_blank">Privacy Policy</a>. *</span></label>' +
+      '<label class="gf-check"><input type="checkbox" id="gf-consent" required><span>I agree to Gaia Search storing my details (and CV, if attached) to consider me for this and similar roles. See our <a href="' + base + 'privacy.html" target="_blank">Privacy Policy</a>. *</span></label>' +
       '<button type="submit" class="gf-submit">Send application</button>' +
       '</form>' +
       '<div class="gf-done" aria-live="polite"><div class="gf-tick">✓</div><h3>Application sent</h3><p class="gf-done-text"></p><button type="button" class="gf-done-close">Close</button></div>' +
@@ -293,15 +293,16 @@
         if (v('#gf-website')) { form.style.display = 'none'; o.querySelector('.gf-done').style.display = 'block'; return; }
         if (!first || !last) return showErr('Please enter your first and last name.');
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Please enter a valid email address.');
-        if (!file) return showErr('Please attach your CV.');
-        var bad = checkCv(file); if (bad) return showErr(bad);
+        var phone = v('#gf-phone');
+        if (!file && phone.replace(/[^0-9]/g, '').length < 7) return showErr('Please attach your CV, or add your phone number so we can give you a call.');
+        if (file) { var bad = checkCv(file); if (bad) return showErr(bad); }
         if (!o.querySelector('#gf-consent').checked) return showErr('Please tick the box to agree to us storing your details.');
 
         var btn = form.querySelector('.gf-submit');
         btn.disabled = true; btn.textContent = 'Sending…';
         try {
           await submitCv({
-            formType: 'apply', name: first + ' ' + last, email: email, phone: v('#gf-phone'),
+            formType: 'apply', name: first + ' ' + last, email: email, phone: phone,
             message: v('#gf-msg'), jobTitle: jobTitle, jobUrl: jobUrl, file: file
           });
           form.reset(); drop._file = null; setFile(null);
