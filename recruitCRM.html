@@ -52,7 +52,8 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .fr{margin-bottom:12px}
 .fr label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.btn-a{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-a{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:var(--g-face);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-a:hover:not(:disabled){filter:brightness(1.08)}
 .btn-a:disabled{opacity:0.6;cursor:default}
 .btn-o{background:transparent;border:0.5px solid var(--brm);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--t1);display:inline-flex;align-items:center;gap:5px}
 .btn-o:hover{background:var(--bg2)}
@@ -72,6 +73,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .today-check:hover{border-color:var(--g-deep);background:rgba(95,169,43,0.25)}
 .fee-break .g-num{font-size:13px!important;letter-spacing:-0.2px!important}
 .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px}
+.nav-head{font-family:var(--g-face);font-size:10px;font-weight:700;color:rgba(160,168,184,0.5);padding:14px 16px 5px;text-transform:uppercase;letter-spacing:1.2px}
+.nav-item{display:flex;align-items:center;gap:10px;margin:1px 8px;padding:7px 10px;border-radius:8px;color:#a0a8b8;cursor:pointer;font-size:13px;transition:background 0.12s,color 0.12s}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:#dfe3ea}
+.nav-item.on{background:rgba(160,208,69,0.14);color:#fff}
+.nav-item.on svg{color:#a0d045}
+.icon-btn{background:none;border:0.5px solid var(--brm);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--t2);line-height:1;display:inline-flex;align-items:center}
+.icon-btn:hover{background:var(--bg2);color:var(--t1)}
 .g-pill{font-family:var(--g-face);font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;border-radius:20px;padding:3px 9px;background:rgba(95,169,43,0.16);color:var(--g-deep);flex-shrink:0}
 .g-stat{background:var(--g-cream);border:0.5px solid var(--br);border-radius:12px;padding:14px 16px}
 .g-stat .r{height:2px;width:22px;background:var(--g-green);border-radius:2px;margin-bottom:9px}
@@ -283,9 +291,45 @@ function AiTag(){return <span style={{display:"flex",alignItems:"center",gap:5,f
 function Err({msg}){return msg?<div className="err">{msg}</div>:null;}
 function Spin(){return <div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}><span className="spin"></span>Loading…</div>;}
 
+
+// ── Line icons: one consistent set instead of emoji ───────────────────────
+const ICON_PATHS={
+  home:"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z",
+  check:"M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
+  users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  briefcase:"M3 7h18v13H3zM16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M3 13h18",
+  building:"M4 21V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M2 21h20M8 7h3M8 11h3M8 15h3",
+  award:"M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.2 13.9 7 22l5-3 5 3-1.2-8.1",
+  inbox:"M22 12h-6l-2 3h-4l-2-3H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+  globe:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20",
+  send:"M22 2 11 13M22 2l-7 20-4-9-9-4z",
+  trend:"M22 7l-8.5 8.5-5-5L2 17M16 7h6v6",
+  star:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z",
+  chart:"M3 3v18h18M7 16v-5M12 16V7M17 16v-8",
+  list:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+  doc:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8",
+  scan:"M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M8 12h8",
+  target:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  pen:"M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z",
+  mail:"M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
+  upload:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
+  bell:"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
+  moon:"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z",
+  sun:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42",
+  search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35",
+  phone:"M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z",
+  handshake:"M8 12l3 3 6-6M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+  plus:"M12 5v14M5 12h14",
+  pound:"M18 7a4 4 0 0 0-8 0v5H6M6 20h12M10 12v8",
+  chevron:"M9 18l6-6-6-6",
+};
+function Icon({n,size=16,stroke=1.6,style}){
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,display:"block",...style}} aria-hidden="true"><path d={ICON_PATHS[n]||""}/></svg>;
+}
+
 function Panel({title,badge,actions,children,style={}}){
-  return <div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:8,overflow:"hidden",...style}}>
-    <div style={{padding:"11px 15px",borderBottom:"0.5px solid var(--br)",fontWeight:500,fontSize:13,color:"var(--t1)",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+  return <div style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:14,overflow:"hidden",...style}}>
+    <div style={{padding:"13px 18px",borderBottom:"0.5px solid var(--br)",fontFamily:"var(--g-face)",fontWeight:600,fontSize:13,color:"var(--t1)",display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
       <span style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>{title}{badge&&<span>{badge}</span>}</span>
       {actions}
     </div>
@@ -1460,7 +1504,7 @@ function MoneyToChase({setPage}){
   </div>:null;
   return <div className="g-canvas">
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12}}>
-      <div className="g-eyebrow">💷 Money to chase</div>
+      <div className="g-eyebrow">Money to chase</div>
       <button onClick={()=>setPage("placements")} style={{background:"none",border:"none",color:"var(--g-deep)",cursor:"pointer",fontSize:11,fontWeight:600,fontFamily:"var(--g-face)"}}>Placements →</button>
     </div>
     <Group title="Overdue invoices" list={overdue}>{overdue.map(x=><Row key={x.p.id} x={x} colour="#c0392b" right={`⚠️ ${x.m.daysLate} day${x.m.daysLate!==1?"s":""} overdue · was due ${niceDate(x.m.dueDate)}`}/>)}</Group>
@@ -1477,8 +1521,8 @@ function DarkModeToggle(){
     document.body.classList.toggle("dark",dark);
     localStorage.setItem("crm_dark",dark?"1":"0");
   },[dark]);
-  return <button onClick={()=>setDark(d=>!d)} title={dark?"Light mode":"Dark mode"} style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:7,padding:"4px 9px",cursor:"pointer",fontSize:15,color:"var(--t2)",lineHeight:1}}>
-    {dark?"☀️":"🌙"}
+  return <button onClick={()=>setDark(d=>!d)} title={dark?"Light mode":"Dark mode"} aria-label={dark?"Light mode":"Dark mode"} className="icon-btn">
+    <Icon n={dark?"sun":"moon"} size={15}/>
   </button>;
 }
 
@@ -1555,7 +1599,7 @@ function GlobalSearch({setPage}){
 
   return <div ref={ref} style={{position:"relative"}}>
     <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--bg2)",border:"0.5px solid var(--brm)",borderRadius:8,padding:"5px 10px",width:220}} className="global-search">
-      <span onClick={seeAll} title="See all results" style={{color:"var(--t3)",fontSize:13,cursor:"pointer"}}>🔍</span>
+      <span onClick={seeAll} title="See all results" style={{color:"var(--t3)",cursor:"pointer"}}><Icon n="search" size={14}/></span>
       <input type="text" value={q} onChange={e=>{setQ(e.target.value);setOpen(true);}} onFocus={()=>{setOpen(true);db.from("saved_searches").select("id,name,query,include_cv").order("name").then(({data,error})=>setSavedList(error?[]:data||[]));}}
         onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();seeAll();}if(e.key==="Escape")setOpen(false);}}
         placeholder="Search… (⌘K)" style={{border:"none",background:"transparent",outline:"none",fontSize:12,color:"var(--t1)",width:"100%",padding:0}}/>
@@ -2849,14 +2893,14 @@ function CandidatesPage(){
         <button className={deep?"btn-a":"btn-o"} style={{fontSize:12,padding:"6px 12px"}}
           onClick={()=>setDeep(d=>!d)}
           title="Also search the text inside uploaded CVs">
-          {deepBusy?<><span className="spin"></span>Searching…</>:"🔍 Search CVs"}
+          {deepBusy?<><span className="spin"></span>Searching…</>:<><Icon n="search" size={13}/>Search CVs</>}
         </button>
         <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{width:"auto"}}>{statuses.map(s=><option key={s}>{s}</option>)}</select>
         <button className={showFilters||activeFilters?"btn-a":"btn-o"} style={{fontSize:12,padding:"6px 12px"}} onClick={()=>setShowFilters(v=>!v)}>
-          🌿 Filters{activeFilters?` (${activeFilters})`:""}
+          <Icon n="list" size={13}/>Filters{activeFilters?` (${activeFilters})`:""}
         </button>
-        <button className="btn-o" style={{fontSize:12}} onClick={exportCSV} title="Export to CSV">⬇ Export CSV</button>
-        <button className="btn-o" style={{fontSize:12}} onClick={()=>setBulkCv(true)} title="Match a batch of CV files to candidates">📎 Bulk CV match</button>
+        <button className="btn-o" style={{fontSize:12}} onClick={exportCSV} title="Export to CSV"><Icon n="upload" size={13} style={{transform:"rotate(180deg)"}}/>Export CSV</button>
+        <button className="btn-o" style={{fontSize:12}} onClick={()=>setBulkCv(true)} title="Match a batch of CV files to candidates"><Icon n="doc" size={13}/>Bulk CV match</button>
         <button className="btn-a" onClick={()=>setModal(true)}>+ Add candidate <span style={{opacity:0.6,fontSize:10,marginLeft:2}}>N</span></button>
       </div>
     </div>
@@ -2951,7 +2995,7 @@ function CandidatesPage(){
               <div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}{hasCv(c)&&<span title="CV attached" style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
               {c.email&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}
             </div></div></td>
-            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}{c.current_employer&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis"}}>🏢 {c.current_employer}</div>}</td>
+            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}{c.current_employer&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis"}}>{c.current_employer}</div>}</td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
             <td className="td"><span style={{fontSize:11,color:lcColor,fontWeight:ds!==null?500:400}}>{ds===null?"Never":ds===0?"Today":ds===1?"Yesterday":`${ds}d ago`}</span></td>
             <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.licences||[]).slice(0,2).map(l=><span key={l} title={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{LICENCE_ICON(l)} {LICENCE_SHORT(l)}</span>)}{(c.skills||[]).slice(0,(c.licences||[]).length?1:2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
@@ -4482,13 +4526,13 @@ const STAGES=["Applied","Screening","Interview","2nd Interview","Offer","Placed"
 // Rejected is an outcome, not a funnel step — excluded from the progress bar
 const FUNNEL_STAGES=STAGES.filter(s=>s!=="Rejected");
 const STAGE_COLORS={
-  "Applied":    {bg:"#eef0f4",fg:"#5b6577",bar:"#5b6577"},
-  "Screening":  {bg:"#faeeda",fg:"#854f0b",bar:"#ba7517"},
-  "Interview":  {bg:"#fbeaf0",fg:"#993556",bar:"#d4537e"},
-  "2nd Interview":{bg:"#eeedfe",fg:"#534ab7",bar:"#7f77dd"},
-  "Offer":      {bg:"#e6f1fb",fg:"#185fa5",bar:"#378add"},
-  "Placed":     {bg:"#eaf3de",fg:"#3b6d11",bar:"#639922"},
-  "Rejected":   {bg:"#fcebeb",fg:"#a32d2d",bar:"#c94a4a"},
+  "Applied":    {bg:"rgba(17,17,17,0.05)",fg:"var(--t2)",bar:"#c9c9c3"},
+  "Screening":  {bg:"rgba(17,17,17,0.05)",fg:"var(--t2)",bar:"#a9a9a2"},
+  "Interview":  {bg:"rgba(160,208,69,0.16)",fg:"var(--g-deep)",bar:"#c3e57a"},
+  "2nd Interview":{bg:"rgba(160,208,69,0.22)",fg:"var(--g-deep)",bar:"#a0d045"},
+  "Offer":      {bg:"rgba(95,169,43,0.20)",fg:"var(--g-deep)",bar:"#5fa92b"},
+  "Placed":     {bg:"rgba(46,122,44,0.20)",fg:"var(--g-deep)",bar:"#2e7a2c"},
+  "Rejected":   {bg:"rgba(17,17,17,0.04)",fg:"var(--t3)",bar:"#d8d8d2"},
 };
 
 function JobPipelinePage({job, onBack}){
@@ -6399,8 +6443,8 @@ function WeeklyScorecard({setPage}){
   const pace=dow>=5?1:Math.min(1,(dow*8+hrs)/40);
   const avg=k=>Math.round(((data[1][k]+data[2][k]+data[3][k]+data[4][k])/4)*10)/10;
   const metrics=[
-    ["calls","📞 Calls & meetings"],["messages","✉️ Messages sent"],["client","🏢 Client touches"],
-    ["cvs","📄 CVs sent to clients"],["interviews","🤝 Interviews"],["placements","🏆 Placements"],["newCands","➕ New candidates"],
+    ["calls","Calls & meetings"],["messages","Messages sent"],["client","Client touches"],
+    ["cvs","CVs sent to clients"],["interviews","Interviews"],["placements","Placements"],["newCands","New candidates"],
   ];
   const nothingLogged=data.every(b=>b.calls+b.messages+b.client===0);
   return <div className="g-canvas">
@@ -6603,17 +6647,17 @@ function ReportingPage(){
         <StatBox label="Total Candidates" value={data.totalCandidates||0}/>
         <StatBox label="Total Jobs" value={data.totalJobs||0}/>
         <StatBox label="Total Companies" value={data.totalCompanies||0}/>
-        <StatBox label="New Candidates" value={data.newCandidates} sub={`This ${period}`} color="#185fa5"/>
+        <StatBox label="New Candidates" value={data.newCandidates} sub={`This ${period}`} color="var(--g-deep)"/>
       </div>
       {/* KPI row 2 — pipeline funnel */}
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:16,marginBottom:14}}>
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:12,textTransform:"uppercase",letterSpacing:"0.4px",fontWeight:500}}>Recruitment funnel — this {period}</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
           {[
-            {label:"CVs Sent",value:data.submittals,color:"#854f0b",bg:"#faeeda"},
-            {label:"Interviews",value:data.interviews,color:"#185fa5",bg:"#e6f1fb"},
-            {label:"Offers Made",value:data.offers,color:"#993556",bg:"#fbeaf0"},
-            {label:"Placed",value:data.placed,color:"#3b6d11",bg:"#eaf3de"},
+            {label:"CVs Sent",value:data.submittals,color:"#a9a9a2",bg:"rgba(17,17,17,0.05)"},
+            {label:"Interviews",value:data.interviews,color:"#a0d045",bg:"rgba(160,208,69,0.16)"},
+            {label:"Offers Made",value:data.offers,color:"#5fa92b",bg:"rgba(95,169,43,0.18)"},
+            {label:"Placed",value:data.placed,color:"#2e7a2c",bg:"rgba(46,122,44,0.18)"},
           ].map((item,i,arr)=>{
             const max=arr[0].value||1;
             const pct=Math.round((item.value/max)*100)||0;
@@ -6632,7 +6676,7 @@ function ReportingPage(){
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
         <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:16}}>
           <div style={{fontSize:11,color:"var(--t2)",marginBottom:12,textTransform:"uppercase",letterSpacing:"0.4px",fontWeight:500}}>Fees — this {period}</div>
-          <div style={{fontSize:28,fontWeight:700,color:"#185fa5",marginBottom:2}}>£{data.fees.toLocaleString()}</div>
+          <div className="g-num" style={{fontSize:28,color:"var(--t1)",marginBottom:4}}>£{data.fees.toLocaleString()}</div>
           <div style={{fontSize:12,color:"var(--t3)",marginBottom:10}}>Total invoiced</div>
           <div style={{background:"var(--bg2)",borderRadius:8,padding:"10px 12px"}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,fontSize:12}}>
@@ -6692,35 +6736,35 @@ function ReportingPage(){
 }
 
 const NAV=[
-  {k:"dashboard",l:"Dashboard",i:"🏠",s:"main"},
-  {k:"reporting",l:"Reporting",i:"📊",s:"main"},
-  {k:"candidates",l:"Candidates",i:"👥",s:"recruit"},
-  {k:"cvinbox",l:"CV inbox",i:"📥",s:"recruit"},
-  {k:"enquiries",l:"Website enquiries",i:"🌐",s:"recruit"},
-  {k:"jobs",l:"Jobs",i:"💼",s:"recruit"},
-  {k:"jds",l:"Job descriptions",i:"📑",s:"recruit"},
-  {k:"companies",l:"Companies",i:"🏢",s:"recruit"},
-  {k:"hotlists",l:"Hotlists",i:"🔥",s:"recruit"},
-  {k:"pipeline",l:"BD Pipeline",i:"📈",s:"recruit"},
-  {k:"submittals",l:"Submittals",i:"📨",s:"recruit"},
-  {k:"placements",l:"Placements",i:"🏆",s:"recruit"},
-  {k:"tasks",l:"Tasks",i:"✅",s:"recruit"},
-  {k:"activity",l:"Activity Log",i:"📋",s:"recruit"},
-  {k:"parse",l:"CV parser",i:"📄",s:"ai"},
-  {k:"match",l:"Job matching",i:"🎯",s:"ai"},
-  {k:"pitch",l:"Pitch writer",i:"✍️",s:"ai"},
-  {k:"sequences",l:"Email sequences",i:"✉️",s:"ai"},
-  {k:"import",l:"CSV import",i:"📥",s:"ai"},
+  {k:"dashboard",l:"Dashboard",i:"home",s:"work"},
+  {k:"tasks",l:"Tasks",i:"check",s:"work"},
+  {k:"candidates",l:"Candidates",i:"users",s:"work"},
+  {k:"jobs",l:"Jobs",i:"briefcase",s:"work"},
+  {k:"companies",l:"Companies",i:"building",s:"work"},
+  {k:"placements",l:"Placements",i:"award",s:"work"},
+  {k:"cvinbox",l:"CV inbox",i:"inbox",s:"in"},
+  {k:"enquiries",l:"Website enquiries",i:"globe",s:"in"},
+  {k:"submittals",l:"Submittals",i:"send",s:"in"},
+  {k:"pipeline",l:"BD pipeline",i:"trend",s:"in"},
+  {k:"hotlists",l:"Hotlists",i:"star",s:"in"},
+  {k:"reporting",l:"Reporting",i:"chart",s:"more"},
+  {k:"activity",l:"Activity log",i:"list",s:"more"},
+  {k:"jds",l:"Job descriptions",i:"doc",s:"more"},
+  {k:"parse",l:"CV parser",i:"scan",s:"more"},
+  {k:"match",l:"Job matching",i:"target",s:"more"},
+  {k:"pitch",l:"Pitch writer",i:"pen",s:"more"},
+  {k:"sequences",l:"Email sequences",i:"mail",s:"more"},
+  {k:"import",l:"CSV import",i:"upload",s:"more"},
 ];
-const SNAMES={main:"Overview",recruit:"Recruitment",ai:"AI tools"};
+const SNAMES={work:"Daily work",in:"Inbound & BD",more:"More"};
 
 function ReminderBell({tasks,onNavigate}){
   const today=todayStr();
   const overdue=(tasks||[]).filter(t=>!t.done&&t.due_date&&t.due_date<today);
   const dueToday=(tasks||[]).filter(t=>!t.done&&t.due_date===today);
   const total=overdue.length+dueToday.length;
-  return <div onClick={onNavigate} style={{position:"relative",cursor:"pointer",padding:"4px 6px"}}>
-    <span style={{fontSize:18}}>🔔</span>
+  return <div onClick={onNavigate} title="Tasks due" className="icon-btn" style={{position:"relative",border:"none"}}>
+    <Icon n="bell" size={18}/>
     {total>0&&<span style={{position:"absolute",top:0,right:0,background:overdue.length>0?"#e24b4a":ACCENT,color:"#fff",fontSize:9,fontWeight:700,borderRadius:"50%",width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center"}}>{total>9?"9+":total}</span>}
   </div>;
 }
@@ -6787,6 +6831,7 @@ function AuthedApp(){
   const [activeJob,setActiveJob]=useState(null);
   const [searchQ,setSearchQ]=useState({q:"",cv:false,n:0});
   const [navOpen,setNavOpen]=useState(false); // phone menu
+  const [showMore,setShowMore]=useState(()=>{try{return localStorage.getItem("crm_nav_more")==="1";}catch(e){return false;}});
   // Website applicants are created as candidates by the database; read their CVs here
   // (once, in the background) so they show up in "search inside CVs"
   useEffect(()=>{
@@ -6861,11 +6906,18 @@ function AuthedApp(){
         <div style={{flex:1,overflowY:"auto",padding:"8px 0"}}>
           {NAV.map(n=>{
             const showS=n.s!==lastS;lastS=n.s;
+            const moreOpen=showMore||NAV.some(x=>x.s==="more"&&x.k===page);
+            if(n.s==="more"&&!moreOpen&&!showS)return null;
+            const on=page===n.k;
             return <Fragment key={n.k}>
-              {showS&&<div style={{fontSize:10,color:"rgba(160,168,184,0.45)",padding:"12px 16px 5px",textTransform:"uppercase",letterSpacing:"0.8px"}}>{SNAMES[n.s]}</div>}
-              <div onClick={()=>{setPage(n.k);if(n.k!=="jobs")setActiveJob(null);setNavOpen(false);}} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 16px",color:page===n.k?"#fff":"#a0a8b8",cursor:"pointer",background:page===n.k?"#2d3548":"transparent",borderLeft:page===n.k?`2px solid ${ACCENT}`:"2px solid transparent",fontSize:13}}>
-                <span>{n.i}</span>{n.l}
-              </div>
+              {showS&&(n.s==="more"
+                ?<button onClick={()=>setShowMore(v=>{const nv=!v;try{localStorage.setItem("crm_nav_more",nv?"1":"0");}catch(e){}return nv;})} className="nav-head" style={{display:"flex",alignItems:"center",gap:6,width:"100%",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
+                    <Icon n="chevron" size={11} stroke={2} style={{transform:moreOpen?"rotate(90deg)":"none",transition:"transform 0.15s"}}/>{SNAMES[n.s]}
+                  </button>
+                :<div className="nav-head">{SNAMES[n.s]}</div>)}
+              {(n.s!=="more"||moreOpen)&&<div onClick={()=>{setPage(n.k);if(n.k!=="jobs")setActiveJob(null);setNavOpen(false);}} className={"nav-item"+(on?" on":"")}>
+                <Icon n={n.i} size={16}/>{n.l}
+              </div>}
             </Fragment>;
           })}
         </div>
