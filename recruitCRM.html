@@ -316,6 +316,9 @@ function cleanTitle(role){
   if(t.length>70)t=t.slice(0,68).replace(/\s+\S*$/,"")+"…";
   return t||String(role);
 }
+// Submittals sent without a job (speculative CVs) keep "Company: …" and
+// "Role: …" lines in their notes so the list can still show who got them.
+const noteField=(notes,key)=>{const m=String(notes||"").match(new RegExp("^"+key+":\\s*(.+)$","mi"));return m?m[1].trim():"";};
 // Open an AI tool with the candidate and/or job already chosen
 function openAiTool(page,preset){
   window.__aiPreset=preset||null;
@@ -5921,8 +5924,8 @@ function SubmittalsPage(){
       </tr></thead>
       <tbody>{rows.map(r=><tr key={r.id}>
         <td className="td" style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.candidates?.name||"—"}</td>
-        <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.jobs?.title||"—"}</td>
-        <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.jobs?.companies?.name||"—"}</td>
+        <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={noteField(r.notes,"Role")||""}>{r.jobs?.title||noteField(r.notes,"Role")||"—"}{!r.job_id&&noteField(r.notes,"Company")&&<span className="g-pill" style={{marginLeft:6,fontSize:8,padding:"1px 6px",background:"rgba(17,17,17,0.06)",color:"var(--t3)"}}>Spec</span>}</td>
+        <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.jobs?.companies?.name||noteField(r.notes,"Company")||"—"}</td>
         <td className="td" style={{color:"var(--t3)",whiteSpace:"nowrap"}}>{fmtDate(r.submitted_date)||"—"}</td>
         <td className="td">
           <select value={r.status} onChange={e=>updateStatus(r.id,e.target.value)} style={{fontSize:11,padding:"2px 6px",background:statusColor(r.status),border:"none",borderRadius:6,fontWeight:500}}>
