@@ -3072,13 +3072,14 @@ function CandidatesPage(){
 // ── Company Contact Modal ──────────────────────────────────────────────────
 function ContactModal({contact, companyId, companyName, onClose, onSaved}){
   const blank={name:"",job_title:"",email:"",phone:"",linkedin:"",notes:""};
-  const [f,setF]=useState(contact||blank);
+  const [f,setF]=useState(contact?{...blank,...contact,job_title:contact.role||contact.job_title||""}:blank);
   const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const s=k=>e=>setF(p=>({...p,[k]:e.target.value}));
   const save=async()=>{
     if(!f.name.trim()){setErr("Name required");return;}
     setSaving(true);setErr("");
-    const payload={...f,company_id:companyId};
+    // The contacts table calls the job title "role"
+    const payload={name:f.name,email:f.email||null,phone:f.phone||null,notes:f.notes||null,role:f.job_title||null,linkedin:f.linkedin||null,company_id:companyId};
     const{error}=contact
       ?await db.from("contacts").update(payload).eq("id",contact.id)
       :await db.from("contacts").insert(payload);
@@ -3286,7 +3287,7 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
                     <Av name={ct.name} size={32}/>
                     <div>
                       <div style={{fontWeight:500,fontSize:13,color:"var(--t1)"}}>{ct.name}</div>
-                      {ct.job_title&&<div style={{fontSize:11,color:"var(--t2)"}}>{ct.job_title}</div>}
+                      {(ct.role||ct.job_title)&&<div style={{fontSize:11,color:"var(--t2)"}}>{ct.role||ct.job_title}</div>}
                     </div>
                   </div>
                   <div style={{display:"flex",gap:4}}>
