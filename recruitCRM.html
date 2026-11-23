@@ -22,7 +22,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
+body{color:var(--t1);font-family:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0}
 :root{--bg:#fff;--bg2:#f7f7f5;--bg3:#f0f0ec;--t1:#1a1a18;--t2:#6b6b68;--t3:#9e9e9b;--br:rgba(0,0,0,0.1);--brm:rgba(0,0,0,0.18);--acc:#2e7a2c;
 /* Gaia Search brand — sampled from the logo */
 --g-cream:var(--bg);--g-cream2:rgba(17,17,17,0.08);--g-ink:#111111;--g-deep:#2e7a2c;--g-green:#5fa92b;--g-lime:#a0d045;
@@ -58,7 +58,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .btn-o{background:transparent;border:0.5px solid var(--brm);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:var(--t1);display:inline-flex;align-items:center;gap:5px}
 .btn-o:hover{background:var(--bg2)}
 .btn-d{background:transparent;border:0.5px solid #f09595;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:#a32d2d}
-.err{background:#fff0f0;border:0.5px solid #f09595;border-radius:7px;padding:8px 12px;font-size:12px;color:#a32d2d;margin-top:8px}
+.err{background:rgba(226,75,74,0.08);border:0.5px solid #f09595;border-radius:7px;padding:8px 12px;font-size:12px;color:#a32d2d;margin-top:8px}
 .g-canvas{background:var(--g-cream);border:0.5px solid var(--br);border-radius:14px;padding:20px 22px;margin-bottom:14px}
 .g-eyebrow{font-family:var(--g-face);font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--g-mute)}
 .g-num{font-family:var(--g-face);font-weight:800;letter-spacing:-1.5px;line-height:1;font-variant-numeric:tabular-nums}
@@ -82,16 +82,20 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .icon-btn:hover{background:var(--bg2);color:var(--t1)}
 .pipe-who:hover .pipe-name{color:var(--g-deep);text-decoration:underline}
 .reach{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+button.reach-btn{cursor:pointer}
 .reach-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:0.5px solid var(--brm);font-size:12px;font-weight:600;color:var(--t1);text-decoration:none;font-family:var(--g-face);background:var(--bg)}
 .reach-btn:hover{background:var(--bg2)}
 .reach-btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}
 .reach-btn.primary:hover{filter:brightness(1.08)}
 .reach-btn.ghost{border-style:dashed;color:var(--t2)}
+.skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:skel 1.4s ease-in-out infinite;border:none!important}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .g-pill{font-family:var(--g-face);font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;border-radius:20px;padding:3px 9px;background:rgba(95,169,43,0.16);color:var(--g-deep);flex-shrink:0}
 .g-stat{background:var(--g-cream);border:0.5px solid var(--br);border-radius:12px;padding:14px 16px}
 .g-stat .r{height:2px;width:22px;background:var(--g-green);border-radius:2px;margin-bottom:9px}
 @media (max-width:760px){.g-num{letter-spacing:-1px}}
 .th{text-align:left;font-family:var(--g-face);font-size:10px;font-weight:700;color:var(--g-mute);padding:9px 12px;border-bottom:0.5px solid var(--br);background:var(--bg2);text-transform:uppercase;letter-spacing:1.2px}
+.td.num,.th.num{text-align:right;font-variant-numeric:tabular-nums}
 .td{padding:10px 12px;border-bottom:0.5px solid var(--br);color:var(--t1);font-size:13px;vertical-align:middle}
 /* ── Row action buttons ── */
 .acts{display:inline-flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
@@ -192,18 +196,18 @@ const BRANDFETCH_CLIENT_ID = ""; // from brandfetch.com → client ID
 const SIDEBAR = "#1a1f2e";
 
 const PILL_MAP = {
-  "New":{bg:"#eef0f4",fg:"#5b6577"},"Active":{bg:"#eaf3de",fg:"#3b6d11"},
-  "Offer stage":{bg:"#eef0f4",fg:"#5b6577"},"Placed":{bg:"#e1f5ee",fg:"#0f6e56"},
-  "Interview":{bg:"#fbeaf0",fg:"#993556"},"Pipeline":{bg:"#faeeda",fg:"#854f0b"},
-  "Open":{bg:"#eaf3de",fg:"#3b6d11"},"Filled":{bg:"#e1f5ee",fg:"#0f6e56"},
-  "On hold":{bg:"#faeeda",fg:"#854f0b"},"Cold":{bg:"#f1efe8",fg:"#5f5e5a"},
-  "Client":{bg:"#e1f5ee",fg:"#0f6e56"},"Closed":{bg:"#fcebeb",fg:"#a32d2d"},
+  "New":{bg:"rgba(91,101,119,0.10)",fg:"#5b6577"},"Active":{bg:"rgba(95,169,43,0.16)",fg:"#3b6d11"},
+  "Offer stage":{bg:"rgba(91,101,119,0.10)",fg:"#5b6577"},"Placed":{bg:"#e1f5ee",fg:"#0f6e56"},
+  "Interview":{bg:"rgba(212,83,126,0.12)",fg:"#993556"},"Pipeline":{bg:"rgba(186,117,23,0.14)",fg:"#854f0b"},
+  "Open":{bg:"rgba(95,169,43,0.16)",fg:"#3b6d11"},"Filled":{bg:"#e1f5ee",fg:"#0f6e56"},
+  "On hold":{bg:"rgba(186,117,23,0.14)",fg:"#854f0b"},"Cold":{bg:"#f1efe8",fg:"#5f5e5a"},
+  "Client":{bg:"#e1f5ee",fg:"#0f6e56"},"Closed":{bg:"rgba(226,75,74,0.12)",fg:"#a32d2d"},
 };
 
 const AV_COLORS = [
-  {bg:"#eef0f4",fg:"#5b6577"},{bg:"#eaf3de",fg:"#3b6d11"},{bg:"#fbeaf0",fg:"#993556"},
-  {bg:"#e6f1fb",fg:"#185fa5"},{bg:"#faece7",fg:"#993c1d"},{bg:"#e1f5ee",fg:"#0f6e56"},
-  {bg:"#faeeda",fg:"#854f0b"},{bg:"#eeedfe",fg:"#534ab7"},
+  {bg:"rgba(91,101,119,0.10)",fg:"#5b6577"},{bg:"rgba(95,169,43,0.16)",fg:"#3b6d11"},{bg:"rgba(212,83,126,0.12)",fg:"#993556"},
+  {bg:"rgba(55,138,221,0.14)",fg:"#185fa5"},{bg:"#faece7",fg:"#993c1d"},{bg:"#e1f5ee",fg:"#0f6e56"},
+  {bg:"rgba(186,117,23,0.14)",fg:"#854f0b"},{bg:"rgba(127,119,221,0.14)",fg:"#534ab7"},
 ];
 
 function getColor(name){let h=0;for(let c of(name||""))h=(h*31+c.charCodeAt(0))%AV_COLORS.length;return AV_COLORS[h];}
@@ -312,6 +316,11 @@ function cleanTitle(role){
   if(t.length>70)t=t.slice(0,68).replace(/\s+\S*$/,"")+"…";
   return t||String(role);
 }
+// Open an AI tool with the candidate and/or job already chosen
+function openAiTool(page,preset){
+  window.__aiPreset=preset||null;
+  window.dispatchEvent(new CustomEvent("gotoPage",{detail:page}));
+}
 // ── Line icons: one consistent set instead of emoji ───────────────────────
 const ICON_PATHS={
   home:"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z",
@@ -342,6 +351,7 @@ const ICON_PATHS={
   plus:"M12 5v14M5 12h14",
   pound:"M18 7a4 4 0 0 0-8 0v5H6M6 20h12M10 12v8",
   chevron:"M9 18l6-6-6-6",
+  chat:"M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z",
 };
 function Icon({n,size=16,stroke=1.6,style}){
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,display:"block",...style}} aria-hidden="true"><path d={ICON_PATHS[n]||""}/></svg>;
@@ -396,7 +406,7 @@ function CopyButton({text}){
     });
   };
   return <button onClick={copy} title={copied?"Copied!":"Copy email"} style={{
-    background:copied?"#eaf3de":"var(--bg2)",
+    background:copied?"rgba(95,169,43,0.16)":"var(--bg2)",
     border:`0.5px solid ${copied?"#97c459":"var(--brm)"}`,
     borderRadius:7,padding:"0 10px",cursor:"pointer",
     color:copied?"#3b6d11":"var(--t2)",fontSize:13,
@@ -661,7 +671,7 @@ function CandModal({cand,onClose,onSaved,initial}){
       </div>
 
       <div className="fr"><label>Notes</label><textarea value={f.notes||""} onChange={s("notes")} placeholder="Additional notes…"/></div>
-      {dupes&&<div ref={dupeRef} style={{background:"#fff6e0",border:"0.5px solid #e8c97a",borderRadius:8,padding:"10px 12px",fontSize:12,color:"#854f0b",marginTop:8}}>
+      {dupes&&<div ref={dupeRef} style={{background:"rgba(186,117,23,0.12)",border:"0.5px solid #e8c97a",borderRadius:8,padding:"10px 12px",fontSize:12,color:"#854f0b",marginTop:8}}>
         <div style={{fontWeight:600,marginBottom:6}}>⚠️ This person may already be in your CRM:</div>
         {dupes.map(d=><div key={d.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
           <span style={{flex:1}}><strong>{d.name}</strong>{d.role?` · ${d.role}`:""}{d.location?` · ${d.location}`:""}{d.email?` · ${d.email}`:""}</span>
@@ -738,7 +748,7 @@ function CoModal({co,onClose,onSaved}){
             <input type="text" value={f.fee_fixed||""} onChange={s("fee_fixed")} placeholder="e.g. 8000"/>
           </div>}
         </div>
-        {termsPreview&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#3b6d11",marginBottom:10}}>
+        {termsPreview&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",borderRadius:7,padding:"8px 12px",fontSize:12,color:"#3b6d11",marginBottom:10}}>
           ✓ Terms: <strong>{termsPreview}</strong>
         </div>}
         <div className="fr2">
@@ -963,7 +973,7 @@ function TodayAgenda({setPage,style={}}){
   },[]);
   const total=tasks.length+interviews.length;
   if(!loading&&total===0)return null;
-  return <Panel title={`📅 Today's agenda`} badge={total>0?<span style={{background:"#fbeaf0",color:"#993556",fontSize:11,fontWeight:600,borderRadius:8,padding:"1px 7px"}}>{total} items</span>:null} style={style}>
+  return <Panel title={`📅 Today's agenda`} badge={total>0?<span style={{background:"rgba(212,83,126,0.12)",color:"#993556",fontSize:11,fontWeight:600,borderRadius:8,padding:"1px 7px"}}>{total} items</span>:null} style={style}>
     {loading?<Spin/>:<div>
       {tasks.length>0&&<>
         <div style={{padding:"8px 14px 4px",fontSize:10,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.5px"}}>Tasks due</div>
@@ -1021,7 +1031,7 @@ function TodayStrip({setPage}){
     });
   },[today]);
   useEffect(()=>{load();},[load]);
-  if(!d)return <div className="g-canvas" style={{minHeight:92}}/>;
+  if(!d)return <div className="g-canvas"><div className="today-tiles">{[0,1,2,3].map(i=><div key={i} className="today-tile skel" style={{height:46}}/>)}</div><div className="skel" style={{height:14,width:"40%",marginTop:16,borderRadius:6}}/><div className="skel" style={{height:14,width:"55%",marginTop:10,borderRadius:6}}/></div>;
   const overdue=d.tasks.filter(t=>t.due_date<today),dueToday=d.tasks.filter(t=>t.due_date===today);
   const sum=l=>l.reduce((t,x)=>t+(parseFloat(x.p.fee_amount)||0),0);
   const done=async t=>{
@@ -1401,7 +1411,7 @@ function HotlistPicker({cands,onClose,onChanged}){
       <h3>🔥 {single?`Hotlists — ${cands[0].name}`:`Add ${cands.length} candidates to a hotlist`}</h3>
       {single&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}>Tick a list to add them, untick to take them off.</div>}
       <Err msg={err}/>
-      {done&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"7px 10px",fontSize:12,marginBottom:8}}>✓ {done}</div>}
+      {done&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"7px 10px",fontSize:12,marginBottom:8}}>✓ {done}</div>}
       {!lists?<Spin/>:<div style={{maxHeight:"45vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:4,marginBottom:10}}>
         {lists.length===0&&<div style={{fontSize:12,color:"var(--t3)",padding:"10px 0"}}>No hotlists yet — create one below.</div>}
         {lists.map(l=>{
@@ -1450,7 +1460,7 @@ function CandidateHotlists({cand}){
       ?<div style={{fontSize:12,color:"var(--t3)"}}>Not on any hotlists.</div>
       :<div style={{display:"flex",flexWrap:"wrap",gap:5}}>
         {rows.map(r=><span key={r.id} onClick={()=>{window._pendingHotlist=r.hotlist_id;window.dispatchEvent(new CustomEvent("nav",{detail:"hotlists"}));}} title="Open hotlist"
-          style={{background:"#fff1e6",color:"#b4560f",fontSize:11,borderRadius:10,padding:"3px 10px",cursor:"pointer"}}>🔥 {r.hotlists.name}</span>)}
+          style={{background:"rgba(186,117,23,0.12)",color:"#b4560f",fontSize:11,borderRadius:10,padding:"3px 10px",cursor:"pointer"}}>🔥 {r.hotlists.name}</span>)}
       </div>}
   </div>;
 }
@@ -1461,13 +1471,24 @@ function linkedinSearchUrl(c){
   const kw=[c.name,company].filter(Boolean).join(" ").replace(/\s*\(.*?\)\s*/g," ").trim();
   return "https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(kw);
 }
-// "2026-12-14" → "14 Dec 2026" (used wherever a date is shown)
+// One date style everywhere: "14 Dec" this year, "14 Dec 2025" otherwise,
+// and "14 Dec · 10:30" when a time matters.
 function fmtDate(iso){
   if(!iso)return "";
   const d=new Date(String(iso).slice(0,10)+"T12:00:00");
-  return isNaN(d)?String(iso):d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+  if(isNaN(d))return String(iso);
+  const sameYear=d.getFullYear()===new Date().getFullYear();
+  return d.toLocaleDateString("en-GB",sameYear?{day:"numeric",month:"short"}:{day:"numeric",month:"short",year:"numeric"});
 }
-const niceDate=iso=>iso?new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"";
+function fmtDateTime(ts){
+  if(!ts)return "";
+  const d=new Date(ts);
+  if(isNaN(d))return String(ts);
+  return fmtDate(d.toISOString())+" · "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+}
+// For timestamps: local calendar date, same style
+const fmtStamp=ts=>{if(!ts)return "";const d=new Date(ts);if(isNaN(d))return String(ts);const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return fmtDate(`${y}-${m}-${dd}`);};
+const niceDate=iso=>fmtDate(iso);
 function placementMoney(p,companies){
   const today=todayStr();
   const co=(companies||[]).find(c=>(c.name||"").trim().toLowerCase()===(p.company_name||"").trim().toLowerCase())||{};
@@ -1740,6 +1761,18 @@ function positiveTerms(ast,neg=false,out=[]){
   return out;
 }
 // Fetch every row of a table in pages (Supabase returns at most 1000 at a time)
+// Supabase returns at most 1,000 rows per request. allRows keeps asking for
+// the next 1,000 until it has them all, so lists don't silently stop at 1,000.
+async function allRows(make){
+  const out=[];
+  for(let from=0;;from+=1000){
+    const{data,error}=await make().range(from,from+999);
+    if(error)return{data:out.length?out:null,error};
+    out.push(...(data||[]));
+    if(!data||data.length<1000)break;
+  }
+  return{data:out,error:null};
+}
 async function fetchAll(table,cols){
   const out=[];
   for(let from=0;;from+=1000){
@@ -1958,7 +1991,7 @@ function SearchResultsPage({query,cvFlag,nonce,setPage}){
     </div>
 
     <Err msg={err}/>
-    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+    {msg&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
 
     {loading?<Spin/>:!res?null:<>
       {tab==="candidates"&&<>
@@ -1986,7 +2019,7 @@ function SearchResultsPage({query,cvFlag,nonce,setPage}){
                 onMouseOver={e=>{if(!selected.has(c.id))e.currentTarget.style.background="var(--bg2)";}} onMouseOut={e=>{if(!selected.has(c.id))e.currentTarget.style.background="";}}>
                 <td className="td" onClick={e=>{e.stopPropagation();toggle(c.id);}}><input type="checkbox" checked={selected.has(c.id)} onClick={e=>e.stopPropagation()} onChange={()=>toggle(c.id)} style={{cursor:"pointer"}}/></td>
                 <td className="td"><div style={{display:"flex",alignItems:"center",gap:8}}><Av name={c.name}/><div style={{minWidth:0}}>
-                  <div style={{fontWeight:500,color:ACCENT}}>{c.name}{hasCv(c)&&<span style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
+                  <div style={{fontWeight:500,color:ACCENT}}>{c.name}{hasCv(c)&&<span style={{marginLeft:5,fontSize:10,background:"rgba(95,169,43,0.16)",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
                   {c.email&&<div style={{fontSize:11,color:"var(--t3)"}}>{c.email}</div>}
                 </div></div></td>
                 <td className="td" style={{color:"var(--t2)"}}>{c.role||"—"}</td>
@@ -2152,7 +2185,7 @@ function CandidateTasks({cand}){
     </div>
     {err&&<div style={{fontSize:11,color:"#a32d2d",marginBottom:6}}>{err}</div>}
     {loading?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:tasks.length===0
-      ?<div style={{fontSize:12,color:"var(--t3)"}}>No tasks for this candidate yet.</div>
+      ?<div style={{fontSize:12,color:"var(--t3)"}}>No follow-ups set. Add one so they don't go cold.</div>
       :<div style={{display:"flex",flexDirection:"column",gap:6}}>
         {tasks.map(t=>{
           const overdue=!t.done&&t.due_date&&t.due_date<today;
@@ -2269,7 +2302,9 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
           {c.linkedin
             ?<a href={c.linkedin} target="_blank" rel="noreferrer" className="reach-btn"><span style={{fontWeight:800,fontSize:12,color:"#0a66c2"}}>in</span>LinkedIn</a>
             :<a href={linkedinSearchUrl(c)} target="_blank" rel="noreferrer" className="reach-btn ghost" title="No LinkedIn saved — search for them, then paste their profile URL via Edit"><span style={{fontWeight:800,fontSize:12,color:"#0a66c2"}}>in</span>Find</a>}
-          {!c.phone&&!c.email&&<span style={{fontSize:11,color:"var(--t3)",alignSelf:"center"}}>No phone or email saved — add them via Edit</span>}
+          <button onClick={()=>{onClose&&onClose();openAiTool("pitch",{candId:c.id});}} className="reach-btn" title="Write a pitch email for this candidate with AI"><Icon n="pen" size={14}/>Pitch</button>
+          <button onClick={()=>{onClose&&onClose();openAiTool("match",{candId:c.id});}} className="reach-btn" title="Score this candidate against a job with AI"><Icon n="target" size={14}/>Match</button>
+          {!c.phone&&!c.email&&<span style={{fontSize:11,color:"var(--t3)",alignSelf:"center",flexBasis:"100%"}}>No phone or email saved — add them via Edit</span>}
         </div>
       </div>
       {/* Body */}
@@ -2320,7 +2355,7 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
         {((c.licences||[]).length>0||c.cieem_level||c.driving_licence)&&<div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Ecology</div>
           {(c.licences||[]).length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:8}}>
-            {c.licences.map(l=><span key={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:11,borderRadius:10,padding:"3px 10px"}}>{LICENCE_ICON(l)} {l}</span>)}
+            {c.licences.map(l=><span key={l} style={{background:"rgba(55,138,221,0.14)",color:"#185fa5",fontSize:11,borderRadius:10,padding:"3px 10px"}}>{LICENCE_ICON(l)} {l}</span>)}
           </div>}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
             {[["CIEEM",c.cieem_level],["Driving licence",c.driving_licence]].map(([l,v])=>v?<div key={l}><div style={{fontSize:11,color:"var(--t3)"}}>{l}</div><div style={{fontSize:13,color:"var(--t1)",marginTop:1}}>{v}</div></div>:null)}
@@ -2341,7 +2376,7 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
         {/* Jobs in pipeline */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>In pipeline ({jobs.length})</div>
-          {loadingActs?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:jobs.length===0?<div style={{fontSize:12,color:"var(--t3)"}}>Not in any job pipeline yet.</div>:
+          {loadingActs?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:jobs.length===0?<div style={{fontSize:12,color:"var(--t3)"}}>Not on a job yet. Open a job and use "+ Add candidates" to put them forward.</div>:
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {jobs.map((j,i)=><div key={i} style={{background:"var(--bg2)",borderRadius:8,padding:"9px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
@@ -2362,12 +2397,12 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
         {/* Activity log */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Recent activity</div>
-          {loadingActs?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:activities.length===0?<div style={{fontSize:12,color:"var(--t3)"}}>No activity logged yet.</div>:
+          {loadingActs?<div style={{fontSize:12,color:"var(--t3)"}}>Loading…</div>:activities.length===0?<div style={{fontSize:12,color:"var(--t3)"}}>No activity yet. Log a call, email or note above to start their history.</div>:
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {activities.map(a=><div key={a.id} style={{background:"var(--bg2)",borderRadius:8,padding:"9px 12px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-                <span style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}>{ACTIVITY_ICONS[a.activity_type]||"📝"} {a.activity_type}{a.subject?` — ${a.subject}`:""}</span>
-                <span style={{fontSize:10,color:"var(--t3)"}}>{new Date(a.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+                <span style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}><span style={{display:"inline-flex",alignItems:"center",gap:6}}><ActIcon t={a.activity_type} size={12}/>{a.activity_type}{a.subject?` — ${a.subject}`:""}</span></span>
+                <span style={{fontSize:10,color:"var(--t3)"}}>{fmtStamp(a.created_at)}</span>
               </div>
               {a.body&&<div style={{fontSize:12,color:"var(--t2)",lineHeight:1.5,whiteSpace:"pre-wrap"}}>{a.body.slice(0,160)}{a.body.length>160?"…":""}</div>}
             </div>)}
@@ -2729,14 +2764,14 @@ function CandidatesPage(){
     const base="id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at,linkedin";
     const extra=",source,licences,cieem_level,driving_licence,salary_expect,current_employer";
     const[cRes,{data:acts}]=await Promise.all([
-      db.from("candidates").select(base+extra).order("created_at",{ascending:false}),
-      db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}),
+      allRows(()=>db.from("candidates").select(base+extra).order("created_at",{ascending:false}).order("id")),
+      allRows(()=>db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}).order("id")),
     ]);
     let{data,error}=cRes;
     // New columns not added yet? Load without them so the page still works
     if(error&&/source|licences|cieem|driving|salary_expect|current_employer/i.test(error.message)){
       setNeedsUpgrade(true);
-      ({data,error}=await db.from("candidates").select(base).order("created_at",{ascending:false}));
+      ({data,error}=await allRows(()=>db.from("candidates").select(base).order("created_at",{ascending:false}).order("id")));
     }else setNeedsUpgrade(false);
     if(error)setErr(error.message);else setRows(data||[]);
     // Build last-contacted map
@@ -2900,7 +2935,7 @@ function CandidatesPage(){
     {modal&&<CandModal onClose={()=>setModal(false)} onSaved={load}/>}
     {hotFor&&<HotlistPicker cands={hotFor} onClose={()=>{setHotFor(null);setSelected(new Set());}}/>}
     {taskFor&&<AddTaskModal cand={taskFor} onClose={()=>setTaskFor(null)} onSaved={()=>{setTaskMsg(`Task added for ${taskFor.name}`);setTimeout(()=>setTaskMsg(""),3000);}}/>}
-    {taskMsg&&<div style={{position:"fixed",bottom:20,right:20,zIndex:1200,background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"10px 14px",fontSize:12,boxShadow:"0 4px 16px rgba(0,0,0,0.12)"}}>✓ {taskMsg} · <span style={{cursor:"pointer",textDecoration:"underline"}} onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"tasks"}))}>View tasks</span></div>}
+    {taskMsg&&<div style={{position:"fixed",bottom:20,right:20,zIndex:1200,background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"10px 14px",fontSize:12,boxShadow:"0 4px 16px rgba(0,0,0,0.12)"}}>✓ {taskMsg} · <span style={{cursor:"pointer",textDecoration:"underline"}} onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"tasks"}))}>View tasks</span></div>}
     {bulkCv&&<BulkCvMatch candidates={rows} onClose={()=>setBulkCv(false)} onDone={load}/>}
     {editRow&&<CandModal cand={editRow} onClose={()=>{setEditRow(null);}} onSaved={()=>{load();setDetailCand(null);}}/>}
     {detailCand&&<CandidateDetailPanel cand={detailCand} onClose={()=>setDetailCand(null)} onEdit={c=>{setDetailCand(null);setEditRow(c);}} onRefresh={load}/>}
@@ -2987,7 +3022,7 @@ function CandidatesPage(){
       {loading?<Spin/>:filtered.length===0
         ?(rows.length>0
           ?<div style={{padding:"36px 20px",textAlign:"center",color:"var(--t3)",fontSize:13}}>No candidates match these filters. <span onClick={()=>{clearFilters();setSearch("");setStatusF("All");}} style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}}>Clear filters</span></div>
-          :<EmptyState icon="👥" title="No candidates yet" sub="Add your first candidate to get started tracking your talent pool." action="+ Add candidate" onAction={()=>setModal(true)}/>)
+          :<EmptyState icon="users" title="No candidates yet" sub="Add your first candidate to get started tracking your talent pool." action="+ Add candidate" onAction={()=>setModal(true)}/>)
         :<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:760}}>
           <colgroup>
             <col style={{width:36}}/>
@@ -3186,7 +3221,7 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
             <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Terms of business</div>
             <span style={{fontSize:10,fontWeight:500,borderRadius:10,padding:"2px 9px",
-              background:tobSigned?"#eaf3de":"#faeeda",color:tobSigned?"#3b6d11":"#854f0b"}}>
+              background:tobSigned?"rgba(95,169,43,0.16)":"rgba(186,117,23,0.14)",color:tobSigned?"#3b6d11":"#854f0b"}}>
               {tobSigned?"✓ Signed":"Not signed"}
             </span>
           </div>
@@ -3299,7 +3334,7 @@ function CompaniesPage(){
     </div>
     <Err msg={err}/>
     <Panel title="All companies">
-      {loading?<Spin/>:rows.length===0?<EmptyState icon="🏢" title="No companies yet" sub="Add client companies to link jobs and track your BD relationships." action="+ Add company" onAction={()=>setModal(true)}/>:
+      {loading?<Spin/>:rows.length===0?<EmptyState icon="building" title="No companies yet" sub="Add client companies to link jobs and track your BD relationships." action="+ Add company" onAction={()=>setModal(true)}/>:
       <div className="tbl-scroll"><table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed",minWidth:600}}>
         <colgroup>
           <col style={{width:"24%"}}/><col style={{width:"18%"}}/><col style={{width:"24%"}}/><col style={{width:"10%"}}/><col style={{width:"12%"}}/><col style={{width:"12%"}}/>
@@ -3575,7 +3610,7 @@ function JDLibraryPage(){
           <td className="td">{r.file_path
             ?<button className="btn-o" style={{fontSize:11,padding:"3px 10px"}} onClick={e=>{e.stopPropagation();openJdFile(r.file_path);}}>📄 Open</button>
             :<span style={{fontSize:12,color:"var(--t3)"}}>Text only</span>}</td>
-          <td className="td" style={{fontSize:12,color:"var(--t2)",whiteSpace:"nowrap"}}>{new Date(r.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</td>
+          <td className="td" style={{fontSize:12,color:"var(--t2)",whiteSpace:"nowrap"}}>{fmtStamp(r.created_at)}</td>
           <td className="td" style={{textAlign:"right"}}><button className="btn-d" style={{fontSize:11}} onClick={e=>{e.stopPropagation();del(r);}}>Del</button></td>
         </tr>)}</tbody>
       </table></div>
@@ -3647,7 +3682,7 @@ function CvInboxPage(){
     setLoading(true);
     const[{data,error},{data:c}]=await Promise.all([
       db.from("cv_inbox").select("id,created_at,file_path,file_name,guess_name,cv_text,source,form_type,email,phone,job_title,job_url,message").order("created_at",{ascending:false}),
-      db.from("candidates").select("id,name,role,location,cv_path,cv_url").order("name"),
+      allRows(()=>db.from("candidates").select("id,name,role,location,cv_path,cv_url").order("name").order("id")),
     ]);
     if(error)setErr(/cv_inbox/.test(error.message)?"The CV inbox isn't set up yet"+INBOX_HINT:error.message);
     else{setErr("");setItems(data||[]);}
@@ -3787,7 +3822,7 @@ function CvInboxPage(){
       When you're ready, <strong>Create candidate</strong> reads the CV and fills in the form for you.
     </div>
     {upload&&<div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}><span className="spin"></span>Uploading {upload.done} of {upload.total}…</div>}
-    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+    {msg&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
     <Err msg={err}/>
 
     {loading?<Spin/>:items.length===0&&!err
@@ -3799,7 +3834,7 @@ function CvInboxPage(){
         {shown.map(it=>{
           const match=matchFor(it);
           return <div key={it.id} style={{background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:10,padding:"12px 14px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-            <div style={{width:38,height:38,borderRadius:9,background:"#fbeaf0",color:"#993556",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📄</div>
+            <div style={{width:38,height:38,borderRadius:9,background:"rgba(212,83,126,0.12)",color:"#993556",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📄</div>
             <div style={{flex:1,minWidth:200}}>
               <div style={{fontWeight:600,fontSize:13,color:"var(--t1)"}}>{it.guess_name||<span style={{color:"var(--t3)",fontWeight:400}}>Name not found</span>}</div>
               {it.source==="website"&&<div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",margin:"3px 0"}}>
@@ -3870,7 +3905,7 @@ function WebEnquiriesPage(){
     <div style={{fontSize:12,color:"var(--t2)",marginBottom:12,lineHeight:1.5}}>
       Referrals and Work With Us enquiries sent from gaia-search.com. Job applications and CV registrations go to the <span style={{color:ACCENT,cursor:"pointer",textDecoration:"underline"}} onClick={()=>window.dispatchEvent(new CustomEvent("nav",{detail:"cvinbox"}))}>CV inbox</span>.
     </div>
-    {msg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
+    {msg&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {msg}</div>}
     <Err msg={err}/>
     {loading?<Spin/>:shown.length===0&&!err
       ?<div style={{textAlign:"center",padding:"50px 20px",color:"var(--t2)",fontSize:13,background:"var(--bg)",border:"0.5px solid var(--br)",borderRadius:12}}>
@@ -3883,7 +3918,7 @@ function WebEnquiriesPage(){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,flexWrap:"wrap"}}>
               <div style={{flex:1,minWidth:220}}>
                 <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-                  <span style={{fontSize:10,fontWeight:600,background:r.form_type==="refer"?"#fbeaf0":"#e6eefb",color:r.form_type==="refer"?"#993556":"#185fa5",borderRadius:4,padding:"2px 6px"}}>{label(r.form_type)}</span>
+                  <span style={{fontSize:10,fontWeight:600,background:r.form_type==="refer"?"rgba(212,83,126,0.12)":"#e6eefb",color:r.form_type==="refer"?"#993556":"#185fa5",borderRadius:4,padding:"2px 6px"}}>{label(r.form_type)}</span>
                   <span style={{fontWeight:600,fontSize:13,color:"var(--t1)"}}>{r.name}</span>
                   <span style={{fontSize:11,color:"var(--t3)"}}>{fmtDate(r.created_at)}</span>
                   {r.handled&&<span style={{fontSize:10,color:"#3b6d11"}}>✓ handled</span>}
@@ -4059,7 +4094,7 @@ function HotlistsPage(){
 
   useEffect(()=>{
     if(addingCand){
-      db.from("candidates").select("id,name,role,location,status").order("name").then(({data})=>setAllCands(data||[]));
+      allRows(()=>db.from("candidates").select("id,name,role,location,status").order("name").order("id")).then(({data})=>setAllCands(data||[]));
     }
   },[addingCand]);
 
@@ -4238,7 +4273,7 @@ function HotlistsPage(){
                   borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,transition:"background 0.15s,border-color 0.15s"}}>
                 <input type="checkbox" title="Select for bulk move" checked={picked.has(hc.id)} onChange={()=>togglePick(hc.id)}
                   style={{width:16,height:16,accentColor:"var(--acc)",cursor:"pointer",flexShrink:0}}/>
-                <label title={done?`Contacted${hc.contacted_at?" "+new Date(hc.contacted_at).toLocaleDateString("en-GB"):""} — click to undo`:"Mark as contacted on LinkedIn"}
+                <label title={done?`Contacted${hc.contacted_at?" "+fmtStamp(hc.contacted_at):""} — click to undo`:"Mark as contacted on LinkedIn"}
                   style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",flexShrink:0,paddingLeft:10,borderLeft:"0.5px solid var(--br)"}}>
                   <input type="checkbox" checked={!!done} onChange={()=>toggleContacted(hc)}
                     style={{width:18,height:18,accentColor:"#5fa92b",cursor:"pointer"}}/>
@@ -4247,7 +4282,7 @@ function HotlistsPage(){
                 <Av name={c.name} size={40}/>
                 <div style={{flex:1,minWidth:0,opacity:dead?0.6:1}}>
                   <div style={{fontWeight:500,fontSize:13,color:"var(--t1)",textDecoration:dead?"line-through":"none"}}>{c.name}
-                    {hasCv(c)&&<span style={{marginLeft:6,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}
+                    {hasCv(c)&&<span style={{marginLeft:6,fontSize:10,background:"rgba(95,169,43,0.16)",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}
                     {urgent&&<span style={{marginLeft:6,fontSize:10,background:"#c0392b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>! Urgent</span>}
                     {done&&<span style={{marginLeft:6,fontSize:10,background:"#5fa92b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>in Contacted</span>}
                     {dead&&<span style={{marginLeft:6,fontSize:10,background:"#7a1414",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>Not interested</span>}
@@ -4376,7 +4411,7 @@ function JobsPage({onOpenJob}){
         <span style={{fontSize:12,color:"#0f6e56"}}>✅ Someone has been placed on this job, but it is still marked Open.</span>
         <button className="btn-a" style={{padding:"4px 10px",fontSize:11}} onClick={()=>setStatus(j,"Filled")}>Mark filled</button>
       </div>}
-      {flag(j)==="stale"&&<div style={{background:"#faeeda",border:"0.5px solid #ba7517",borderRadius:8,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+      {flag(j)==="stale"&&<div style={{background:"rgba(186,117,23,0.14)",border:"0.5px solid #ba7517",borderRadius:8,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
         <span style={{fontSize:12,color:"#854f0b"}}>⚠️ No live candidates and open for {jobAge(j)} days. Is the client still hiring?</span>
         <span style={{display:"flex",gap:6}}>
           <button className="btn-o" style={{padding:"4px 10px",fontSize:11}} onClick={()=>setStatus(j,"On hold")}>Put on hold</button>
@@ -4395,7 +4430,7 @@ function JobsPage({onOpenJob}){
           </div>
           :<div style={{fontSize:11,color:"var(--t3)",fontStyle:"italic"}}>No fee terms set — edit job or company to add terms</div>
         }
-        {j.actual_fee&&<div style={{display:"flex",alignItems:"center",gap:6,background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:8,padding:"6px 12px"}}>
+        {j.actual_fee&&<div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",borderRadius:8,padding:"6px 12px"}}>
           <span style={{fontSize:16}}>✅</span>
           <div>
             <div style={{fontSize:13,fontWeight:500,color:"#3b6d11"}}>£{parseFloat(j.actual_fee).toLocaleString()} actual fee</div>
@@ -4448,7 +4483,7 @@ function JobsPage({onOpenJob}){
         </button>
         {showDone&&done.map(j=><JobCard key={j.id} j={j}/>)}
       </>}
-      {rows.length===0&&<EmptyState icon="💼" title="No jobs yet" sub="Create your first job to start building pipelines and tracking candidates." action="+ Add job" onAction={()=>setModal(true)}/>}
+      {rows.length===0&&<EmptyState icon="briefcase" title="No jobs yet" sub="Create your first job to start building pipelines and tracking candidates." action="+ Add job" onAction={()=>setModal(true)}/>}
     </>}
   </div>;
 }
@@ -4464,7 +4499,7 @@ function AddCandToJobModal({job, existingIds, onClose, onAdded}){
   const [err,setErr]=useState("");
 
   useEffect(()=>{
-    db.from("candidates").select("*").order("name").then(({data})=>{ setCandidates(data||[]); setLoading(false); });
+    allRows(()=>db.from("candidates").select("*").order("name").order("id")).then(({data})=>{ setCandidates(data||[]); setLoading(false); });
   },[]);
 
   const filtered=(candidates||[]).filter(c=>{
@@ -4769,7 +4804,7 @@ function JobPipelinePage({job, onBack}){
       </div>
     </div>}
 
-    {placeDone&&<div style={{background:"#eaf3de",border:"0.5px solid #639922",color:"#3b6d11",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10}}>
+    {placeDone&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #639922",color:"#3b6d11",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10}}>
       ✓ {placeDone}
     </div>}
     {jobNote&&<div style={{background:"#e1f5ee",border:"0.5px solid #0f6e56",color:"#0f6e56",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10,display:"flex",justifyContent:"space-between",gap:10}}>
@@ -4795,7 +4830,10 @@ function JobPipelinePage({job, onBack}){
         <div style={{fontSize:15,fontWeight:500,color:"var(--t1)"}}>{job.title}</div>
         <div style={{fontSize:12,color:"var(--t2)"}}>{job.companies?.name||"No client"} · {jobSalaryText(job)} · {entries.length} candidate{entries.length!==1?"s":""}</div>
       </div>
-      <button className="btn-a" onClick={()=>setAddModal(true)}>+ Add candidates</button>
+      <div style={{display:"flex",gap:8}}>
+         <button className="btn-o" onClick={()=>openAiTool("match",{jobId:job.id})} title="Score a candidate against this job with AI"><Icon n="target" size={13}/>Match a candidate</button>
+         <button className="btn-a" onClick={()=>setAddModal(true)}>+ Add candidates</button>
+       </div>
     </div>
 
     {/* Progress bar */}
@@ -4850,7 +4888,9 @@ function JobPipelinePage({job, onBack}){
                   </div>
                 </div>;
               })}
-              {stageCands.length===0&&<div style={{border:"1px dashed var(--br)",borderRadius:8,padding:"14px 6px",textAlign:"center",color:"var(--t3)",fontSize:11}}>—</div>}
+                {stageCands.length===0&&(stage==="Applied"
+                  ?<button onClick={()=>setAddModal(true)} style={{width:"100%",border:"1px dashed var(--brm)",borderRadius:8,padding:"12px 6px",textAlign:"center",color:"var(--g-deep)",fontSize:11,fontWeight:600,background:"transparent",cursor:"pointer"}}>+ Add candidates</button>
+                  :<div style={{border:"1px dashed var(--br)",borderRadius:8,padding:"14px 6px",textAlign:"center",color:"var(--t3)",fontSize:11}}>—</div>)}
             </div>;
           })}
         </div>
@@ -5010,9 +5050,9 @@ function TasksPage(){
   };
 
   const PRIORITY_STYLES={
-    urgent:{bg:"#fcebeb",fg:"#a32d2d",label:"Urgent"},
-    high:{bg:"#faeeda",fg:"#854f0b",label:"High"},
-    normal:{bg:"#eef0f4",fg:"#5b6577",label:"Normal"},
+    urgent:{bg:"rgba(226,75,74,0.12)",fg:"#a32d2d",label:"Urgent"},
+    high:{bg:"rgba(186,117,23,0.14)",fg:"#854f0b",label:"High"},
+    normal:{bg:"rgba(91,101,119,0.10)",fg:"#5b6577",label:"Normal"},
     low:{bg:"#f1efe8",fg:"#5f5e5a",label:"Low"},
   };
 
@@ -5045,7 +5085,7 @@ function TasksPage(){
   const renderTask=(t)=>{
     const dl=dueLabel(t.due_date,t.due_time);
     const ps=PRIORITY_STYLES[t.priority||"normal"];
-    return <div key={t.id} onClick={selMode?()=>togglePick(t.id):undefined} style={{position:"relative",display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"0.5px solid var(--br)",background:selMode&&sel.has(t.id)?"rgba(95,169,43,0.12)":dl?.overdue?"#fffaf9":"transparent",cursor:selMode?"pointer":"default"}}>
+    return <div key={t.id} onClick={selMode?()=>togglePick(t.id):undefined} style={{position:"relative",display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderBottom:"0.5px solid var(--br)",background:selMode&&sel.has(t.id)?"rgba(95,169,43,0.12)":dl?.overdue?"rgba(226,75,74,0.05)":"transparent",cursor:selMode?"pointer":"default"}}>
       {selMode&&<input type="checkbox" checked={sel.has(t.id)} onChange={()=>togglePick(t.id)} onClick={e=>e.stopPropagation()} style={{width:16,height:16,accentColor:ACCENT,flexShrink:0,cursor:"pointer"}}/>}
       <div onClick={selMode?undefined:()=>toggle(t)} style={{width:18,height:18,borderRadius:4,border:"0.5px solid var(--brm)",cursor:selMode?"inherit":"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:t.done?"#1d9e75":"transparent",opacity:selMode?0.5:1}}>
         {t.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
@@ -5053,7 +5093,7 @@ function TasksPage(){
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:13,color:t.done?"var(--t3)":"var(--t1)",textDecoration:t.done?"line-through":"none",marginBottom:2}}>{t.title}</div>
         <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-          {dl&&<span style={{fontSize:11,fontWeight:500,color:dl.overdue?"#a32d2d":dl.today?"#854f0b":"var(--t3)",background:dl.overdue?"#fcebeb":dl.today?"#faeeda":"transparent",padding:dl.overdue||dl.today?"1px 6px":"0",borderRadius:8}}>
+          {dl&&<span style={{fontSize:11,fontWeight:500,color:dl.overdue?"#a32d2d":dl.today?"#854f0b":"var(--t3)",background:dl.overdue?"rgba(226,75,74,0.12)":dl.today?"rgba(186,117,23,0.14)":"transparent",padding:dl.overdue||dl.today?"1px 6px":"0",borderRadius:8}}>
             {dl.overdue?"⚠️ ":dl.today?"📅 ":""}{dl.label}{t.due_time?" · "+t.due_time:""}
           </span>}
           <span style={{fontSize:11,background:ps.bg,color:ps.fg,padding:"1px 6px",borderRadius:8}}>{ps.label}</span>
@@ -5104,7 +5144,7 @@ function TasksPage(){
     </div>
 
     {/* Overdue alert banner with one-click clean-up */}
-    {overdue.length>0&&!selMode&&<div style={{background:"#fcebeb",border:"0.5px solid #f09595",borderRadius:8,padding:"10px 14px",marginBottom:12}}>
+    {overdue.length>0&&!selMode&&<div style={{background:"rgba(226,75,74,0.12)",border:"0.5px solid #f09595",borderRadius:8,padding:"10px 14px",marginBottom:12}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <span style={{fontSize:16}}>⚠️</span>
         <div style={{flex:1,minWidth:0}}>
@@ -5145,7 +5185,7 @@ function TasksPage(){
         </div>
       </div>;
     })()}
-    {bulkMsg&&<div style={{background:"#eaf3de",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {bulkMsg}</div>}
+    {bulkMsg&&<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",color:"#3b6d11",borderRadius:8,padding:"8px 12px",fontSize:12,marginBottom:10}}>✓ {bulkMsg}</div>}
 
     {/* Bulk action bar */}
     {selMode&&<div style={{position:"sticky",top:0,zIndex:30,background:"var(--bg)",border:"1px solid "+ACCENT,borderRadius:10,padding:"10px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",boxShadow:"0 4px 16px rgba(0,0,0,0.08)"}}>
@@ -5229,7 +5269,7 @@ function TasksPage(){
 
 function EmptyState({icon,title,sub,action,onAction}){
   return <div style={{padding:"48px 20px",textAlign:"center",color:"var(--t3)"}}>
-    <div style={{fontSize:40,marginBottom:12}}>{icon}</div>
+    <div style={{display:"flex",justifyContent:"center",marginBottom:12,color:"var(--g-green)"}}>{ICON_PATHS[icon]?<Icon n={icon} size={34} stroke={1.3}/>:<span style={{fontSize:34}}>{icon}</span>}</div>
     <div style={{fontSize:14,fontWeight:500,color:"var(--t1)",marginBottom:6}}>{title}</div>
     <div style={{fontSize:13,color:"var(--t2)",marginBottom:16,maxWidth:300,margin:"0 auto 16px"}}>{sub}</div>
     {action&&<button className="btn-a" onClick={onAction}>{action}</button>}
@@ -5242,7 +5282,7 @@ function CVParserPage(){
   const [summary,setSummary]=useState("");const [loading,setLoading]=useState(false);const [listLoading,setListLoading]=useState(true);const [err,setErr]=useState("");
   // upload mode state
   const [cvText,setCvText]=useState("");const [parsed,setParsed]=useState(null);const [saving,setSaving]=useState(false);const [saved,setSaved]=useState(false);
-  useEffect(()=>{db.from("candidates").select("*").order("created_at",{ascending:false}).then(({data})=>{setCands(data||[]);if(data&&data.length)setSel(data[0]);setListLoading(false);});},[]);
+  useEffect(()=>{allRows(()=>db.from("candidates").select("*").order("created_at",{ascending:false}).order("id")).then(({data})=>{setCands(data||[]);if(data&&data.length)setSel(data[0]);setListLoading(false);});},[]);
   const run=useCallback(async()=>{
     if(!sel)return;setSummary("");setLoading(true);setErr("");
     try{await claude("You are a recruitment AI. Write a concise 3-sentence recruiter summary highlighting the candidate's strongest selling points. Professional, no bullet points.",`Candidate: ${sel.name}, ${sel.role||"?"}, ${sel.experience||"?"} experience, ${sel.location||"?"}, ${sel.salary||"?"}, notice ${sel.notice||"?"}. Skills: ${(sel.skills||[]).join(", ")||"not listed"}. Notes: ${sel.notes||"none"}.`,chunk=>setSummary(s=>s+chunk));}
@@ -5271,7 +5311,7 @@ function CVParserPage(){
     setSaving(true);setErr("");
     const payload={...parsed,skills:Array.isArray(parsed.skills)?parsed.skills:[],status:"New",initials:ini(parsed.name)};
     const{error}=await db.from("candidates").insert(payload);
-    if(error){setErr(error.message);}else{setSaved(true);db.from("candidates").select("*").order("created_at",{ascending:false}).then(({data})=>setCands(data||[]));}
+    if(error){setErr(error.message);}else{setSaved(true);allRows(()=>db.from("candidates").select("*").order("created_at",{ascending:false}).order("id")).then(({data})=>setCands(data||[]));}
     setSaving(false);
   };
 
@@ -5298,7 +5338,7 @@ function CVParserPage(){
         </Panel>
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        {parsed&&<Panel title="Extracted data" badge={<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Parsed</span>}>
+        {parsed&&<Panel title="Extracted data" badge={<span style={{background:"rgba(95,169,43,0.16)",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Parsed</span>}>
           <div style={{padding:14}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}><Av name={parsed.name||"?"} size={42}/><div><div style={{fontWeight:500,fontSize:14,color:"var(--t1)"}}>{parsed.name||"Unknown"}</div><div style={{fontSize:12,color:"var(--t2)"}}>{parsed.role||"—"}</div></div></div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 12px",marginBottom:10}}>
@@ -5307,7 +5347,7 @@ function CVParserPage(){
             {(parsed.skills||[]).length>0&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:5}}>Skills</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:10}}>{(parsed.skills||[]).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:11,borderRadius:10,padding:"2px 8px"}}>{s}</span>)}</div></>}
             {parsed.notes&&<><div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>Notes</div><div style={{fontSize:12,color:"var(--t2)",lineHeight:1.55,marginBottom:12}}>{parsed.notes}</div></>}
             {saved
-              ?<div style={{background:"#eaf3de",border:"0.5px solid #97c459",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#3b6d11",fontWeight:500}}>✓ Candidate saved to database!</div>
+              ?<div style={{background:"rgba(95,169,43,0.16)",border:"0.5px solid #97c459",borderRadius:8,padding:"10px 14px",fontSize:13,color:"#3b6d11",fontWeight:500}}>✓ Candidate saved to database!</div>
               :<button className="btn-a" style={{width:"100%",justifyContent:"center"}} onClick={saveCandidate} disabled={saving||!parsed.name}>
                 {saving?<><span className="spin"></span>Saving…</>:"+ Add to candidates"}
               </button>
@@ -5342,7 +5382,7 @@ function CVParserPage(){
         </Panel>}
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        {(summary||loading)&&<Panel title="AI summary" badge={loading?<span style={{fontSize:11,color:ACCENT}}>Generating…</span>:<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>}>
+        {(summary||loading)&&<Panel title="AI summary" badge={loading?<span style={{fontSize:11,color:ACCENT}}>Generating…</span>:<span style={{background:"rgba(95,169,43,0.16)",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>}>
           <div style={{padding:14}}><div style={{background:"var(--bg2)",borderRadius:8,padding:"11px 13px"}}><AiTag/><StreamText text={summary} loading={loading}/></div>
           {summary&&!loading&&<button className="btn-o" style={{marginTop:10,fontSize:12}} onClick={()=>navigator.clipboard?.writeText(summary)}>📋 Copy</button>}
           </div>
@@ -5363,14 +5403,14 @@ function MatchingPage(){
   const [cand,setCand]=useState(null);const [job,setJob]=useState(null);
   const [reasoning,setReasoning]=useState("");const [score,setScore]=useState(null);
   const [loading,setLoading]=useState(false);const [dataLoading,setDataLoading]=useState(true);const [err,setErr]=useState("");
-  useEffect(()=>{Promise.all([db.from("candidates").select("*").order("created_at",{ascending:false}),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);if(c&&c.length)setCand(c[0]);if(j&&j.length)setJob(j[0]);setDataLoading(false);});},[]);
+  useEffect(()=>{Promise.all([allRows(()=>db.from("candidates").select("*").order("created_at",{ascending:false}).order("id")),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);const pr=window.__aiPreset||{};window.__aiPreset=null;setCand((pr.candId&&(c||[]).find(x=>x.id===pr.candId))||(c&&c[0])||null);setJob((pr.jobId&&(j||[]).find(x=>x.id===pr.jobId))||(j&&j[0])||null);setDataLoading(false);});},[]);
   const run=useCallback(async()=>{
     if(!cand||!job)return;setReasoning("");setScore(null);setLoading(true);setErr("");let full="";
     try{await claude("You are an expert recruitment AI. Analyse candidate-job fit.\nFirst line MUST be exactly: SCORE: [number 0-100]\nThen 3-4 sentences on experience, skills, gaps, and a recommendation.",`CANDIDATE: ${cand.name}, ${cand.role||"?"}, ${cand.experience||"?"}, ${cand.location||"?"}, ${cand.salary||"?"}, notice ${cand.notice||"?"}. Skills: ${(cand.skills||[]).join(", ")||"unknown"}.\nJOB: ${job.title} at ${job.companies?.name||"?"} (${job.salary||"?"}). ${job.description||"No description."}`,chunk=>{full+=chunk;setReasoning(full);});const m=full.match(/SCORE:\s*(\d+)/);if(m)setScore(parseInt(m[1]));}
     catch(e){setErr(e.message);}setLoading(false);
   },[cand,job]);
   const text=reasoning.replace(/SCORE:\s*\d+\n?/,"").trim();
-  const sb2=score>=80?"#eaf3de":score>=60?"#faeeda":"#fcebeb";const sf=score>=80?"#3b6d11":score>=60?"#854f0b":"#a32d2d";const sl=score>=80?"Excellent":score>=60?"Possible":score!==null?"Low fit":null;
+  const sb2=score>=80?"rgba(95,169,43,0.16)":score>=60?"rgba(186,117,23,0.14)":"rgba(226,75,74,0.12)";const sf=score>=80?"#3b6d11":score>=60?"#854f0b":"#a32d2d";const sl=score>=80?"Excellent":score>=60?"Possible":score!==null?"Low fit":null;
   return <div>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <span style={{fontSize:14,fontWeight:500,color:"var(--t1)"}}>AI job matching</span>
@@ -5417,7 +5457,7 @@ function PitchPage(){
   const [cand,setCand]=useState(null);const [job,setJob]=useState(null);const [tone,setTone]=useState("professional");
   const [pitch,setPitch]=useState("");const [loading,setLoading]=useState(false);const [dataLoading,setDataLoading]=useState(true);
   const [err,setErr]=useState("");const [copied,setCopied]=useState(false);
-  useEffect(()=>{Promise.all([db.from("candidates").select("*").order("created_at",{ascending:false}),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);if(c&&c.length)setCand(c[0]);if(j&&j.length)setJob(j[0]);setDataLoading(false);});},[]);
+  useEffect(()=>{Promise.all([allRows(()=>db.from("candidates").select("*").order("created_at",{ascending:false}).order("id")),db.from("jobs").select("*,companies(name)").order("created_at",{ascending:false})]).then(([{data:c},{data:j}])=>{setCands(c||[]);setJobs(j||[]);const pr=window.__aiPreset||{};window.__aiPreset=null;setCand((pr.candId&&(c||[]).find(x=>x.id===pr.candId))||(c&&c[0])||null);setJob((pr.jobId&&(j||[]).find(x=>x.id===pr.jobId))||(j&&j[0])||null);setDataLoading(false);});},[]);
   const gen=useCallback(async()=>{
     if(!cand||!job)return;setPitch("");setLoading(true);setErr("");setCopied(false);
     const td=tone==="professional"?"professional and concise":tone==="enthusiastic"?"enthusiastic and detailed":"executive summary, very brief";
@@ -5448,7 +5488,7 @@ function PitchPage(){
           <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{(cand.skills||[]).slice(0,5).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:10,padding:"2px 7px"}}>{s}</span>)}</div>
         </div>}
       </div>
-      <Panel title="Generated pitch" badge={pitch&&!loading?<span style={{background:"#eaf3de",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>:loading?<span style={{fontSize:11,color:ACCENT}}>Writing…</span>:null}>
+      <Panel title="Generated pitch" badge={pitch&&!loading?<span style={{background:"rgba(95,169,43,0.16)",color:"#3b6d11",fontSize:11,fontWeight:500,borderRadius:10,padding:"2px 8px"}}>Ready</span>:loading?<span style={{fontSize:11,color:ACCENT}}>Writing…</span>:null}>
         <div style={{padding:14}}>
           {!pitch&&!loading&&<div style={{color:"var(--t3)",fontSize:12,textAlign:"center",padding:"28px 0"}}>Configure and click generate to create your pitch.</div>}
           {(pitch||loading)&&<div style={{background:"var(--bg2)",borderRadius:8,padding:"11px 13px"}}><AiTag/><StreamText text={pitch} loading={loading}/></div>}
@@ -5718,7 +5758,7 @@ function CSVImportPage() {
 // FEATURE 1: BD PIPELINE (Client pipeline board)
 // ============================================================
 const BD_STAGES=["Prospect","Qualified","Proposal Sent","Terms Agreed","Live Client","Cold"];
-const BD_COLORS={"Prospect":"#eef0f4","Qualified":"#faeeda","Proposal Sent":"#e6f1fb","Terms Agreed":"#fbeaf0","Live Client":"#eaf3de","Cold":"#f1efe8"};
+const BD_COLORS={"Prospect":"rgba(91,101,119,0.10)","Qualified":"rgba(186,117,23,0.14)","Proposal Sent":"rgba(55,138,221,0.14)","Terms Agreed":"rgba(212,83,126,0.12)","Live Client":"rgba(95,169,43,0.16)","Cold":"#f1efe8"};
 const BD_FG={"Prospect":"#5b6577","Qualified":"#854f0b","Proposal Sent":"#185fa5","Terms Agreed":"#993556","Live Client":"#3b6d11","Cold":"#5f5e5a"};
 
 function BDPipelinePage(){
@@ -5839,7 +5879,7 @@ function SubmittalsPage(){
     setLoading(true);
     const[{data:sub},{data:cands},{data:js}]=await Promise.all([
       db.from("submittals").select("*,candidates(name,role),jobs(title,companies(name))").order("created_at",{ascending:false}),
-      db.from("candidates").select("id,name,role").order("name"),
+      allRows(()=>db.from("candidates").select("id,name,role").order("name").order("id")),
       db.from("jobs").select("id,title,companies(name)").order("title"),
     ]);
     setRows(sub||[]);setCandidates(cands||[]);setJobs(js||[]);setLoading(false);
@@ -5859,8 +5899,8 @@ function SubmittalsPage(){
   };
 
   const statusColor=st=>({
-    "Submitted":"#eef0f4","Shortlisted":"#faeeda","Interview Booked":"#e6f1fb",
-    "Offer Made":"#fbeaf0","Placed":"#eaf3de","Rejected":"#fcebeb"
+    "Submitted":"rgba(91,101,119,0.10)","Shortlisted":"rgba(186,117,23,0.14)","Interview Booked":"rgba(55,138,221,0.14)",
+    "Offer Made":"rgba(212,83,126,0.12)","Placed":"rgba(95,169,43,0.16)","Rejected":"rgba(226,75,74,0.12)"
   }[st]||"#f1efe8");
 
   return <div>
@@ -5946,7 +5986,7 @@ function EmailSequencesPage(){
     setLoading(true);
     const[{data:seqs},{data:cands},{data:cos}]=await Promise.all([
       db.from("email_sequences").select("*").order("created_at",{ascending:false}),
-      db.from("candidates").select("id,name").order("name"),
+      allRows(()=>db.from("candidates").select("id,name").order("name").order("id")),
       db.from("companies").select("id,name").order("name"),
     ]);
     setRows(seqs||[]);setCandidates(cands||[]);setCompanies(cos||[]);setLoading(false);
@@ -5970,7 +6010,7 @@ function EmailSequencesPage(){
       <div style={{fontSize:15,fontWeight:500}}>Email Sequences</div>
       <button className="btn-a" onClick={()=>{setF(blank);setModal(true);}}>+ New Sequence</button>
     </div>
-    <div style={{background:"#faeeda",border:"0.5px solid #e8c97a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#854f0b",marginBottom:14}}>
+    <div style={{background:"rgba(186,117,23,0.14)",border:"0.5px solid #e8c97a",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#854f0b",marginBottom:14}}>
       ℹ️ Sequences are a planning tool — use them to track your outreach schedule. Copy the email body and send manually via Outlook.
     </div>
     {loading?<Spin/>:
@@ -5982,7 +6022,7 @@ function EmailSequencesPage(){
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
               <div style={{fontWeight:500,fontSize:14}}>{r.name}</div>
-              <div style={{fontSize:11,color:"var(--t2)",marginTop:2}}>{r.target_type} · Started {r.started_date}</div>
+              <div style={{fontSize:11,color:"var(--t2)",marginTop:2}}>{r.target_type} · Started {fmtDate(r.started_date)}</div>
             </div>
             <button className="btn-d" onClick={()=>del(r.id)}>Delete</button>
           </div>
@@ -6055,7 +6095,7 @@ function PlacementsPage(){
     setLoading(true);
     const[{data:pl},{data:cands},{data:js},{data:co}]=await Promise.all([
       db.from("placements").select("*").order("created_at",{ascending:false}),
-      db.from("candidates").select("id,name").order("name"),
+      allRows(()=>db.from("candidates").select("id,name").order("name").order("id")),
       db.from("jobs").select("id,title,companies(name)").order("title"),
       db.from("companies").select("name,terms_payment_days,terms_rebate"),
     ]);
@@ -6160,20 +6200,20 @@ function PlacementsPage(){
     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:16}}>
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>TOTAL PLACEMENTS</div>
-        <div style={{fontSize:24,fontWeight:700,color:"var(--t1)"}}>{rows.length}</div>
+        <div className="g-num" style={{fontSize:24,color:"var(--t1)"}}>{rows.length}</div>
       </div>
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>TOTAL FEES</div>
-        <div style={{fontSize:24,fontWeight:700,color:"#185fa5"}}>£{totalFees.toLocaleString()}</div>
+        <div className="g-num" style={{fontSize:24,color:"var(--t1)"}}>£{totalFees.toLocaleString()}</div>
       </div>
       <div style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:14}}>
         <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>FEES RECEIVED</div>
-        <div style={{fontSize:24,fontWeight:700,color:"#3b6d11"}}>£{paidFees.toLocaleString()}</div>
+        <div className="g-num" style={{fontSize:24,color:"var(--g-deep)"}}>£{paidFees.toLocaleString()}</div>
       </div>
       {(()=>{const od=rows.filter(r=>placementMoney(r,cos).invoice==="overdue");const amt=od.reduce((t,r)=>t+(parseFloat(r.fee_amount)||0),0);
         return <div style={{background:"var(--bg)",borderRadius:10,border:od.length?"0.5px solid #f09595":"0.5px solid var(--br)",padding:14}}>
           <div style={{fontSize:11,color:"var(--t2)",marginBottom:4}}>OVERDUE INVOICES</div>
-          <div style={{fontSize:24,fontWeight:700,color:od.length?"#c0392b":"var(--t3)"}}>£{amt.toLocaleString()}</div>
+          <div className="g-num" style={{fontSize:24,color:od.length?"#a32d2d":"var(--t3)"}}>£{amt.toLocaleString()}</div>
           <div style={{fontSize:11,color:"var(--t3)"}}>{od.length} invoice{od.length!==1?"s":""}</div>
         </div>;})()}
     </div>
@@ -6189,7 +6229,7 @@ function PlacementsPage(){
       </colgroup>
       <thead><tr>
         <th className="th">Candidate</th><th className="th">Role</th><th className="th">Company</th>
-        <th className="th">Start Date</th><th className="th">Salary</th><th className="th">Fee</th>
+        <th className="th">Start Date</th><th className="th num">Salary</th><th className="th num">Fee</th>
         <th className="th">Invoice</th><th className="th">Paid</th>
       </tr></thead>
       <tbody>{rows.map(r=><tr key={r.id}>
@@ -6202,11 +6242,11 @@ function PlacementsPage(){
             if(!m.started)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>Starts in {daysBetween(todayStr(),r.start_date)}d</div>;
             if(!m.rebateKnown)return <div style={{fontSize:10,color:"var(--t3)",marginTop:2}} title="Add the rebate period on the company's terms">Rebate ?</div>;
             return m.inRebate
-              ?<div style={{fontSize:10,color:"#7f77dd",marginTop:2}} title={`Fee at risk until ${niceDate(m.rebateEnd)}`}>🛡 {m.rebateLeft}d rebate left</div>
+              ?<div style={{fontSize:10,color:"#7f77dd",marginTop:2}} title={`Fee at risk until ${niceDate(m.rebateEnd)}`}>{m.rebateLeft}d rebate left</div>
               :<div style={{fontSize:10,color:"#3b6d11",marginTop:2}}>✓ Fee safe</div>;})()}
         </td>
-        <td className="td">{r.salary?`£${parseFloat(r.salary).toLocaleString()}`:"—"}</td>
-        <td className="td" style={{color:"#185fa5",fontWeight:500}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
+        <td className="td num">{r.salary?`£${parseFloat(r.salary).toLocaleString()}`:"—"}</td>
+        <td className="td num" style={{color:"var(--t1)",fontWeight:600}}>{r.fee_amount?`£${parseFloat(r.fee_amount).toLocaleString()}`:"—"}</td>
         <td className="td">
           {invNoFor===r.id
             ?<div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:4}}>
@@ -6225,7 +6265,7 @@ function PlacementsPage(){
             ?<span style={{fontSize:11,color:"var(--t2)"}}><span className="spin"></span>Uploading…</span>
             :r.invoice_path
               ?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
-                <button onClick={()=>viewInvoice(r)} title={r.invoice_filename||"Invoice"} style={{background:"#eaf3de",color:"#3b6d11",border:"none",borderRadius:6,padding:"2px 8px",fontSize:11,cursor:"pointer",maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>📄 View invoice</button>
+                <button onClick={()=>viewInvoice(r)} title={r.invoice_filename||"Invoice"} style={{background:"rgba(95,169,43,0.16)",color:"#3b6d11",border:"none",borderRadius:6,padding:"2px 8px",fontSize:11,cursor:"pointer",maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>📄 View invoice</button>
                 <button onClick={()=>pickInvoice(r)} title="Replace invoice" style={{background:"none",border:"0.5px solid var(--brm)",borderRadius:6,padding:"2px 6px",fontSize:10,cursor:"pointer",color:"var(--t2)"}}>Replace</button>
                 <button onClick={()=>removeInvoice(r)} title="Remove invoice" style={{background:"none",border:"none",color:"var(--t3)",cursor:"pointer",fontSize:11,padding:"0 2px"}}>✕</button>
               </div>
@@ -6238,7 +6278,7 @@ function PlacementsPage(){
         </td>
         <td className="td">
           <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap",justifyContent:"space-between"}}>
-            <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"#eaf3de":"#fcebeb",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+            <button onClick={()=>togglePaid(r.id,!r.payment_received)} style={{background:r.payment_received?"rgba(95,169,43,0.16)":"rgba(226,75,74,0.12)",color:r.payment_received?"#3b6d11":"#a32d2d",border:"none",borderRadius:6,padding:"3px 8px",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
               {r.payment_received?"✓ Paid":"Unpaid"}
             </button>
             <span className="acts">
@@ -6295,6 +6335,11 @@ function PlacementsPage(){
 // ============================================================
 const ACTIVITY_TYPES=["Note","Call","Email","Meeting","LinkedIn","WhatsApp"];
 const ACTIVITY_ICONS={"Note":"📝","Call":"📞","Email":"✉️","Meeting":"🤝","LinkedIn":"💼","WhatsApp":"💬"};
+const ACT_LINE={"Note":"pen","Call":"phone","Email":"mail","Meeting":"users","WhatsApp":"chat","CV sent":"send"};
+function ActIcon({t,size=13}){
+  if(t==="LinkedIn")return <span style={{fontWeight:800,fontSize:size-1,color:"#0a66c2",lineHeight:1,width:size,textAlign:"center",display:"inline-block"}}>in</span>;
+  return <span style={{color:"var(--t2)",display:"inline-flex"}}><Icon n={ACT_LINE[t]||"pen"} size={size}/></span>;
+}
 
 // ── One-click activity logging ────────────────────────────────────────────
 // Pick a type, then an outcome — that's it. Notes are optional. A real
@@ -6362,7 +6407,7 @@ function QuickLog({entityType,entityId,entityName,onLogged}){
     <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Log activity</div>
     <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
       {types.map(t=><button key={t} onClick={()=>pickType(t)} style={chip(type===t)} disabled={saving}>
-        {t==="CV sent"?"📄":ACTIVITY_ICONS[t]} {t}
+        <span style={{display:"inline-flex",alignItems:"center",gap:5}}><ActIcon t={t}/>{t}</span>
       </button>)}
     </div>
     {type&&<div style={{background:"var(--bg2)",borderRadius:8,padding:"10px 12px",marginTop:8,display:"flex",flexDirection:"column",gap:8}}>
@@ -6398,8 +6443,8 @@ function CompanyActivity({company}){
     {acts&&acts.length>0&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
       {acts.map(a=><div key={a.id} style={{background:"var(--bg2)",borderRadius:8,padding:"8px 12px"}}>
         <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
-          <span style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}>{ACTIVITY_ICONS[a.activity_type]||"📝"} {a.activity_type}{a.subject?` — ${a.subject}`:""}</span>
-          <span style={{fontSize:10,color:"var(--t3)",flexShrink:0}}>{new Date(a.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+          <span style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}><span style={{display:"inline-flex",alignItems:"center",gap:6}}><ActIcon t={a.activity_type} size={12}/>{a.activity_type}{a.subject?` — ${a.subject}`:""}</span></span>
+          <span style={{fontSize:10,color:"var(--t3)",flexShrink:0}}>{fmtStamp(a.created_at)}</span>
         </div>
         {a.body&&<div style={{fontSize:12,color:"var(--t2)",marginTop:2,whiteSpace:"pre-wrap"}}>{a.body.slice(0,140)}{a.body.length>140?"…":""}</div>}
       </div>)}
@@ -6452,7 +6497,7 @@ function WeeklyScorecard({setPage}){
     if(v===null)return;const n=parseInt(v,10);if(!(n>=0))return;
     const next={...targets,[k]:n};setTargets(next);localStorage.setItem("gaiaScoreTargets",JSON.stringify(next));
   };
-  if(!data)return null;
+  if(!data)return <div className="g-canvas"><div className="skel" style={{height:10,width:140,borderRadius:4,marginBottom:14}}/><div className="score-grid">{[0,1,2,3,4,5,6].map(i=><div key={i} className="skel" style={{height:96,borderRadius:10}}/>)}</div></div>;
   // How far through the working week are we? Mon 9am ≈ 0, Fri 5pm = 1.
   // Each figure is judged against where it should be by now, so Monday
   // morning is neutral rather than a wall of red zeros.
@@ -6520,7 +6565,7 @@ function ActivityLogPage(){
     setLoading(true);
     const[{data:acts},{data:cands},{data:cos}]=await Promise.all([
       db.from("activity_log").select("*").order("created_at",{ascending:false}).limit(100),
-      db.from("candidates").select("id,name").order("name"),
+      allRows(()=>db.from("candidates").select("id,name").order("name").order("id")),
       db.from("companies").select("id,name").order("name"),
     ]);
     setRows(acts||[]);setCandidates(cands||[]);setCompanies(cos||[]);setLoading(false);
@@ -6545,18 +6590,18 @@ function ActivityLogPage(){
     </div>
     <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
       {["All",...ACTIVITY_TYPES].map(t=><button key={t} onClick={()=>setFilter(t)} style={{background:filter===t?"#1a1f2e":"var(--bg)",color:filter===t?"#fff":"var(--t2)",border:"0.5px solid var(--br)",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>
-        {ACTIVITY_ICONS[t]||""} {t}
+        <span style={{display:"inline-flex",alignItems:"center",gap:5}}><ActIcon t={t}/>{t}</span>
       </button>)}
     </div>
     {loading?<Spin/>:
     filtered.length===0?<div style={{padding:"40px 0",textAlign:"center",color:"var(--t3)",fontSize:13}}>No activities yet. Click "Log Activity" to start tracking.</div>:
     <div style={{display:"grid",gap:8}}>
       {filtered.map(r=><div key={r.id} style={{background:"var(--bg)",borderRadius:10,border:"0.5px solid var(--br)",padding:"12px 14px",display:"flex",gap:12}}>
-        <div style={{fontSize:20,flexShrink:0}}>{ACTIVITY_ICONS[r.activity_type]||"📝"}</div>
+        <div style={{flexShrink:0,width:30,height:30,borderRadius:8,background:"var(--bg2)",display:"flex",alignItems:"center",justifyContent:"center"}}><ActIcon t={r.activity_type} size={15}/></div>
         <div style={{flex:1}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
             <div style={{fontWeight:500,fontSize:13}}>{r.entity_name||r.entity_type} <span style={{fontSize:11,color:"var(--t3)",fontWeight:400}}>· {r.activity_type}</span></div>
-            <div style={{fontSize:11,color:"var(--t3)"}}>{new Date(r.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>
+            <div style={{fontSize:11,color:"var(--t3)"}}>{fmtDateTime(r.created_at)}</div>
           </div>
           {r.subject&&<div style={{fontSize:12,fontWeight:500,color:"var(--t2)",marginBottom:2}}>{r.subject}</div>}
           <div style={{fontSize:12,color:"var(--t2)",whiteSpace:"pre-wrap"}}>{r.body}</div>
@@ -6720,7 +6765,7 @@ function ReportingPage(){
                 const maxAct=Math.max(...Object.values(data.actByType));
                 return <div key={type}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:3,fontSize:12}}>
-                    <span>{ACTIVITY_ICONS[type]||"📝"} {type}</span>
+                    <span style={{display:"inline-flex",alignItems:"center",gap:6}}><ActIcon t={type}/>{type}</span>
                     <span style={{fontWeight:600}}>{count}</span>
                   </div>
                   <div style={{height:5,background:"var(--bg2)",borderRadius:10,overflow:"hidden"}}>
@@ -6845,6 +6890,7 @@ function App(){
 
 function AuthedApp(){
   const [page,setPage]=useState("dashboard");
+  useEffect(()=>{const h=e=>{setPage(e.detail);setActiveJob(null);};window.addEventListener("gotoPage",h);return()=>window.removeEventListener("gotoPage",h);},[]);
   const [allTasks,setAllTasks]=useState([]);
   const [activeJob,setActiveJob]=useState(null);
   const [searchQ,setSearchQ]=useState({q:"",cv:false,n:0});
