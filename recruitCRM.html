@@ -427,10 +427,41 @@ const SOURCES=["LinkedIn","Applied to advert","Referral","Job board","CV databas
 const salaryNum=v=>{const n=parseFloat(String(v||"").replace(/[^0-9.k]/gi,"").replace(/k$/i,"000"));return n>0?Math.round(n<1000?n*1000:n):null;};
 const UPGRADE_HINT=" — run crm-upgrade.sql in Supabase first.";
 // Fields the candidate form is allowed to write (keeps system columns out of saves)
-const CAND_FIELDS=["name","role","email","phone","location","experience","salary","notice","skills","status","notes","linkedin","source","licences","cieem_level","driving_licence","salary_expect"];
+// ── Candidate status follows the pipeline ─────────────────────────────────
+// Status is worked out from the furthest stage the candidate has reached on
+// any job, so it never has to be updated by hand:
+//   Applied / Screening → Pipeline · Interview / 2nd Interview → Interview
+//   Offer → Offer stage · Placed → Placed
+// If they drop out of every job they go back to Active. Placed is never
+// downgraded automatically, and On hold / Closed / Cold are only changed if
+// they move forward in a pipeline.
+const AUTO_STATUS={"Applied":"Pipeline","Screening":"Pipeline","Interview":"Interview","2nd Interview":"Interview","Offer":"Offer stage","Placed":"Placed"};
+const STATUS_RANK=["New","Active","Pipeline","Interview","Offer stage","Placed"];
+async function syncCandidateStatus(candId){
+  if(!candId)return null;
+  const[{data:jcs},{data:c}]=await Promise.all([
+    db.from("job_candidates").select("stage").eq("candidate_id",candId),
+    db.from("candidates").select("status").eq("id",candId).single(),
+  ]);
+  const cur=c?.status||"New";
+  const live=(jcs||[]).map(j=>AUTO_STATUS[j.stage]).filter(Boolean);
+  let next=null;
+  if(live.length) next=live.sort((a,b)=>STATUS_RANK.indexOf(b)-STATUS_RANK.indexOf(a))[0];
+  else if(["Pipeline","Interview","Offer stage"].includes(cur)) next="Active";
+  if(!next||next===cur)return cur;
+  if(cur==="Placed")return cur; // a past placement is never undone automatically
+  await db.from("candidates").update({status:next}).eq("id",candId);
+  return next;
+}
+// A real conversation turns a New record into an Active candidate
+async function markActiveIfNew(candId){
+  if(!candId)return;
+  await db.from("candidates").update({status:"Active"}).eq("id",candId).eq("status","New");
+}
+const CAND_FIELDS=["name","role","current_employer","email","phone","location","experience","salary","notice","skills","status","notes","linkedin","source","licences","cieem_level","driving_licence","salary_expect"];
 
 function CandModal({cand,onClose,onSaved,initial}){
-  const blank={name:"",role:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:"",source:"",licences:[],cieem_level:"",driving_licence:"",salary_expect:""};
+  const blank={name:"",role:"",current_employer:"",email:"",phone:"",location:"",experience:"",salary:"",notice:"",skills:"",status:"New",notes:"",linkedin:"",source:"",licences:[],cieem_level:"",driving_licence:"",salary_expect:""};
   const [f,setF]=useState(cand?{...blank,...cand,skills:Array.isArray(cand.skills)?cand.skills.join(", "):cand.skills||"",licences:cand.licences||[],salary_expect:cand.salary_expect||""}:{...blank,...(initial||{})});
   const [saving,setSaving]=useState(false);const [err,setErr]=useState("");
   const [genDesc,setGenDesc]=useState(false);
@@ -445,7 +476,7 @@ function CandModal({cand,onClose,onSaved,initial}){
     if(!cand?.id)return;
     db.from("candidates").select(CAND_FIELDS.join(",")).eq("id",cand.id).single().then(({data})=>{
       if(data)setF(p=>({...p,...data,skills:Array.isArray(data.skills)?data.skills.join(", "):data.skills||"",licences:data.licences||[],salary_expect:data.salary_expect||"",
-        cieem_level:data.cieem_level||"",driving_licence:data.driving_licence||"",source:data.source||"",linkedin:data.linkedin||""}));
+        cieem_level:data.cieem_level||"",driving_licence:data.driving_licence||"",source:data.source||"",linkedin:data.linkedin||"",current_employer:data.current_employer||""}));
     });
   },[cand?.id]);
 
@@ -474,12 +505,13 @@ function CandModal({cand,onClose,onSaved,initial}){
     payload.skills=String(f.skills||"").split(",").map(x=>x.trim()).filter(Boolean);
     payload.initials=ini(f.name);
     payload.salary_expect=salaryNum(f.salary_expect);
-    ["source","cieem_level","driving_licence"].forEach(k=>{if(!payload[k])payload[k]=null;});
+    ["source","cieem_level","driving_licence","current_employer"].forEach(k=>{if(!payload[k])payload[k]=null;});
+    if(payload.current_employer)payload.current_employer=String(payload.current_employer).trim();
     const{data:savedRow,error}=cand
       ?await db.from("candidates").update(payload).eq("id",cand.id).select("id,name").single()
       :await db.from("candidates").insert(payload).select("id,name").single();
     setSaving(false);
-    if(error){setErr(error.message+(/source|licences|cieem|driving|salary_expect/i.test(error.message)?UPGRADE_HINT:""));return;}
+    if(error){setErr(error.message+(/source|licences|cieem|driving|salary_expect|current_employer/i.test(error.message)?UPGRADE_HINT:""));return;}
     await onSaved(savedRow);onClose();
   };
   return <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
@@ -487,7 +519,11 @@ function CandModal({cand,onClose,onSaved,initial}){
       <h3>{cand?"Edit candidate":"Add candidate"}</h3>
       <div className="fr2">
         <div><label>Full name *</label><input type="text" value={f.name} onChange={s("name")} placeholder="Sophie Archer"/></div>
-        <div><label>Role</label><input type="text" value={f.role||""} onChange={s("role")} placeholder="Data Analyst"/></div>
+        <div><label>Role</label><input type="text" value={f.role||""} onChange={s("role")} placeholder="Senior Ecologist"/></div>
+      </div>
+      <div className="fr2">
+        <div><label title="Who they work for now — searchable, and used when sourcing from competitor firms">Current employer</label><input type="text" value={f.current_employer||""} onChange={s("current_employer")} placeholder="WSP"/></div>
+        <div/>
       </div>
       <div className="fr2">
         <div><label>Email</label><div style={{display:"flex",gap:6}}>
@@ -879,7 +915,7 @@ function TodayAgenda({setPage,style={}}){
 
 function DashboardPage({setPage}){
   const [stats,setStats]=useState({c:0,j:0,t:0,co:0});
-  const [revenue,setRevenue]=useState({potential:0,actual:0,placed:0,interviewJobs:[]});
+  const [revenue,setRevenue]=useState({potential:0,actual:0,placed:0,paid:0,invoiced:0,toInvoice:0,toInvoiceCount:0,interviewJobs:[]});
   const [recent,setRecent]=useState([]);
   const [topJobs,setTopJobs]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -938,7 +974,7 @@ function DashboardPage({setPage}){
           .or("potential_fee.not.is.null,actual_fee.not.is.null")
           .order("potential_fee",{ascending:false,nullsFirst:false})
           .limit(6),
-        db.from("placements").select("id,job_id,job_title,company_name,fee_amount,payment_received"),
+        db.from("placements").select("id,job_id,job_title,company_name,fee_amount,payment_received,invoice_date"),
       ]);
 
       setStats({c:c.count||0,j:j.count||0,t:t.count||0,co:co.count||0});
@@ -988,7 +1024,14 @@ function DashboardPage({setPage}){
         + unrecordedFilled.reduce((sum,j)=>sum+(parseFloat(j.actual_fee)||parseFloat(j.potential_fee)||0),0);
       const placed=placements.length+unrecordedPlaced.length+unrecordedFilled.length;
 
-      setRevenue({potential,actual,placed,interviewJobs:interviewQualified});
+      // Split what is placed into cash received, invoiced but unpaid, and not
+      // yet invoiced — "placed" is not money in the bank until it is paid.
+      const fa=p=>parseFloat(p.fee_amount)||0;
+      const paid=placements.filter(p=>p.payment_received).reduce((t,p)=>t+fa(p),0);
+      const invoiced=placements.filter(p=>!p.payment_received&&p.invoice_date).reduce((t,p)=>t+fa(p),0);
+      const toInvoice=Math.max(0,actual-paid-invoiced);
+      const toInvoiceCount=placements.filter(p=>!p.payment_received&&!p.invoice_date).length+unrecordedPlaced.length+unrecordedFilled.length;
+      setRevenue({potential,actual,placed,paid,invoiced,toInvoice,toInvoiceCount,interviewJobs:interviewQualified});
       setLastRefresh(new Date());
     } catch(e) { console.error("Dashboard load error",e); }
     setLoading(false);
@@ -1030,10 +1073,18 @@ function DashboardPage({setPage}){
           <div className="g-num" style={{fontSize:38,color:"var(--g-ink)"}}>
             {loading?"—":`£${revenue.actual.toLocaleString()}`}
           </div>
-          <div className="g-eyebrow" style={{marginTop:9,color:"var(--g-ink)"}}>Banked</div>
+          <div className="g-eyebrow" style={{marginTop:9,color:"var(--g-ink)"}}>Placed</div>
           <div style={{fontSize:11,color:"var(--g-mute)",marginTop:3}}>
-            {revenue.placed||0} placement{revenue.placed!==1?"s":""} confirmed
+            {revenue.placed||0} placement{revenue.placed!==1?"s":""} this year
           </div>
+          {!loading&&<div style={{display:"flex",flexDirection:"column",gap:3,marginTop:10,fontSize:12}}>
+            {[["Cash received",revenue.paid,"var(--g-deep)",1],["Invoiced, awaiting payment",revenue.invoiced,"var(--g-lime)",1],[`Not invoiced yet${revenue.toInvoiceCount?` (${revenue.toInvoiceCount})`:""}`,revenue.toInvoice,"var(--g-lime)",0.5]].map(([l,v,col,op])=>
+              <div key={l} style={{display:"flex",alignItems:"center",gap:7}}>
+                <span style={{width:9,height:9,borderRadius:2,background:col,opacity:op,flexShrink:0}}/>
+                <span className="g-num" style={{fontSize:13,color:"var(--g-ink)",minWidth:62}}>£{Math.round(v||0).toLocaleString()}</span>
+                <span style={{color:"var(--g-mute)"}}>{l}</span>
+              </div>)}
+          </div>}
         </div>
         <div>
           <div className="g-num" style={{fontSize:38,color:"var(--g-deep)"}}>
@@ -1057,16 +1108,20 @@ function DashboardPage({setPage}){
 
       {/* Progress toward target: solid = banked, pale = in play */}
       {(()=>{
-        const bankedPct=Math.min(100,(revenue.actual/target)*100);
-        const playPct=Math.min(100-bankedPct,(revenue.potential/target)*100);
+        const seg=v=>Math.max(0,(v||0)/target*100);
+        let left=100;const take=v=>{const w=Math.min(left,seg(v));left-=w;return w;};
+        const paidPct=take(revenue.paid),invPct=take(revenue.invoiced),toInvPct=take(revenue.toInvoice),playPct=take(revenue.potential);
         const pctOfTarget=Math.round((revenue.actual/target)*100);
+        const cashPct=Math.round(((revenue.paid||0)/target)*100);
         return <div>
           <div style={{height:11,borderRadius:6,background:"var(--g-cream2)",overflow:"hidden",display:"flex"}}>
-            <div style={{width:`${bankedPct}%`,background:"linear-gradient(90deg,var(--g-deep),var(--g-lime))",transition:"width 0.6s ease"}}/>
-            <div style={{width:`${playPct}%`,background:"var(--g-lime)",opacity:0.38,transition:"width 0.6s ease"}}/>
+            <div title="Cash received" style={{width:`${paidPct}%`,background:"var(--g-deep)",transition:"width 0.6s ease"}}/>
+            <div title="Invoiced, awaiting payment" style={{width:`${invPct}%`,background:"var(--g-lime)",transition:"width 0.6s ease"}}/>
+            <div title="Placed, not invoiced yet" style={{width:`${toInvPct}%`,background:"var(--g-lime)",opacity:0.6,transition:"width 0.6s ease"}}/>
+            <div title="In play" style={{width:`${playPct}%`,background:"var(--g-lime)",opacity:0.25,transition:"width 0.6s ease"}}/>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,marginTop:8,fontSize:11,color:"var(--g-mute)",flexWrap:"wrap"}}>
-            <span>{loading?"":`${pctOfTarget}% of target banked · £${(revenue.actual+revenue.potential).toLocaleString()} including everything in play`}</span>
+            <span>{loading?"":`${pctOfTarget}% of target placed · ${cashPct}% received as cash · £${(revenue.actual+revenue.potential).toLocaleString()} including everything in play`}</span>
             <button onClick={loadData} disabled={loading}
               style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:"var(--g-deep)",fontFamily:"var(--g-face)",fontWeight:600,padding:0}}>
               {loading?"Refreshing…":`Updated ${fmtTime(lastRefresh)} · refresh`}
@@ -1107,6 +1162,9 @@ function DashboardPage({setPage}){
       Nothing in play yet. Move a candidate to Interview on an open job and the fee will appear here.
     </div>}
 
+    {/* Weekly activity scorecard */}
+    <WeeklyScorecard setPage={setPage}/>
+
     {/* Invoices to chase and fees still in rebate */}
     <MoneyToChase setPage={setPage}/>
 
@@ -1144,7 +1202,7 @@ function DashboardPage({setPage}){
               </div>
               <div style={{textAlign:"right",flexShrink:0}}>
                 <div className="g-num" style={{fontSize:15,letterSpacing:"-0.4px",color:isActual?"var(--g-ink)":"var(--g-deep)"}}>£{(fee||0).toLocaleString()}</div>
-                <div className="g-eyebrow" style={{marginTop:3}}>{isActual?"banked":"in play"}</div>
+                <div className="g-eyebrow" style={{marginTop:3}}>{isActual?"placed":"in play"}</div>
               </div>
               <Pill label={j.status||"Open"}/>
             </div>;
@@ -1413,13 +1471,13 @@ function GlobalSearch({setPage}){
     const t=setTimeout(async()=>{
       setLoading(true);
       const term=q.trim();
-      const cf="id,name,role,location";
+      const cf="id,name,role,location,current_employer";
       // Three simple searches (name, location, role) merged together, so typing
       // a town such as "Birmingham" finds everyone based there.
       const [cn,cl,cr,j,co]=await Promise.all([
         db.from("candidates").select(cf).ilike("name",`%${term}%`).limit(15),
         db.from("candidates").select(cf).ilike("location",`%${term}%`).limit(25),
-        db.from("candidates").select(cf).ilike("role",`%${term}%`).limit(15),
+        db.from("candidates").select(cf).or(`role.ilike.%${term.replace(/[,()]/g," ")}%,current_employer.ilike.%${term.replace(/[,()]/g," ")}%`).limit(15),
         db.from("jobs").select("id,title,status,companies(name)").ilike("title",`%${term}%`).limit(5),
         db.from("companies").select("id,name,industry").ilike("name",`%${term}%`).limit(4),
       ]);
@@ -1688,11 +1746,11 @@ function SearchResultsPage({query,cvFlag,nonce,setPage}){
       return;
     }
     setMode("simple");
-    const cf="id,name,role,location,email,status,skills,cv_url,cv_path,cv_filename";
+    const cf="id,name,role,location,current_employer,email,status,skills,cv_url,cv_path,cv_filename";
     const [cn,cl,cr,j,co]=await Promise.all([
       db.from("candidates").select(cf).ilike("name",`%${t}%`).limit(1000),
       db.from("candidates").select(cf).ilike("location",`%${t}%`).limit(1000),
-      db.from("candidates").select(cf).ilike("role",`%${t}%`).limit(1000),
+      db.from("candidates").select(cf).or(`role.ilike.%${t.replace(/[,()]/g," ")}%,current_employer.ilike.%${t.replace(/[,()]/g," ")}%`).limit(1000),
       db.from("jobs").select("id,title,status,salary,companies(name)").ilike("title",`%${t}%`).limit(200),
       db.from("companies").select("id,name,industry,status").ilike("name",`%${t}%`).limit(200),
     ]);
@@ -2037,6 +2095,7 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
   },[candProp?.id]);
 
   const [activities,setActivities]=useState([]);
+  const [actTick,setActTick]=useState(0);
   const [jobs,setJobs]=useState([]);
   const [loadingActs,setLoadingActs]=useState(true);
   const [cvUploading,setCvUploading]=useState(false);
@@ -2056,7 +2115,12 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
       setJobs((jcs||[]).map(jc=>({...jc.jobs,stage:jc.stage,jcId:jc.id})));
       setLoadingActs(false);
     });
-  },[cand]);
+  },[cand,actTick]);
+  const afterLog=()=>{
+    setActTick(t=>t+1);
+    db.from("candidates").select("*").eq("id",cand.id).single().then(({data})=>{if(data)setFull(data);});
+    if(onRefresh)onRefresh();
+  };
 
   const uploadCV=async(e)=>{
     const file=e.target.files[0];
@@ -2108,13 +2172,15 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
           <Av name={c.name} size={52}/>
           <div>
             <div style={{fontWeight:600,fontSize:16,color:"var(--t1)"}}>{c.name}</div>
-            <div style={{fontSize:13,color:"var(--t2)",marginTop:2}}>{c.role||"No role set"}</div>
+            <div style={{fontSize:13,color:"var(--t2)",marginTop:2}}>{c.role||"No role set"}{c.current_employer?<span style={{color:"var(--t3)"}}> · {c.current_employer}</span>:""}</div>
             <div style={{marginTop:6}}><Pill label={c.status||"New"}/></div>
           </div>
         </div>
       </div>
       {/* Body */}
       <div style={{padding:20,display:"flex",flexDirection:"column",gap:18,flex:1}}>
+        {/* One-click activity logging */}
+        <QuickLog entityType="candidate" entityId={c.id} entityName={c.name} onLogged={afterLog}/>
         {/* CV */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>CV / Resume</div>
@@ -2573,14 +2639,14 @@ function CandidatesPage(){
     // into the browser on every page load. CV text is only needed for the
     // server-side search, and the detail panel fetches the full row itself.
     const base="id,name,role,location,email,phone,status,experience,salary,notice,skills,notes,cv_url,cv_path,cv_filename,created_at,linkedin";
-    const extra=",source,licences,cieem_level,driving_licence,salary_expect";
+    const extra=",source,licences,cieem_level,driving_licence,salary_expect,current_employer";
     const[cRes,{data:acts}]=await Promise.all([
       db.from("candidates").select(base+extra).order("created_at",{ascending:false}),
       db.from("activity_log").select("entity_id,created_at").order("created_at",{ascending:false}),
     ]);
     let{data,error}=cRes;
     // New columns not added yet? Load without them so the page still works
-    if(error&&/source|licences|cieem|driving|salary_expect/i.test(error.message)){
+    if(error&&/source|licences|cieem|driving|salary_expect|current_employer/i.test(error.message)){
       setNeedsUpgrade(true);
       ({data,error}=await db.from("candidates").select(base).order("created_at",{ascending:false}));
     }else setNeedsUpgrade(false);
@@ -2618,7 +2684,7 @@ function CandidatesPage(){
   const del=async id=>{if(!confirm("Delete this candidate?"))return;setDelId(id);await db.from("candidates").delete().eq("id",id);setDelId(null);load();};
 
   const statuses=["All",...new Set(rows.map(r=>r.status).filter(Boolean))];
-  const ALL_STATUSES=["New","Active","Interview","Offer stage","Placed","On hold","Closed"];
+  const ALL_STATUSES=["New","Active","Pipeline","Interview","Offer stage","Placed","On hold","Closed"];
 
   // Deep search asks Postgres to look inside CV text as well as the fields on
   // screen. Quotes work for phrases, - excludes a word, OR broadens.
@@ -2682,7 +2748,7 @@ function CandidatesPage(){
   const filtered=rows.filter(r=>{
     const ms=deep&&deepIds
       ?deepIds.has(r.id)
-      :(!search||[r.name,r.role,r.location,r.email].some(v=>v?.toLowerCase().includes(search.toLowerCase())));
+      :(!search||[r.name,r.role,r.current_employer,r.location,r.email].some(v=>v?.toLowerCase().includes(search.toLowerCase())));
     const mf=statusF==="All"||r.status===statusF;
     if(!(ms&&mf))return false;
     if(reviewMode&&!isStale(r))return false;
@@ -2859,7 +2925,7 @@ function CandidatesPage(){
               <div style={{fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:ACCENT}}>{c.name}{hasCv(c)&&<span title="CV attached" style={{marginLeft:5,fontSize:10,background:"#eaf3de",color:"#3b6d11",borderRadius:6,padding:"1px 5px"}}>📄 CV</span>}</div>
               {c.email&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.email}</div>}
             </div></div></td>
-            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}</td>
+            <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.role||"—"}{c.current_employer&&<div style={{fontSize:11,color:"var(--t3)",overflow:"hidden",textOverflow:"ellipsis"}}>🏢 {c.current_employer}</div>}</td>
             <td className="td" style={{color:"var(--t2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.location||"—"}</td>
             <td className="td"><span style={{fontSize:11,color:lcColor,fontWeight:ds!==null?500:400}}>{ds===null?"Never":ds===0?"Today":ds===1?"Yesterday":`${ds}d ago`}</span></td>
             <td className="td"><div style={{display:"flex",flexWrap:"wrap",gap:3}}>{(c.licences||[]).slice(0,2).map(l=><span key={l} title={l} style={{background:"#e6f1fb",color:"#185fa5",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{LICENCE_ICON(l)} {LICENCE_SHORT(l)}</span>)}{(c.skills||[]).slice(0,(c.licences||[]).length?1:2).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:8,padding:"1px 6px",whiteSpace:"nowrap"}}>{s}</span>)}{(c.skills||[]).length>2&&<span style={{fontSize:10,color:"var(--t3)"}}>+{c.skills.length-2}</span>}</div></td>
@@ -3021,6 +3087,8 @@ function CompanyDetailPanel({company, onClose, onEdit, onRefresh}){
       </div>
       {/* Body */}
       <div style={{padding:20,display:"flex",flexDirection:"column",gap:18,flex:1}}>
+        {/* Client activity — calls, meetings, emails with this company */}
+        <CompanyActivity company={c}/>
         {/* Details */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Details</div>
@@ -3764,7 +3832,7 @@ function HotlistsPage(){
 
   const load=useCallback(async()=>{
     setLoading(true);
-    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,urgent,not_interested,candidates(id,name,role,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
+    const{data}=await db.from("hotlists").select("*,hotlist_candidates(id,candidate_id,contacted_linkedin,contacted_at,urgent,not_interested,candidates(id,name,role,current_employer,location,skills,status,cv_url,cv_path))").order("created_at",{ascending:false});
     setLists(data||[]);
     // Opened from a hotlist chip on a candidate's record
     const want=window._pendingHotlist;
@@ -4099,7 +4167,7 @@ function HotlistsPage(){
                     {done&&<span style={{marginLeft:6,fontSize:10,background:"#5fa92b",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>in Contacted</span>}
                     {dead&&<span style={{marginLeft:6,fontSize:10,background:"#7a1414",color:"#fff",borderRadius:6,padding:"1px 6px",fontWeight:600}}>Not interested</span>}
                   </div>
-                  <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.location?` · ${c.location}`:""}</div>
+                  <div style={{fontSize:12,color:"var(--t2)",marginTop:1}}>{c.role||"—"}{c.current_employer?` @ ${c.current_employer}`:""}{c.location?` · ${c.location}`:""}</div>
                   <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>{(c.skills||[]).slice(0,3).map(s=><span key={s} style={{background:"rgba(95,169,43,0.14)",color:"#2e7a2c",fontSize:10,borderRadius:6,padding:"1px 6px"}}>{s}</span>)}</div>
                 </div>
                 <button onClick={()=>toggleUrgent(hc)}
@@ -4154,15 +4222,45 @@ function JobsPage({onOpenJob}){
   const load=useCallback(async()=>{
     setLoading(true);
     const[{data:j,error:je},{data:c}]=await Promise.all([
-      db.from("jobs").select("*,companies(name,fee_type,fee_percentage,fee_fixed,terms_notes),job_candidates(id)").order("created_at",{ascending:false}),
+      db.from("jobs").select("*,companies(name,fee_type,fee_percentage,fee_fixed,terms_notes),job_candidates(id,stage)").order("created_at",{ascending:false}),
       db.from("companies").select("id,name,fee_type,fee_percentage,fee_fixed,terms_notes")
     ]);
     if(je)setErr(je.message);else{setRows(j||[]);setCompanies(c||[]);}setLoading(false);
   },[]);
   useEffect(()=>{load();},[load]);
   const del=async id=>{if(!confirm("Delete this job?"))return;await db.from("jobs").delete().eq("id",id);load();};
+  // ── Job hygiene ── a job only counts as live while it has a live candidate
+  // or is fresh. Already-placed jobs and long-dead ones are flagged so the
+  // jobs list (and the dashboard's "Active jobs") reflects real work.
+  const STALE_DAYS=30;
+  const jobAge=j=>Math.floor((Date.now()-new Date(j.created_at))/864e5);
+  const liveCands=j=>(j.job_candidates||[]).filter(x=>!["Rejected","Placed"].includes(x.stage)).length;
+  const hasPlaced=j=>(j.job_candidates||[]).some(x=>x.stage==="Placed");
+  const flag=j=>{
+    if(j.status!=="Open")return null;
+    if(hasPlaced(j))return "placed";
+    if(liveCands(j)===0&&jobAge(j)>STALE_DAYS)return "stale";
+    return null;
+  };
+  const setStatus=async(j,status)=>{
+    const{error}=await db.from("jobs").update({status}).eq("id",j.id);
+    if(error)setErr(error.message);else load();
+  };
+  const [tidying,setTidying]=useState(false);
+  const fillAllPlaced=async()=>{
+    const ids=rows.filter(j=>flag(j)==="placed").map(j=>j.id);
+    if(!ids.length)return;
+    setTidying(true);
+    const{error}=await db.from("jobs").update({status:"Filled"}).in("id",ids);
+    setTidying(false);
+    if(error)setErr(error.message);else load();
+  };
+  const placedFlags=rows.filter(j=>flag(j)==="placed").length;
+  const staleFlags=rows.filter(j=>flag(j)==="stale").length;
+  const [showDone,setShowDone]=useState(false);
   const live=rows.filter(r=>r.status==="Open");
-  const other=rows.filter(r=>r.status!=="Open");
+  const onHold=rows.filter(r=>r.status==="On hold");
+  const done=rows.filter(r=>r.status!=="Open"&&r.status!=="On hold");
   const JobCard=({j})=>{
     const cnt=(j.job_candidates||[]).length;
     const co=j.companies||{};
@@ -4184,8 +4282,22 @@ function JobsPage({onOpenJob}){
           <div style={{fontWeight:500,fontSize:14,color:"var(--t1)",marginBottom:3}}>{j.title}</div>
           <div style={{fontSize:12,color:"var(--t2)"}}>{co.name||"No client"} · {j.salary||"Salary TBC"}{j.industry?` · ${j.industry}`:""}</div>
         </div>
-        <Pill label={j.status||"Open"}/>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+          <Pill label={j.status||"Open"}/>
+          <span style={{fontSize:10,color:"var(--t3)"}}>{jobAge(j)} days old</span>
+        </div>
       </div>
+      {flag(j)==="placed"&&<div style={{background:"#e1f5ee",border:"0.5px solid #0f6e56",borderRadius:8,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+        <span style={{fontSize:12,color:"#0f6e56"}}>✅ Someone has been placed on this job, but it is still marked Open.</span>
+        <button className="btn-a" style={{padding:"4px 10px",fontSize:11}} onClick={()=>setStatus(j,"Filled")}>Mark filled</button>
+      </div>}
+      {flag(j)==="stale"&&<div style={{background:"#faeeda",border:"0.5px solid #ba7517",borderRadius:8,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+        <span style={{fontSize:12,color:"#854f0b"}}>⚠️ No live candidates and open for {jobAge(j)} days. Is the client still hiring?</span>
+        <span style={{display:"flex",gap:6}}>
+          <button className="btn-o" style={{padding:"4px 10px",fontSize:11}} onClick={()=>setStatus(j,"On hold")}>Put on hold</button>
+          <button className="btn-o" style={{padding:"4px 10px",fontSize:11,color:"#a32d2d"}} onClick={()=>setStatus(j,"Closed")}>Close</button>
+        </span>
+      </div>}
       {/* Fee bar */}
       <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
         {potFee
@@ -4209,11 +4321,12 @@ function JobsPage({onOpenJob}){
       {j.description&&<div style={{fontSize:12,color:"var(--t3)",lineHeight:1.55,marginBottom:10}}>{j.description.slice(0,110)}{j.description.length>110?"…":""}</div>}
       {co.terms_notes&&<div style={{fontSize:11,color:"var(--t3)",marginBottom:8}}>📋 {co.terms_notes}</div>}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
-        <span style={{fontSize:12,color:"var(--t2)"}}>👥 {cnt} candidate{cnt!==1?"s":""} in pipeline</span>
+        <span style={{fontSize:12,color:"var(--t2)"}}>👥 {cnt} candidate{cnt!==1?"s":""} in pipeline{cnt>0?` · ${liveCands(j)} live`:""}</span>
         <div style={{display:"flex",gap:6}}>
           <button className="btn-o" style={{padding:"5px 10px",fontSize:12}} onClick={()=>setEditRow(j)}>Edit</button>
           <button className="btn-d" style={{padding:"5px 10px"}} onClick={()=>del(j.id)}>Delete</button>
-          {j.status==="Open"&&<button className="btn-a" style={{padding:"5px 12px",fontSize:12}} onClick={()=>onOpenJob(j)}>Open pipeline →</button>}
+          {j.status==="On hold"&&<button className="btn-o" style={{padding:"5px 10px",fontSize:12}} onClick={()=>setStatus(j,"Open")}>Reopen</button>}
+          <button className={j.status==="Open"?"btn-a":"btn-o"} style={{padding:"5px 12px",fontSize:12}} onClick={()=>onOpenJob(j)}>Open pipeline →</button>
         </div>
       </div>
     </div>;
@@ -4226,14 +4339,29 @@ function JobsPage({onOpenJob}){
       <button className="btn-a" onClick={()=>setModal(true)}>+ Add job</button>
     </div>
     <Err msg={err}/>
+    {!loading&&(placedFlags>0||staleFlags>0)&&<div style={{background:"var(--bg)",border:"0.5px solid #ba7517",borderRadius:10,padding:"12px 14px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+      <div style={{fontSize:13,color:"var(--t1)"}}>
+        <b>Tidy up:</b>{" "}
+        {placedFlags>0&&<span>{placedFlags} open job{placedFlags!==1?"s have":" has"} already been placed</span>}
+        {placedFlags>0&&staleFlags>0&&" · "}
+        {staleFlags>0&&<span>{staleFlags} job{staleFlags!==1?"s have":" has"} had no live candidates for over {STALE_DAYS} days</span>}
+      </div>
+      {placedFlags>0&&<button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} disabled={tidying} onClick={fillAllPlaced}>{tidying?"Updating…":`Mark ${placedFlags} as filled`}</button>}
+    </div>}
     {loading?<Spin/>:<>
       {live.length>0&&<>
         <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Live jobs ({live.length})</div>
-        {live.map(j=><JobCard key={j.id} j={j}/>)}
+        {[...live].sort((a,b)=>(flag(a)?1:0)-(flag(b)?1:0)).map(j=><JobCard key={j.id} j={j}/>)}
       </>}
-      {other.length>0&&<>
-        <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",margin:"16px 0 8px"}}>Other ({other.length})</div>
-        {other.map(j=><JobCard key={j.id} j={j}/>)}
+      {onHold.length>0&&<>
+        <div style={{fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",margin:"16px 0 8px"}}>On hold ({onHold.length})</div>
+        {onHold.map(j=><JobCard key={j.id} j={j}/>)}
+      </>}
+      {done.length>0&&<>
+        <button onClick={()=>setShowDone(v=>!v)} style={{background:"none",border:"none",padding:0,cursor:"pointer",fontSize:11,fontWeight:500,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",margin:"16px 0 8px",display:"block"}}>
+          {showDone?"▾":"▸"} Filled &amp; closed ({done.length})
+        </button>
+        {showDone&&done.map(j=><JobCard key={j.id} j={j}/>)}
       </>}
       {rows.length===0&&<EmptyState icon="💼" title="No jobs yet" sub="Create your first job to start building pipelines and tracking candidates." action="+ Add job" onAction={()=>setModal(true)}/>}
     </>}
@@ -4267,6 +4395,7 @@ function AddCandToJobModal({job, existingIds, onClose, onAdded}){
     setSaving(true);setErr("");
     const rows=selected.map(cid=>({job_id:job.id,candidate_id:cid,stage,notes:""}));
     const{error}=await db.from("job_candidates").insert(rows);
+    if(!error) await Promise.all(selected.map(cid=>syncCandidateStatus(cid)));
     setSaving(false);
     if(error){setErr(error.message);return;}
     onAdded();onClose();
@@ -4343,6 +4472,7 @@ function JobPipelinePage({job, onBack}){
   const [placeSaving,setPlaceSaving]=useState(false);
   const [placeErr,setPlaceErr]=useState("");
   const [placeDone,setPlaceDone]=useState("");
+  const [jobNote,setJobNote]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -4359,6 +4489,13 @@ function JobPipelinePage({job, onBack}){
   const moveStage=async(entry,newStage)=>{
     setMovingId(entry.id);
     await db.from("job_candidates").update({stage:newStage}).eq("id",entry.id);
+    await syncCandidateStatus(entry.candidates?.id);
+    // A placement fills the job — take it off the live list automatically
+    if(newStage==="Placed"&&job.status!=="Filled"){
+      await db.from("jobs").update({status:"Filled"}).eq("id",job.id);
+      job.status="Filled";
+      setJobNote("This job has been marked Filled. If you are hiring more than one person, set it back to Open via Jobs → Edit.");
+    }
     // Auto-create a submittal when reaching Interview or beyond
     const SUBMITTAL_TRIGGER=["Interview","2nd Interview","Offer","Placed"];
     if(newStage==="Rejected"){
@@ -4459,7 +4596,9 @@ function JobPipelinePage({job, onBack}){
 
   const removeFromJob=async(id)=>{
     if(!confirm("Remove this candidate from the job?"))return;
+    const ent=entries.find(e=>e.id===id);
     await db.from("job_candidates").delete().eq("id",id);
+    await syncCandidateStatus(ent?.candidates?.id||ent?.candidate_id);
     load();
   };
 
@@ -4536,6 +4675,9 @@ function JobPipelinePage({job, onBack}){
 
     {placeDone&&<div style={{background:"#eaf3de",border:"0.5px solid #639922",color:"#3b6d11",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10}}>
       ✓ {placeDone}
+    </div>}
+    {jobNote&&<div style={{background:"#e1f5ee",border:"0.5px solid #0f6e56",color:"#0f6e56",borderRadius:8,padding:"9px 12px",fontSize:12,marginBottom:10,display:"flex",justifyContent:"space-between",gap:10}}>
+      <span>✓ {jobNote}</span><button onClick={()=>setJobNote("")} style={{background:"none",border:"none",cursor:"pointer",color:"#0f6e56"}}>✕</button>
     </div>}
 
     {/* Note modal */}
@@ -6047,6 +6189,196 @@ function PlacementsPage(){
 // ============================================================
 const ACTIVITY_TYPES=["Note","Call","Email","Meeting","LinkedIn","WhatsApp"];
 const ACTIVITY_ICONS={"Note":"📝","Call":"📞","Email":"✉️","Meeting":"🤝","LinkedIn":"💼","WhatsApp":"💬"};
+
+// ── One-click activity logging ────────────────────────────────────────────
+// Pick a type, then an outcome — that's it. Notes are optional. A real
+// conversation (spoke / replied / met) turns a New candidate into Active.
+// "CV sent" records a submittal against a job so the weekly scorecard counts it.
+const QUICK_OUTCOMES={
+  Call:["Spoke","No answer","Left voicemail"],
+  Email:["Sent","Replied"],
+  LinkedIn:["Messaged","Replied"],
+  WhatsApp:["Messaged","Replied"],
+  Meeting:["In person","Video call"],
+  Note:["Save note"],
+};
+const CONVERSATION_OUTCOMES=["Spoke","Replied","In person","Video call"];
+function QuickLog({entityType,entityId,entityName,onLogged}){
+  const [type,setType]=useState(null);
+  const [body,setBody]=useState("");
+  const [showNote,setShowNote]=useState(false);
+  const [saving,setSaving]=useState(false);
+  const [done,setDone]=useState("");
+  const [err,setErr]=useState("");
+  const [cvJobs,setCvJobs]=useState(null);
+  const [cvJob,setCvJob]=useState("");
+  const reset=()=>{setType(null);setBody("");setShowNote(false);setCvJob("");setErr("");};
+  const flash=m=>{setDone(m);setTimeout(()=>setDone(""),2500);};
+  const pickType=t=>{
+    if(type===t){reset();return;}
+    setType(t);setErr("");setShowNote(t==="Note");
+    if(t==="CV sent"&&!cvJobs){
+      db.from("jobs").select("id,title,companies(name)").in("status",["Open","On hold"]).order("created_at",{ascending:false})
+        .then(({data})=>setCvJobs(data||[]));
+    }
+  };
+  const save=async outcome=>{
+    if(type==="Note"&&!body.trim())return setErr("Write the note first");
+    setSaving(true);setErr("");
+    const subject=type==="Note"?"":outcome;
+    const{error}=await db.from("activity_log").insert({
+      entity_type:entityType,entity_id:entityId,entity_name:entityName||"",
+      activity_type:type,subject,body:body.trim()||null,
+    });
+    if(error){setErr(error.message);setSaving(false);return;}
+    if(entityType==="candidate"&&CONVERSATION_OUTCOMES.includes(outcome))await markActiveIfNew(entityId);
+    setSaving(false);flash(`✓ ${type}${subject?` · ${subject}`:""} logged`);reset();
+    if(onLogged)onLogged();
+  };
+  const saveCv=async()=>{
+    if(!cvJob)return setErr("Pick the job you sent the CV for");
+    setSaving(true);setErr("");
+    const job=(cvJobs||[]).find(j=>j.id===cvJob);
+    const today=new Date().toISOString().split("T")[0];
+    const{error}=await db.from("submittals").insert({candidate_id:entityId,job_id:cvJob,status:"Submitted",submitted_date:today,notes:body.trim()||null});
+    if(error){setErr(error.message);setSaving(false);return;}
+    await db.from("activity_log").insert({
+      entity_type:"candidate",entity_id:entityId,entity_name:entityName||"",
+      activity_type:"Email",subject:`CV sent — ${job?.title||"job"}${job?.companies?.name?` (${job.companies.name})`:""}`,body:body.trim()||null,
+    });
+    await markActiveIfNew(entityId);
+    setSaving(false);flash("✓ CV sent recorded — counts on your weekly scorecard");reset();
+    if(onLogged)onLogged();
+  };
+  const types=[...ACTIVITY_TYPES,...(entityType==="candidate"?["CV sent"]:[])];
+  const chip=(active)=>({border:"0.5px solid "+(active?"var(--g-deep)":"var(--brm)"),background:active?"var(--g-deep)":"var(--bg)",color:active?"#fff":"var(--t2)",borderRadius:14,padding:"4px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"});
+  return <div>
+    <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Log activity</div>
+    <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+      {types.map(t=><button key={t} onClick={()=>pickType(t)} style={chip(type===t)} disabled={saving}>
+        {t==="CV sent"?"📄":ACTIVITY_ICONS[t]} {t}
+      </button>)}
+    </div>
+    {type&&<div style={{background:"var(--bg2)",borderRadius:8,padding:"10px 12px",marginTop:8,display:"flex",flexDirection:"column",gap:8}}>
+      {type==="CV sent"
+        ?<select value={cvJob} onChange={e=>setCvJob(e.target.value)} style={{fontSize:12}}>
+            <option value="">{cvJobs?"Which job?":"Loading jobs…"}</option>
+            {(cvJobs||[]).map(j=><option key={j.id} value={j.id}>{j.title}{j.companies?.name?` — ${j.companies.name}`:""}</option>)}
+          </select>
+        :null}
+      {showNote
+        ?<textarea value={body} onChange={e=>setBody(e.target.value)} rows={3} placeholder={type==="Note"?"Note…":"Optional note — what was said, next step…"} style={{fontSize:12,resize:"vertical"}} autoFocus/>
+        :type!=="CV sent"&&<button onClick={()=>setShowNote(true)} style={{alignSelf:"flex-start",background:"none",border:"none",padding:0,cursor:"pointer",fontSize:11,color:"var(--g-deep)",fontWeight:600}}>+ Add a note</button>}
+      <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+        {type==="CV sent"
+          ?<button className="btn-a" style={{fontSize:12,padding:"5px 12px"}} disabled={saving} onClick={saveCv}>{saving?"Saving…":"Record CV sent"}</button>
+          :QUICK_OUTCOMES[type].map(o=><button key={o} className={o===QUICK_OUTCOMES[type][0]?"btn-a":"btn-o"} style={{fontSize:12,padding:"5px 12px"}} disabled={saving} onClick={()=>save(o)}>{o}</button>)}
+        <button className="btn-o" style={{fontSize:12,padding:"5px 10px"}} onClick={reset} disabled={saving}>Cancel</button>
+      </div>
+    </div>}
+    {err&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>{err}</div>}
+    {done&&<div style={{fontSize:12,color:"#3b6d11",marginTop:6}}>{done}</div>}
+  </div>;
+}
+function CompanyActivity({company}){
+  const [acts,setActs]=useState(null);
+  const load=useCallback(()=>{
+    db.from("activity_log").select("*").eq("entity_id",company.id).order("created_at",{ascending:false}).limit(6)
+      .then(({data})=>setActs(data||[]));
+  },[company.id]);
+  useEffect(()=>{load();},[load]);
+  return <div style={{display:"flex",flexDirection:"column",gap:10}}>
+    <QuickLog entityType="company" entityId={company.id} entityName={company.name} onLogged={load}/>
+    {acts&&acts.length>0&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
+      {acts.map(a=><div key={a.id} style={{background:"var(--bg2)",borderRadius:8,padding:"8px 12px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
+          <span style={{fontSize:12,fontWeight:500,color:"var(--t1)"}}>{ACTIVITY_ICONS[a.activity_type]||"📝"} {a.activity_type}{a.subject?` — ${a.subject}`:""}</span>
+          <span style={{fontSize:10,color:"var(--t3)",flexShrink:0}}>{new Date(a.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+        </div>
+        {a.body&&<div style={{fontSize:12,color:"var(--t2)",marginTop:2,whiteSpace:"pre-wrap"}}>{a.body.slice(0,140)}{a.body.length>140?"…":""}</div>}
+      </div>)}
+    </div>}
+    {acts&&acts.length===0&&<div style={{fontSize:12,color:"var(--t3)"}}>No client activity logged yet.</div>}
+  </div>;
+}
+
+// ── Weekly scorecard ──────────────────────────────────────────────────────
+// The activity that produces fees, week by week: this week against target,
+// last week, and the four-week average. Click a target to change it.
+const SCORE_DEFAULTS={calls:25,messages:40,client:10,cvs:3,interviews:2,newCands:20};
+const getScoreTargets=()=>{try{return{...SCORE_DEFAULTS,...JSON.parse(localStorage.getItem("gaiaScoreTargets")||"{}")};}catch(e){return{...SCORE_DEFAULTS};}};
+const weekStart=(d=new Date())=>{const x=new Date(d);x.setHours(0,0,0,0);const dow=(x.getDay()+6)%7;x.setDate(x.getDate()-dow);return x;};
+function WeeklyScorecard({setPage}){
+  const [data,setData]=useState(null);
+  const [targets,setTargets]=useState(getScoreTargets());
+  useEffect(()=>{
+    const w0=weekStart();const from=new Date(w0);from.setDate(from.getDate()-28);
+    const iso=from.toISOString();const isoDay=iso.slice(0,10);
+    Promise.all([
+      db.from("activity_log").select("activity_type,entity_type,subject,created_at").gte("created_at",iso),
+      db.from("submittals").select("status,submitted_date,interview_date,created_at").or(`submitted_date.gte.${isoDay},interview_date.gte.${isoDay},created_at.gte.${iso}`),
+      db.from("placements").select("created_at").gte("created_at",iso),
+      db.from("candidates").select("created_at").gte("created_at",iso),
+    ]).then(([{data:acts},{data:subs},{data:pls},{data:cands}])=>{
+      // bucket 0 = this week, 1 = last week … 4 = four weeks ago
+      const bucket=d=>{if(!d)return -1;const t=new Date(d.length===10?d+"T12:00:00":d);const diff=Math.floor((w0-weekStart(t))/(7*864e5));return diff;};
+      const blank=()=>({calls:0,messages:0,client:0,cvs:0,interviews:0,placements:0,newCands:0});
+      const B=[0,1,2,3,4].map(blank);
+      const add=(d,k)=>{const b=bucket(d);if(b>=0&&b<=4)B[b][k]++;};
+      (acts||[]).forEach(a=>{
+        if(a.entity_type==="company"){add(a.created_at,"client");return;}
+        if(a.activity_type==="Call")add(a.created_at,"calls");
+        else if(["Email","LinkedIn","WhatsApp"].includes(a.activity_type)&&!/^CV sent/.test(a.subject||""))add(a.created_at,"messages");
+        else if(a.activity_type==="Meeting")add(a.created_at,"calls");
+      });
+      (subs||[]).forEach(x=>{
+        add(x.submitted_date||x.created_at,"cvs");
+        if(x.interview_date)add(x.interview_date,"interviews");
+        else if(["Interview Booked","Offer Made","Placed"].includes(x.status))add(x.submitted_date||x.created_at,"interviews");
+      });
+      (pls||[]).forEach(x=>add(x.created_at,"placements"));
+      (cands||[]).forEach(x=>add(x.created_at,"newCands"));
+      setData(B);
+    });
+  },[]);
+  const editTarget=(k,label)=>{
+    const v=prompt(`Weekly target — ${label}`,String(targets[k]??""));
+    if(v===null)return;const n=parseInt(v,10);if(!(n>=0))return;
+    const next={...targets,[k]:n};setTargets(next);localStorage.setItem("gaiaScoreTargets",JSON.stringify(next));
+  };
+  if(!data)return null;
+  const avg=k=>Math.round(((data[1][k]+data[2][k]+data[3][k]+data[4][k])/4)*10)/10;
+  const metrics=[
+    ["calls","📞 Calls & meetings"],["messages","✉️ Messages sent"],["client","🏢 Client touches"],
+    ["cvs","📄 CVs sent to clients"],["interviews","🤝 Interviews"],["placements","🏆 Placements"],["newCands","➕ New candidates"],
+  ];
+  const nothingLogged=data.every(b=>b.calls+b.messages+b.client===0);
+  return <div className="g-canvas">
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12,gap:10,flexWrap:"wrap"}}>
+      <div className="g-eyebrow">This week · scorecard</div>
+      <span style={{fontSize:11,color:"var(--g-mute)"}}>Week starting {weekStart().toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · click a target to change it</span>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(128px,1fr))",gap:8}}>
+      {metrics.map(([k,label])=>{
+        const v=data[0][k],t=targets[k],pct=t?Math.min(100,Math.round(v/t*100)):null;
+        const col=t==null?"var(--g-ink)":v>=t?"var(--g-deep)":v>=t*0.5?"#ba7517":"#a32d2d";
+        return <div key={k} style={{border:"0.5px solid var(--br)",borderRadius:8,padding:"10px 12px"}}>
+          <div style={{fontSize:11,color:"var(--g-mute)",marginBottom:4}}>{label}</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:5}}>
+            <span className="g-num" style={{fontSize:24,color:col}}>{v}</span>
+            {t!=null&&<button onClick={()=>editTarget(k,label)} title="Change target" style={{background:"none",border:"none",padding:0,cursor:"pointer",fontSize:12,color:"var(--g-mute)"}}>/ {t}</button>}
+            {t==null&&k!=="placements"&&<button onClick={()=>editTarget(k,label)} style={{background:"none",border:"none",padding:0,cursor:"pointer",fontSize:11,color:"var(--g-mute)"}}>set target</button>}
+          </div>
+          {pct!=null&&<div style={{height:4,borderRadius:2,background:"var(--g-cream2)",marginTop:6,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:col}}/></div>}
+          <div style={{fontSize:10,color:"var(--g-mute)",marginTop:6}}>Last week {data[1][k]} · 4-wk avg {avg(k)}</div>
+        </div>;
+      })}
+    </div>
+    {nothingLogged&&<div style={{fontSize:11,color:"#854f0b",marginTop:10}}>
+      Calls, messages and client touches only count once they're logged — use the <b>Log activity</b> buttons on a candidate or company.
+    </div>}
+  </div>;
+}
 
 function ActivityLogPage(){
   const [rows,setRows]=useState([]);
