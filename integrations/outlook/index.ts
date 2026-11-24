@@ -152,6 +152,7 @@ async function sync() {
     }, { onConflict: "graph_id" });
     if (!error) stored++;
     if (direction !== "sent") return; // only sent mail counts on the scorecard
+    if (/^your application for /i.test(m.subject || "")) return; // website's automatic acknowledgements aren't outreach
     const mid = m.internetMessageId;
     const marker = `Auto-logged from Outlook [mid:${mid}]`;
     const subj = `Email: ${(m.subject || "(no subject)").slice(0, 80)}`;
