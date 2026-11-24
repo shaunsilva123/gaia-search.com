@@ -104,7 +104,7 @@ async function fetchFolder(folder: "sentitems" | "inbox", since: string, cap = 5
 // Normal run: everything since the last sync. Backfill: one past date window,
 // dated correctly, without touching last_sync and without creating submittals
 // (the one-off email import already recorded past CVs).
-async function sync(window?: { from: string; to: string }) {
+async function sync(window?: { from: string; to: string; cvs?: boolean }) {
   const backfill = !!window;
   const { data: conn } = await admin.from("ms_connection").select("account,last_sync").eq("id", 1).maybeSingle();
   if (!conn) throw new Error("Outlook is not connected");
@@ -183,7 +183,7 @@ async function sync(window?: { from: string; to: string }) {
       await admin.from("activity_log").insert({ entity_type: "company", entity_id: id, entity_name: coName.get(id) || "", activity_type: "Email", subject: subj, body: marker, ...(backfill ? { created_at: when } : {}) });
       seenMid.add(mid + "|" + id); logged++;
       // a CV sent to a client → submittal
-      if (!backfill && m.hasAttachments && /\bcv\b|\bresume\b|profile/i.test(`${m.subject} ${m.bodyPreview}`)) {
+      if ((!backfill || window!.cvs) && m.hasAttachments && /\bcv\b|\bresume\b|profile/i.test(`${m.subject} ${m.bodyPreview}`)) {
         const { data: dup } = await admin.from("submittals").select("id").ilike("notes", `%[mid:${mid}]%`).limit(1);
         if (!dup?.length) {
           const text = `${m.subject} ${m.bodyPreview}`.toLowerCase();
@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
     if (who !== "user") return json({ error: "Not allowed" }, 403);
     if (action === "backfill") {
       if (!body.from || !body.to) return json({ error: "from and to dates needed" }, 400);
-      return json(await sync({ from: body.from, to: body.to }));
+      return json(await sync({ from: body.from, to: body.to, cvs: !!body.cvs }));
     }
 
     switch (action) {
