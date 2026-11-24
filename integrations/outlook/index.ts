@@ -88,10 +88,10 @@ async function allRows(table: string, cols: string) {
   return out;
 }
 
-async function fetchFolder(folder: "sentitems" | "inbox", since: string, cap = 500) {
+async function fetchFolder(folder: "sentitems" | "inbox", since: string, cap = 500, until?: string) {
   const field = folder === "sentitems" ? "sentDateTime" : "receivedDateTime";
   const sel = "id,internetMessageId,conversationId,subject,bodyPreview,from,toRecipients,ccRecipients,sentDateTime,receivedDateTime,webLink,hasAttachments";
-  let url: string | null = `/me/mailFolders/${folder}/messages?$filter=${field} ge ${since}&$orderby=${field} asc&$top=50&$select=${sel}`;
+  let url: string | null = `/me/mailFolders/${folder}/messages?$filter=${field} ge ${since}${until ? ` and ${field} lt ${until}` : ""}&$orderby=${field} asc&$top=50&$select=${sel}`;
   const out: any[] = [];
   while (url && out.length < cap) {
     const page: any = await graph(url);
@@ -101,15 +101,21 @@ async function fetchFolder(folder: "sentitems" | "inbox", since: string, cap = 5
   return out;
 }
 
-async function sync() {
+// Normal run: everything since the last sync. Backfill: one past date window,
+// dated correctly, without touching last_sync and without creating submittals
+// (the one-off email import already recorded past CVs).
+async function sync(window?: { from: string; to: string }) {
+  const backfill = !!window;
   const { data: conn } = await admin.from("ms_connection").select("account,last_sync").eq("id", 1).maybeSingle();
   if (!conn) throw new Error("Outlook is not connected");
   const me = lower(conn.account);
-  const since = new Date(conn.last_sync ? new Date(conn.last_sync).getTime() - 10 * 60_000 : Date.now() - 2 * 86_400_000).toISOString();
+  const since = backfill ? new Date(window!.from).toISOString()
+    : new Date(conn.last_sync ? new Date(conn.last_sync).getTime() - 10 * 60_000 : Date.now() - 2 * 86_400_000).toISOString();
+  const until = backfill ? new Date(window!.to).toISOString() : undefined;
   const started = new Date().toISOString();
 
   const [sent, inbox, cands, contacts, cos] = await Promise.all([
-    fetchFolder("sentitems", since), fetchFolder("inbox", since),
+    fetchFolder("sentitems", since, backfill ? 1500 : 500, until), fetchFolder("inbox", since, backfill ? 1500 : 500, until),
     allRows("candidates", "id,name,email"), allRows("contacts", "company_id,email"), allRows("companies", "id,name,website"),
   ]);
   const candByEmail = new Map<string, any>();
@@ -125,7 +131,8 @@ async function sync() {
 
   // existing activity markers (for de-duplication with earlier runs / the daily task)
   const { data: recentActs } = await admin.from("activity_log").select("id,entity_id,activity_type,subject,body,created_at")
-    .gte("created_at", new Date(Date.parse(since) - 86_400_000).toISOString());
+    .gte("created_at", new Date(Date.parse(since) - 86_400_000).toISOString())
+    .lte("created_at", until ? new Date(Date.parse(until) + 86_400_000).toISOString() : "9999-12-31");
   const seenMid = new Set<string>();
   for (const a of recentActs || []) { const m = /\[mid:([^\]]+)\]/.exec(a.body || ""); if (m) seenMid.add(m[1] + "|" + a.entity_id); }
 
@@ -162,15 +169,15 @@ async function sync() {
       // merge with a tap on the CRM "Email" button that day instead of double-counting
       const tap = (recentActs || []).find((a: any) => a.entity_id === id && a.activity_type === "Email" && a.subject === "Emailed from CRM" && !a.body && String(a.created_at).slice(0, 10) === day);
       if (tap) { await admin.from("activity_log").update({ subject: subj, body: marker }).eq("id", tap.id); tap.body = marker; }
-      else await admin.from("activity_log").insert({ entity_type: "candidate", entity_id: id, entity_name: candByEmail.get(others.find((e: string) => candByEmail.get(e)?.id === id)!)?.name || "", activity_type: "Email", subject: subj, body: marker });
+      else await admin.from("activity_log").insert({ entity_type: "candidate", entity_id: id, entity_name: candByEmail.get(others.find((e: string) => candByEmail.get(e)?.id === id)!)?.name || "", activity_type: "Email", subject: subj, body: marker, ...(backfill ? { created_at: when } : {}) });
       seenMid.add(mid + "|" + id); logged++;
     }
     for (const id of coIds) {
       if (seenMid.has(mid + "|" + id)) continue;
-      await admin.from("activity_log").insert({ entity_type: "company", entity_id: id, entity_name: coName.get(id) || "", activity_type: "Email", subject: subj, body: marker });
+      await admin.from("activity_log").insert({ entity_type: "company", entity_id: id, entity_name: coName.get(id) || "", activity_type: "Email", subject: subj, body: marker, ...(backfill ? { created_at: when } : {}) });
       seenMid.add(mid + "|" + id); logged++;
       // a CV sent to a client → submittal
-      if (m.hasAttachments && /\bcv\b|\bresume\b|profile/i.test(`${m.subject} ${m.bodyPreview}`)) {
+      if (!backfill && m.hasAttachments && /\bcv\b|\bresume\b|profile/i.test(`${m.subject} ${m.bodyPreview}`)) {
         const { data: dup } = await admin.from("submittals").select("id").ilike("notes", `%[mid:${mid}]%`).limit(1);
         if (!dup?.length) {
           const text = `${m.subject} ${m.bodyPreview}`.toLowerCase();
@@ -188,7 +195,7 @@ async function sync() {
   for (const m of sent) await handle(m, "sent");
   for (const m of inbox) await handle(m, "received");
   const result = `${sent.length} sent / ${inbox.length} received checked · ${logged} logged · ${cvs} CVs · ${stored} on record`;
-  await admin.from("ms_connection").update({ last_sync: started, last_sync_result: result, updated_at: started }).eq("id", 1);
+  if (!backfill) await admin.from("ms_connection").update({ last_sync: started, last_sync_result: result, updated_at: started }).eq("id", 1);
   return { ok: true, sent: sent.length, received: inbox.length, logged, cvs, stored, unmatched: [...unmatched].slice(0, 15) };
 }
 
@@ -219,6 +226,10 @@ Deno.serve(async (req) => {
     if (!who) return json({ error: "Not signed in" }, 401);
     if (action === "sync") return json(await sync());
     if (who !== "user") return json({ error: "Not allowed" }, 403);
+    if (action === "backfill") {
+      if (!body.from || !body.to) return json({ error: "from and to dates needed" }, 400);
+      return json(await sync({ from: body.from, to: body.to }));
+    }
 
     switch (action) {
       case "start": {

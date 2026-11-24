@@ -355,6 +355,22 @@ function OutlookPage(){
   const [busy,setBusy]=useState("");const [msg,setMsg]=useState("");const [err,setErr]=useState("");
   const connect=async()=>{setBusy("connect");setErr("");try{const{url}=await outlookCall({action:"start"});window.location.href=url;}catch(e){setErr(e.message);setBusy("");}};
   const syncNow=async()=>{setBusy("sync");setErr("");setMsg("");try{const r=await outlookCall({action:"sync"});setMsg(`Checked ${r.sent} sent and ${r.received} received emails · ${r.logged} logged to the CRM${r.cvs?` · ${r.cvs} CVs recorded as submittals`:""}.`+(r.unmatched?.length?` Not in the CRM yet: ${r.unmatched.join(", ")}`:""));await refreshOutlookStatus();}catch(e){setErr(e.message);}setBusy("");};
+  const [bf,setBf]=useState(null);
+  const backfill=async()=>{
+    setErr("");const DAY=86400000,STEP=10;const end=Date.now();const start=end-365*DAY;
+    const steps=Math.ceil(365/STEP);let tot={logged:0,stored:0,sent:0,received:0};
+    for(let i=0;i<steps;i++){
+      const from=new Date(start+i*STEP*DAY),to=new Date(Math.min(end,start+(i+1)*STEP*DAY));
+      setBf({i,steps,label:`${fmtStamp(from)} – ${fmtStamp(to)}`,tot:{...tot}});
+      let ok=false;
+      for(let attempt=0;attempt<3&&!ok;attempt++){
+        try{const r=await outlookCall({action:"backfill",from:from.toISOString(),to:to.toISOString()});
+          tot={logged:tot.logged+r.logged,stored:tot.stored+r.stored,sent:tot.sent+r.sent,received:tot.received+r.received};ok=true;}
+        catch(e){if(attempt===2){setErr(`Stopped at ${fmtStamp(from)}: ${e.message}. Click again to resume — nothing is duplicated.`);setBf(null);return;}await new Promise(r=>setTimeout(r,3000));}
+      }
+    }
+    setBf(null);setMsg(`Past 12 months imported: ${tot.sent} sent and ${tot.received} received emails checked, ${tot.stored} saved to candidate and company records, ${tot.logged} logged as activity.`);
+  };
   const disconnect=async()=>{if(!confirm("Disconnect Outlook? Email history already saved stays in the CRM."))return;setBusy("dis");try{await outlookCall({action:"disconnect"});await refreshOutlookStatus();}catch(e){setErr(e.message);}setBusy("");};
   return <div style={{maxWidth:720,display:"flex",flexDirection:"column",gap:14}}>
     <div className="g-canvas">
@@ -365,8 +381,13 @@ function OutlookPage(){
           <div style={{fontSize:12,color:"var(--t2)",marginTop:4}}>Last sync: {st.last_sync?fmtDateTime(st.last_sync):"not yet"}{st.last_sync_result?` · ${st.last_sync_result}`:""}</div>
           <div style={{display:"flex",gap:8,marginTop:14,flexWrap:"wrap"}}>
             <button className="btn-a" onClick={syncNow} disabled={!!busy}>{busy==="sync"?<><span className="spin" style={{margin:0}}></span>Syncing…</>:"Sync now"}</button>
-            <button className="btn-o" onClick={disconnect} disabled={!!busy}>Disconnect</button>
+            <button className="btn-o" onClick={backfill} disabled={!!busy||!!bf}>Import past emails (12 months)</button>
+            <button className="btn-o" onClick={disconnect} disabled={!!busy||!!bf}>Disconnect</button>
           </div>
+          {bf&&<div style={{marginTop:12}}>
+            <div style={{fontSize:12,color:"var(--t2)"}}>Importing {bf.label} ({bf.i+1} of {bf.steps}) · {bf.tot.stored} emails saved so far — keep this tab open</div>
+            <div style={{height:4,borderRadius:2,background:"var(--g-cream2)",marginTop:6,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.round((bf.i)/bf.steps*100)}%`,background:"var(--g-green)"}}/></div>
+          </div>}
         </>
         :<>
           <div style={{fontSize:14,color:"var(--t1)",marginTop:6}}>Connect your gaia-search.com mailbox so the CRM can log emails and book interviews for you.</div>
