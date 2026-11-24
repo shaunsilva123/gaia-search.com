@@ -138,6 +138,7 @@ async function sync(window?: { from: string; to: string }) {
 
   let logged = 0, stored = 0, cvs = 0;
   const unmatched = new Set<string>();
+  const unmatchedSent: any[] = []; // backfill only: full detail so older contacts can be reviewed and added
   const handle = async (m: any, direction: "sent" | "received") => {
     const fromE = lower(m.from?.emailAddress?.address);
     const toE = [...(m.toRecipients || []), ...(m.ccRecipients || [])].map((r: any) => lower(r.emailAddress?.address)).filter(Boolean);
@@ -148,6 +149,11 @@ async function sync(window?: { from: string; to: string }) {
       const c = candByEmail.get(e); if (c) candIds.add(c.id);
       const co = coByEmail.get(e) || coByDomain.get(domainOf(e))?.id; if (co) coIds.add(co);
       if (!c && !co && direction === "sent") unmatched.add(e);
+    }
+    if (backfill && direction === "sent") {
+      const um = others.filter((e: string) => !candByEmail.get(e) && !coByEmail.get(e) && !coByDomain.get(domainOf(e)));
+      if (um.length) unmatchedSent.push({ to: um, names: (m.toRecipients || []).map((r: any) => r.emailAddress?.name).filter(Boolean),
+        subject: m.subject || "", preview: (m.bodyPreview || "").slice(0, 300), date: m.sentDateTime, att: !!m.hasAttachments, mid: m.internetMessageId });
     }
     if (!candIds.size && !coIds.size) return;
     const when = direction === "sent" ? m.sentDateTime : m.receivedDateTime;
@@ -196,7 +202,7 @@ async function sync(window?: { from: string; to: string }) {
   for (const m of inbox) await handle(m, "received");
   const result = `${sent.length} sent / ${inbox.length} received checked · ${logged} logged · ${cvs} CVs · ${stored} on record`;
   if (!backfill) await admin.from("ms_connection").update({ last_sync: started, last_sync_result: result, updated_at: started }).eq("id", 1);
-  return { ok: true, sent: sent.length, received: inbox.length, logged, cvs, stored, unmatched: [...unmatched].slice(0, 15) };
+  return { ok: true, sent: sent.length, received: inbox.length, logged, cvs, stored, unmatched: [...unmatched].slice(0, 15), ...(backfill ? { unmatchedSent } : {}) };
 }
 
 // ── request router ───────────────────────────────────────────────────────
