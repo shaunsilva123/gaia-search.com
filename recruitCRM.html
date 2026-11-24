@@ -81,6 +81,9 @@ select:focus,input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
 .icon-btn{background:none;border:0.5px solid var(--brm);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--t2);line-height:1;display:inline-flex;align-items:center}
 .icon-btn:hover{background:var(--bg2);color:var(--t1)}
 .pipe-who:hover .pipe-name{color:var(--g-deep);text-decoration:underline}
+.auto-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:7px 10px;border-radius:8px;background:rgba(95,169,43,0.10);font-size:12px;color:var(--t1)}
+.auto-btn{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--g-face)}
+.auto-btn.ghost{background:transparent;color:var(--t2);border:0.5px solid var(--brm)}
 .reach{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
 button.reach-btn{cursor:pointer}
 .reach-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:0.5px solid var(--brm);font-size:12px;font-weight:600;color:var(--t1);text-decoration:none;font-family:var(--g-face);background:var(--bg)}
@@ -2222,6 +2225,16 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
 
   const [activities,setActivities]=useState([]);
   const [actTick,setActTick]=useState(0);
+  // One-tap logging: tapping Call or Email logs it straight away (with Undo);
+  // LinkedIn asks once whether a message was actually sent.
+  const [autoNote,setAutoNote]=useState(null);
+  const autoLog=async(type,subject)=>{
+    const{data,error}=await db.from("activity_log").insert({entity_type:"candidate",entity_id:c.id,entity_name:c.name||"",activity_type:type,subject,body:null}).select("id").single();
+    if(error){setAutoNote({err:error.message});return;}
+    if(type==="Call")await markActiveIfNew(c.id);
+    setAutoNote({id:data.id,type});setActTick(t=>t+1);
+  };
+  const undoAuto=async()=>{if(autoNote?.id){await db.from("activity_log").delete().eq("id",autoNote.id);setActTick(t=>t+1);}setAutoNote(null);};
   const [jobs,setJobs]=useState([]);
   const [loadingActs,setLoadingActs]=useState(true);
   const [cvUploading,setCvUploading]=useState(false);
@@ -2300,15 +2313,24 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
           </div>
         </div>
         <div className="reach">
-          {c.phone&&<a href={`tel:${String(c.phone).replace(/[^+\d]/g,"")}`} className="reach-btn primary"><Icon n="phone" size={14}/>Call</a>}
-          {c.email&&<a href={`mailto:${c.email}`} className="reach-btn"><Icon n="mail" size={14}/>Email</a>}
+          {c.phone&&<a href={`tel:${String(c.phone).replace(/[^+\d]/g,"")}`} onClick={()=>autoLog("Call","Called from CRM")} title="Rings them and logs the call" className="reach-btn primary"><Icon n="phone" size={14}/>Call</a>}
+          {c.email&&<a href={`mailto:${c.email}`} onClick={()=>autoLog("Email","Emailed from CRM")} title="Opens a new email and logs it" className="reach-btn"><Icon n="mail" size={14}/>Email</a>}
           {c.linkedin
-            ?<a href={c.linkedin} target="_blank" rel="noreferrer" className="reach-btn"><span style={{fontWeight:800,fontSize:12,color:"#0a66c2"}}>in</span>LinkedIn</a>
+            ?<a href={c.linkedin} target="_blank" rel="noreferrer" onClick={()=>setAutoNote({askLI:true})} className="reach-btn"><span style={{fontWeight:800,fontSize:12,color:"#0a66c2"}}>in</span>LinkedIn</a>
             :<a href={linkedinSearchUrl(c)} target="_blank" rel="noreferrer" className="reach-btn ghost" title="No LinkedIn saved — search for them, then paste their profile URL via Edit"><span style={{fontWeight:800,fontSize:12,color:"#0a66c2"}}>in</span>Find</a>}
           <button onClick={()=>{onClose&&onClose();openAiTool("pitch",{candId:c.id});}} className="reach-btn" title="Write a pitch email for this candidate with AI"><Icon n="pen" size={14}/>Pitch</button>
           <button onClick={()=>{onClose&&onClose();openAiTool("match",{candId:c.id});}} className="reach-btn" title="Score this candidate against a job with AI"><Icon n="target" size={14}/>Match</button>
           {!c.phone&&!c.email&&<span style={{fontSize:11,color:"var(--t3)",alignSelf:"center",flexBasis:"100%"}}>No phone or email saved — add them via Edit</span>}
         </div>
+        {autoNote&&<div className="auto-note">
+          {autoNote.err?<span style={{color:"#a32d2d"}}>Couldn't log: {autoNote.err}</span>
+           :autoNote.askLI?<>Did you message them on LinkedIn?
+              <button onClick={async()=>{await autoLog("LinkedIn","LinkedIn message");}} className="auto-btn">Yes, log it</button>
+              <button onClick={()=>setAutoNote(null)} className="auto-btn ghost">No</button></>
+           :<>✓ {autoNote.type} logged — counts on your scorecard
+              <button onClick={undoAuto} className="auto-btn ghost">Undo</button>
+              <button onClick={()=>setAutoNote(null)} className="auto-btn ghost" aria-label="Dismiss">×</button></>}
+        </div>}
       </div>
       {/* Body */}
       <div style={{padding:20,display:"flex",flexDirection:"column",gap:18,flex:1}}>
