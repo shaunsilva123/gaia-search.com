@@ -7092,7 +7092,7 @@ function App(){
 
 function AuthedApp(){
   const [page,setPage]=useState(()=>/[?&]outlook=/.test(location.search)?"outlook":"dashboard");
-  useEffect(()=>{refreshOutlookStatus();const m=/[?&]outlook=(\w+)/.exec(location.search);if(m){history.replaceState(null,"",location.pathname);refreshOutlookStatus();if(m[1]!=="connected")setTimeout(()=>alert(m[1]==="denied"?"Microsoft sign-in was cancelled.":"That sign-in link expired — click Connect Outlook again."),300);}},[]);
+  useEffect(()=>{refreshOutlookStatus();const m=/[?&]outlook=(\w+)/.exec(location.search);if(m){history.replaceState(null,"",location.pathname);refreshOutlookStatus();if(m[1]==="denied"||m[1]==="expired")setTimeout(()=>alert(m[1]==="denied"?"Microsoft sign-in was cancelled.":"That sign-in link expired — click Connect Outlook again."),300);}},[]);
   useEffect(()=>{const h=e=>{setPage(e.detail);setActiveJob(null);};window.addEventListener("gotoPage",h);return()=>window.removeEventListener("gotoPage",h);},[]);
   const [allTasks,setAllTasks]=useState([]);
   const [activeJob,setActiveJob]=useState(null);
