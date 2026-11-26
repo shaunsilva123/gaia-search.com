@@ -2393,6 +2393,73 @@ function CandidateTasks({cand}){
   </div>;
 }
 
+// ─── CANDIDATE DOCUMENTS ──────────────────────────────────────────────────
+// Extra files kept against a candidate (follow-up summaries, references,
+// certificates…). Stored privately in the candidate-cvs bucket under docs/,
+// listed in the candidate_documents table. The CV keeps its own slot above.
+function CandidateDocuments({candidateId}){
+  const [docs,setDocs]=useState([]);
+  const [busy,setBusy]=useState(false);
+  const [err,setErr]=useState("");
+  const ref=React.useRef();
+  const load=()=>{ if(!candidateId)return;
+    db.from("candidate_documents").select("*").eq("candidate_id",candidateId).order("doc_date",{ascending:false,nullsFirst:false})
+      .then(({data,error})=>{ if(error)setErr(error.message); else setDocs(data||[]); });
+  };
+  useEffect(load,[candidateId]);
+  const open=async(d)=>{
+    const tab=window.open("","_blank");
+    const{data,error}=await db.storage.from("candidate-cvs").createSignedUrl(d.file_path,3600);
+    if(error||!data?.signedUrl){ if(tab)tab.close(); setErr("Could not open: "+(error?.message||"not found")); return; }
+    if(tab)tab.location.href=data.signedUrl; else window.location.href=data.signedUrl;
+  };
+  const upload=async(e)=>{
+    const files=[...(e.target.files||[])]; e.target.value="";
+    if(!files.length)return;
+    setBusy(true);setErr("");
+    for(const f of files){
+      if(f.size>15*1024*1024){setErr(f.name+" is too large (max 15MB)");continue;}
+      const safe=f.name.replace(/[^\w.\- ]+/g,"_");
+      const path=`docs/${candidateId}/${Date.now()}_${safe}`;
+      const{error:upErr}=await db.storage.from("candidate-cvs").upload(path,f,{contentType:f.type||undefined});
+      if(upErr){setErr(upErr.message);continue;}
+      const{error:dbErr}=await db.from("candidate_documents").insert({candidate_id:candidateId,name:f.name,file_path:path,kind:"Other",doc_date:new Date().toISOString()});
+      if(dbErr)setErr(dbErr.message);
+    }
+    setBusy(false);load();
+  };
+  const remove=async(d)=>{
+    if(!confirm(`Delete "${d.name}" from this candidate?`))return;
+    await db.storage.from("candidate-cvs").remove([d.file_path]);
+    await db.from("candidate_documents").delete().eq("id",d.id);
+    load();
+  };
+  return <div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px"}}>Documents{docs.length?` (${docs.length})`:""}</div>
+      <button onClick={()=>ref.current?.click()} disabled={busy} style={{background:"transparent",border:"0.5px solid var(--brm)",borderRadius:6,padding:"3px 9px",fontSize:11,cursor:"pointer",color:"var(--t2)"}}>{busy?"Uploading…":"+ Add"}</button>
+    </div>
+    {docs.length===0&&<div style={{fontSize:12,color:"var(--t3)"}}>No documents yet.</div>}
+    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+      {docs.map(d=><div key={d.id} style={{border:"0.5px solid var(--brm)",borderRadius:8,padding:"8px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+          <span style={{color:"var(--t3)"}}><Icon n="doc" size={16}/></span>
+          <div style={{minWidth:0}}>
+            <div title={d.name} style={{fontSize:12,fontWeight:500,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.name}</div>
+            <div style={{fontSize:11,color:"var(--t3)"}}>{d.kind||"Document"}{d.doc_date?" · "+new Date(d.doc_date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):""}</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:6,flexShrink:0}}>
+          <button onClick={()=>open(d)} style={{background:ACCENT,color:"#fff",border:"none",borderRadius:6,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>Open</button>
+          <button onClick={()=>remove(d)} title="Delete" style={{background:"transparent",border:"0.5px solid #f09595",borderRadius:6,padding:"4px 8px",fontSize:11,cursor:"pointer",color:"#a32d2d"}}>✕</button>
+        </div>
+      </div>)}
+    </div>
+    <input ref={ref} type="file" multiple style={{display:"none"}} onChange={upload}/>
+    {err&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>⚠️ {err}</div>}
+  </div>;
+}
+
 function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
   // The list only carries the columns it displays, so fetch the whole record
   // here — that way any field added to the table later still shows up.
@@ -2553,6 +2620,7 @@ function CandidateDetailPanel({cand:candProp, onClose, onEdit, onRefresh}){
           <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" style={{display:"none"}} onChange={uploadCV}/>
           {cvErr&&<div style={{fontSize:11,color:"#a32d2d",marginTop:6}}>⚠️ {cvErr}</div>}
         </div>
+        <CandidateDocuments candidateId={c.id}/>
         {/* Contact */}
         <div>
           <div style={{fontSize:11,fontWeight:600,color:"var(--t3)",textTransform:"uppercase",letterSpacing:"0.6px",marginBottom:8}}>Contact</div>

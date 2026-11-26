@@ -270,6 +270,35 @@ Deno.serve(async (req) => {
         }) });
         return json({ ok: true, id: ev?.id, webLink: ev?.webLink, joinUrl: ev?.onlineMeeting?.joinUrl || null });
       }
+      case "thread": {
+        // Full text of every message in the given Outlook conversations, oldest first.
+        // uniqueBody = just the new part of each message, so replies aren't repeated.
+        const ids: string[] = (body.conversation_ids || []).filter(Boolean).slice(0, 20);
+        if (!ids.length) return json({ error: "conversation_ids needed" }, 400);
+        const out: any[] = [];
+        for (const cid of ids) {
+          let next: string | null = `/me/messages?$filter=conversationId eq '${cid.replace(/'/g, "''")}'&$top=50&$select=subject,from,toRecipients,ccRecipients,sentDateTime,receivedDateTime,uniqueBody,body,isDraft,conversationId`;
+          while (next) {
+            const page: any = await graph(next, { headers: { Prefer: 'outlook.body-content-type="html"' } });
+            for (const m of page?.value || []) {
+              if (m.isDraft) continue;
+              out.push({
+                conversation_id: m.conversationId, subject: m.subject,
+                from: m.from?.emailAddress, to: (m.toRecipients || []).map((r: any) => r.emailAddress),
+                cc: (m.ccRecipients || []).map((r: any) => r.emailAddress),
+                date: m.sentDateTime || m.receivedDateTime,
+                html: m.uniqueBody?.content || m.body?.content || "",
+              });
+            }
+            next = page?.["@odata.nextLink"] || null;
+          }
+        }
+        // the same message can sit in Sent Items and another folder — keep one
+        const seen = new Set<string>();
+        const msgs = out.filter((m) => { const k = `${m.date}|${m.from?.address}|${m.subject}`; if (seen.has(k)) return false; seen.add(k); return true; })
+          .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        return json({ messages: msgs });
+      }
       case "today": {
         const d = body.date || new Date().toISOString().slice(0, 10);
         const r: any = await graph(`/me/calendarView?startDateTime=${d}T00:00:00&endDateTime=${d}T23:59:59&$orderby=start/dateTime&$top=30&$select=subject,start,end,location,webLink,onlineMeeting,attendees,isCancelled`);
