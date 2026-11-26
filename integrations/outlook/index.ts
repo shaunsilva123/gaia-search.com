@@ -299,6 +299,29 @@ Deno.serve(async (req) => {
           .sort((a, b) => String(a.date).localeCompare(String(b.date)));
         return json({ messages: msgs });
       }
+      case "attachments": {
+        // Search the mailbox and list file attachments on matching messages (no file bytes).
+        // body.query: Outlook search text. Returns up to 25 messages, newest first.
+        if (!body.query) return json({ error: "query needed" }, 400);
+        const q = encodeURIComponent('"' + String(body.query).replace(/"/g, "") + '"');
+        const r: any = await graph(`/me/messages?$search=${q}&$top=25&$select=id,subject,sentDateTime,from,toRecipients,hasAttachments`);
+        const out: any[] = [];
+        for (const m of r?.value || []) {
+          if (!m.hasAttachments) continue;
+          const a: any = await graph(`/me/messages/${m.id}/attachments?$select=id,name,contentType,size,isInline`);
+          const files = (a?.value || []).filter((x: any) => !x.isInline && x["@odata.type"] === "#microsoft.graph.fileAttachment")
+            .map((x: any) => ({ id: x.id, name: x.name, type: x.contentType, size: x.size }));
+          if (files.length) out.push({ id: m.id, subject: m.subject, date: m.sentDateTime, from: m.from?.emailAddress?.address,
+            to: (m.toRecipients || []).map((t: any) => t.emailAddress?.address), files });
+        }
+        return json({ messages: out });
+      }
+      case "attachment": {
+        // One attachment's bytes (base64), for copying a file from Outlook into the CRM.
+        if (!body.message_id || !body.attachment_id) return json({ error: "message_id and attachment_id needed" }, 400);
+        const a: any = await graph(`/me/messages/${body.message_id}/attachments/${body.attachment_id}`);
+        return json({ name: a?.name, type: a?.contentType, size: a?.size, base64: a?.contentBytes || null });
+      }
       case "today": {
         const d = body.date || new Date().toISOString().slice(0, 10);
         const r: any = await graph(`/me/calendarView?startDateTime=${d}T00:00:00&endDateTime=${d}T23:59:59&$orderby=start/dateTime&$top=30&$select=subject,start,end,location,webLink,onlineMeeting,attendees,isCancelled`);
